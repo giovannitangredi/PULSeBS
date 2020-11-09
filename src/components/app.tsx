@@ -6,5 +6,6 @@ import "./../styles/styles.css";
 
 // Create App component
 export const App = () => {
+
   return <div className="app"></div>;
 };
