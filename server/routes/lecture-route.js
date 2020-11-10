@@ -7,7 +7,7 @@ const lectureRoutes = require("./../controllers/lecture-controller");
 const router = express.Router();
 
 router.get("/bookable/:userId", lectureRoutes.getBookingLectures);
-router.get("/:lectureId/book", lectureRoutes.newBooking);
+router.post("/:lectureId/book", lectureRoutes.newBooking);
 router.get("/previousbooking", lectureRoutes.getExistentBooking);
 
 // Export router
