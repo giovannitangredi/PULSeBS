@@ -7,6 +7,7 @@ const lectureRoutes = require("./../controllers/lecture_booking-controller");
 const router = express.Router();
 
 router.get("/studentbooking", lectureRoutes.getBookingLectures);
+router.get("/previousbooking", lectureRoutes.getExistentBooking);
 
 // Export router
 module.exports = router;

@@ -13,7 +13,7 @@ exports.getBookingLectures = async (req, res) => {
     
     knex
       //.select(knex.raw('lecture.id, name, course, lecturer, start, end, capacity, count(*) as booked_students'))
-      .select({id: "lecture.id"}, {name: "name"}, {course: "course"}, {start: "start"}, {end: "end"}, {capacity: "capacity"})
+      .select({lecture_id: "lecture.id"}, {name: "name"}, {course: "course"}, {start: "start"}, {end: "end"}, {capacity: "capacity"})
       .from("lecture")
       .join("lecture_booking", "lecture.lecture_id", "=", "lecture_booking.lecture_id")
       .join("course_available_student", "lecture.course", "=", "course_available_student.course_id")
