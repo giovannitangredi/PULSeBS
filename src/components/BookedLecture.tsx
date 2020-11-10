@@ -9,7 +9,6 @@ export const BookedLecture = (props: any)=>{
             <td>{props.lecture.lecturer}</td>
             <td>{props.lecture.start}</td>
             <td>{props.lecture.end}</td>
-            <td>{props.lecture.booked_students}/{props.lecture.capacity}</td>
         </tr>
     );
 }

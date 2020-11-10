@@ -12,7 +12,6 @@ export const BookedLectureList = (props:any)=>{
                     <th>Professor</th>
                     <th>Start</th>
                     <th>End</th>
-                    <th>Capacity</th>
                 </tr>
             </thead>
             <tbody>
