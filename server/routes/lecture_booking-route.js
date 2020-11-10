@@ -6,7 +6,7 @@ const lectureRoutes = require("./../controllers/lecture_booking-controller");
 // Create router
 const router = express.Router();
 
-router.get("/studentlectures", lectureRoutes.getStudentLectures);
+router.get("/studentbooking", lectureRoutes.getBookingLectures);
 
 // Export router
 module.exports = router;

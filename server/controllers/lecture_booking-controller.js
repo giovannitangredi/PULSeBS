@@ -8,11 +8,11 @@ exports.newBooking = async (req, res) => {
     const studentId = req.user && req.user.id;
     console.log(req.user);
     today = moment().format('YYYY-MM-DD HH:mm:ss');
-    //console.log(moment(),moment().format())
 
     knex("lecture_booking")
       .insert({
         // insert new record
+        lecture_id: req.body.lecture_id,
         student_id: studentId,//idstudent  
         booked_at: today  //time
       })
