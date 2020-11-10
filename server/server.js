@@ -13,7 +13,6 @@ const jwtSecret = process.env.JWT_SECRET;
 const authRouter = require("./routes/auth-route");
 const userRouter = require("./routes/user-route");
 const lectureRouter = require("./routes/lecture-route");
-const lecturebookingRouter = require("./routes/lecture_booking-route");
 
 // Set default port for express app
 const PORT = process.env.PORT || 4001;
@@ -43,8 +42,7 @@ app.use(
   })
 );
 app.use("/api/user", userRouter);
-app.use("/api/lectures", lectureRouter);
-app.use("/api/lecturesbooking", lecturebookingRouter);
+app.use("/api/lecture", lectureRouter);
 
 
 // To return a better object in case of errors
