@@ -77,7 +77,7 @@ describe("Lecture test", async () => {
     describe("reservation test", async () => {
         it("book a seat: should return a 200 response", async () => {
             const res = await authenticatedUser
-                .post(`/api/lecture/${lectureTuple.id}/book`)
+                .post(`/api/lectures/${lectureTuple.id}/book`)
                 .expect(200, {message: "Booking created."});
         });
 
