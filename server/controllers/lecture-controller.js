@@ -23,7 +23,7 @@ exports.getBookingLectures = async (req, res) => {
     .from("lecture")
     .join(
       "lecture_booking",
-      "lecture.lecture_id",
+      "lecture.id",
       "=",
       "lecture_booking.lecture_id"
     )
@@ -33,7 +33,7 @@ exports.getBookingLectures = async (req, res) => {
       "=",
       "course_available_student.course_id"
     )
-    .whereNotIn("lecture.lecture_id", function () {
+    .whereNotIn("lecture.id", function () {
       //don't select the lectures already booked
       this.select("lecture_id")
         .from("lecture_booking")
@@ -42,7 +42,7 @@ exports.getBookingLectures = async (req, res) => {
     .andWhere("course_available_student", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
     .andWhere("start", "<", dateShown) //show only lecture in two weeks
-    .groupBy("lecture.lecture_id")
+    .groupBy("lecture.id")
     .count("* as booked_students")
     .then((queryResults) => {
       res.json(queryResults);
@@ -74,7 +74,7 @@ exports.getExistentBooking = async (req, res) => {
     .from("lecture")
     .join(
       "lecture_booking",
-      "lecture.lecture_id",
+      "lecture.id",
       "=",
       "lecture_booking.lecture_id"
     )
@@ -102,7 +102,7 @@ exports.newBooking = async (req, res) => {
   knex("lecture_booking")
     .insert({
       // insert new record
-      lecture_id: req.param.lecture_id,
+      lecture_id: req.params.lectureId,
       student_id: studentId, //idstudent
       booked_at: today, //time
     })
