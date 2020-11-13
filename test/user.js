@@ -24,19 +24,19 @@ const userTuple = {
 const userResponseData = { ...userTuple };
 delete userResponseData.password_hash;
 
-//now let's login the user before we run any tests
-const authenticatedUser = request.agent(app);
-beforeEach(async () => {
-  await knex("user").del();
-  await knex("user").insert(userTuple);
-  const res = await authenticatedUser
-    .post("/api/auth/login")
-    .send(userCredentials);
-
-  expect(res.status).to.equal(200);
-});
-
 describe("GET /api/user", async () => {
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  beforeEach(async () => {
+    await knex("user").del();
+    await knex("user").insert(userTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(userCredentials);
+
+    expect(res.status).to.equal(200);
+  });
+
   it("should return a 200 response with the user data if the user is logged in.", async () => {
     const res = await authenticatedUser.get("/api/user");
     expect(res.status).to.equal(200);
