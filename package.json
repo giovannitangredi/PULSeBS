@@ -37,9 +37,9 @@
     "start-server": "nodemon server/server.js --watch server/*",
     "start-front": "react-scripts start",
     "start": "concurrently \"npm run start-server\" \"npm run start-front\" --kill-others --kill-others-on-fail",
-    "test": "cross-env NODE_ENV=testing mocha",
-    "test-sonar-report": "cross-env NODE_ENV=testing mocha --reporter mocha-sonarqube-reporter --reporter-options output=xunit.xml",
-    "test-coverage": "cross-env NODE_ENV=testing nyc --reporter=lcov --reporter=text-lcov mocha test/*.js",
+    "test": "cross-env NODE_ENV=testing mocha --exit",
+    "test-sonar-report": "cross-env NODE_ENV=testing mocha --reporter mocha-sonarqube-reporter --reporter-options output=xunit.xml --exit || exit 0",
+    "test-coverage": "cross-env NODE_ENV=testing nyc --reporter=lcov --reporter=text-lcov mocha test/*.js --exit || exit 0",
     "test-full-reports" : "concurrently \"npm run test-sonar-report\" \"npm run test-coverage\" --kill-others --kill-others-on-fail"
   },
   "dependencies": {
