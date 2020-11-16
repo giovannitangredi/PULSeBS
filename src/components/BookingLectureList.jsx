@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table"
-import {BookedLecture} from "./BookedLecture"
-export const BookedLectureList = (props:any)=>{
+import {BookingLecture} from "./BookingLecture"
+export const BookingLectureList = (props)=>{
    
     return (
         <Table>
@@ -12,10 +12,12 @@ export const BookedLectureList = (props:any)=>{
                     <th>Professor</th>
                     <th>Start</th>
                     <th>End</th>
+                    <th>Capacity</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                {props.lectures.map((lecture : any) => <BookedLecture key={lecture.id} lecture={lecture}></BookedLecture>)}
+                {props.lectures.lenght > 0 && props.lectures.map((lecture) => <BookingLecture key={lecture.id} lecture={lecture} bookLecture={props.bookLecture}></BookingLecture>)}
             </tbody>
         </Table>
     );
