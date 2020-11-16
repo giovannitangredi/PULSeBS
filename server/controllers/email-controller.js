@@ -9,7 +9,7 @@ const dateShown = moment(today).add(2, "weeks");
 
 let listOfEmails = ["pulsebs.softeng@gmail.com"];
 
-exports.sendMail = async (email) => {
+exports.sendMail = async (email, subject, body) => {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -25,8 +25,8 @@ exports.sendMail = async (email) => {
   let info = await transporter.sendMail({
     from: "pulsebs.softeng@gmail.com", // sender address
     to: email, // reciever mail of receivers
-    subject: "Hello ✔", // Subject line
-    html: "<b>Hello world?</b>", // html body
+    subject: subject, // Subject line
+    html: body, // html body
   });
 
   console.log("Message sent: %s", info.messageId);
