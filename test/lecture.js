@@ -56,7 +56,8 @@ const courseStudentTuple = {
 
 const authenticatedUser = request.agent(app);
 
-describe("Lecture test", async () => {
+describe("Lecture test", async function() {
+    this.timeout(10000);
     before(async () => {
         await knex("user").del();
         await knex("course").del();
@@ -85,7 +86,7 @@ describe("Lecture test", async () => {
             const inbox = (await mailslurp.getInboxes())[0];
             mailslurp.emptyInbox(inbox.id); 
             const email = await mailslurp.waitForLatestEmail(inbox.id);
-            expect(email.body).to.equal("test");
+            expect(email.body).to.match(/You have successfully booked a seat/);
         });
     });
 });
