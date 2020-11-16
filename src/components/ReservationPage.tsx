@@ -6,7 +6,7 @@ import axios from "axios";
 export const ReservationPage = (props:any)=>{
   const getBookedLectures = ()=>{
     axios
-    .get('/lecture/previousbooking')
+    .get('/lectures/previousbooking')
     .then((res)=>{
       let lectures= [...res.data];
       setBookedLectures(lectures);
@@ -18,7 +18,7 @@ export const ReservationPage = (props:any)=>{
   }
     const getReservations = ()=>{
        axios
-       .get(`/lecture/bookable`)
+       .get(`/lectures/bookable`)
        .then(res=>{
         let lectures = res.data;
         setLectures(lectures);
@@ -32,7 +32,7 @@ export const ReservationPage = (props:any)=>{
       const bookLecture = (lectureID : any,studentID : any) =>{
         setLoading(true);
         axios.
-        post(`/lecture/${lectureID}/book`,{lecture_id : lectureID,student_id:studentID})
+        post(`/lectures/${lectureID}/book`,{lecture_id : lectureID,student_id:studentID})
         .then(res=>{
           getReservations();
         }).catch(err =>{

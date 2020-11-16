@@ -39,12 +39,13 @@ exports.getBookingLectures = async (req, res) => {
         .from("lecture_booking")
         .where("student_id", studentId);
     })
-    .andWhere("course_available_student", studentId) //select only lectures that student can attend
+    .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
     .andWhere("start", "<", dateShown) //show only lecture in two weeks
     .groupBy("lecture.id")
     .count("* as booked_students")
     .then((queryResults) => {
+      console.log(queryResults);
       res.json(queryResults);
     })
     .catch((err) => {
@@ -57,6 +58,7 @@ exports.getBookingLectures = async (req, res) => {
 //Get existent bookings by one student
 exports.getExistentBooking = async (req, res) => {
   const studentId = req.user && req.user.id;
+  console.log(studentId)
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const dateShown = moment(today).add(2, "weeks");
   console.log(today);
@@ -78,10 +80,11 @@ exports.getExistentBooking = async (req, res) => {
       "=",
       "lecture_booking.lecture_id"
     )
-    .where("lecture.student_id", studentId)
+    .where("lecture_booking.student_id", studentId)
     .andWhere("start", ">", today) //show only future lectures
     .andWhere("start", "<", dateShown) //show only lecture in two weeks
     .then((queryResults) => {
+      console.log(queryResults);
       res.json(queryResults);
     })
     .catch((err) => {
