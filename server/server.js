@@ -68,8 +68,8 @@ app.listen(PORT, function () {
   console.log(`Server is running on: ${PORT}`);
 });
 
-startMailCron = () => {
+function startMailCron() {
   mail.startScheduler();
-};
+}
 
 module.exports = app;
