@@ -15,7 +15,7 @@ export const BookedLectureList = (props)=>{
                 </tr>
             </thead>
             <tbody>
-                {props.lectures.lenght > 0 && props.lectures.map((lecture) => <BookedLecture key={lecture.id} lecture={lecture}></BookedLecture>)}
+                {props.lectures.length > 0 && props.lectures.map((lecture) => <BookedLecture key={lecture.id} lecture={lecture}></BookedLecture>)}
             </tbody>
         </Table>
     );

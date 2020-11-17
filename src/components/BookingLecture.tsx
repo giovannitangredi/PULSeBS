@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 export const BookingLecture = (props: any) => {
   const handleBooking = (evt: any) => {
     if (evt) evt.preventDefault();
-    props.bookLecture(props.lecture.id, 1);
+    props.bookLecture(props.lecture.id);
   };
   return (
     <tr>
