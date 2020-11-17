@@ -29,10 +29,10 @@ export const ReservationPage = (props:any)=>{
        });
        
       }
-      const bookLecture = (lectureID : any,studentID : any) =>{
+      const bookLecture = (lectureID : any) =>{
         setLoading(true);
-        axios.
-        post(`/lectures/${lectureID}/book`,{lecture_id : lectureID,student_id:studentID})
+        axios
+        .post(`/lectures/${lectureID}/book`,{lecture_id : lectureID})
         .then(res=>{
           getReservations();
         }).catch(err =>{
@@ -54,6 +54,7 @@ export const ReservationPage = (props:any)=>{
   if (loading) return <div>Page is loading...</div>;
   return (
     <Container>
+      
       <h1>Book a Lecture</h1>
       <BookingLectureList
         lectures={lectures}

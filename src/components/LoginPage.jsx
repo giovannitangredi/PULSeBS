@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Container, Form, Button,Alert } from "react-bootstrap";
 import axios from 'axios'
-import {Redirect} from 'react-router-dom'
 export const LoginPage = (props) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -26,6 +25,7 @@ export const LoginPage = (props) => {
         })
     }
     return <Container>
+        
         <h1>Login</h1>
         {error && <Alert variant="warning"> You have inserted Wrong Credentials! Please try again</Alert>}
         <Form method='post' onSubmit={(e) => { onSubmit(e) }}>
