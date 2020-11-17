@@ -1,6 +1,7 @@
 // Import deps
 import React, { useEffect, useState } from "react";
 import { ReservationPage } from "./ReservationPage";
+import {NavBar} from "./NavBar";
 import {
   BrowserRouter as Router,
   Switch,
@@ -32,15 +33,22 @@ export const App = () => {
     console.log(result);
     setAuthUser(result);
   }
+  const logout = ()=>{
+    setLoading(true)
+    setAuthUser({})
+    setLoading(false)
+  }
   useEffect(()=>{
     setLoading(true);
     getUser();
   },[])
   if(loading)
-    return(<p>Page is Loading...</p>)
+    return(<p>Page is Loading...</p>);
   return (
     <Router>
       <div className="app">
+      {authUser.id && <NavBar user={authUser} logout={logout}></NavBar>}
+      <hr></hr>
       <Switch>
         <Route path = "/login">
         {authUser.id && authUser.role==="student" && <Redirect to ="/student"></Redirect>}

@@ -54,8 +54,6 @@ export const ReservationPage = (props:any)=>{
   if (loading) return <div>Page is loading...</div>;
   return (
     <Container>
-      <h1>Welcome {props.user.name +" " +props.user.surname}</h1>
-      <hr></hr>
       <h1>Book a Lecture</h1>
       <BookingLectureList
         lectures={lectures}
