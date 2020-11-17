@@ -23,6 +23,9 @@ export const App = () => {
         if(res.data.id)
           setAuthUser(res.data);
         setLoading(false);
+    }).catch(err =>{
+      setAuthUser({})
+      setLoading(false)
     });
   }
   const login = (result)=>{
@@ -46,7 +49,7 @@ export const App = () => {
         </Route>
         <Route path = "/student">
             {(!authUser.id) && <Redirect to="/login"></Redirect> }
-            {(authUser.id && authUser.role=="teacher") && <Redirect to="/teacher"></Redirect> }
+            {(authUser.id && authUser.role==="teacher") && <Redirect to="/teacher"></Redirect> }
             <ReservationPage user={authUser}></ReservationPage>
         </Route>
         <Route path="/teacher">
