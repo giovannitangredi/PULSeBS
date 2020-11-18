@@ -2,7 +2,7 @@ import React from "react";
 import ListGroup from "react-bootstrap/ListGroup";
 
 const lectureItem = (props) => {
-  let { lecture, loadCourseData } = props;
+  let { lecture } = props;
 
   return (
     <ListGroup.Item id={lecture.id}>

@@ -89,6 +89,7 @@ exports.fetchemails = async (Imapconfig) => {
   second ( optional )
   */
 exports.startScheduler = async (schedulePattern) => {
+  /*
   const Imapconfig = {
     imap: {
       user: "pulsebs.softeng@gmail.com",
@@ -102,10 +103,8 @@ exports.startScheduler = async (schedulePattern) => {
   };
   //checks for unread message
   this.fetchemails(Imapconfig);
-
+  */
   return new Promise((resolve, reject) => {
-    let today = null;
-    let tomorrow = null;
     // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
     cron.schedule(schedulePattern, () => {
       const today = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -115,7 +114,7 @@ exports.startScheduler = async (schedulePattern) => {
         .then((lectures) => {
           //console.log(res);
           const emailSubject = "Bookings for the lecture";
-          for (lecture of lectures) {
+          for (let lecture of lectures) {
             const emailBody = `Dear ${lecture.lecturerName} ${lecture.lecturerSurname},<br/> \
                   We inform You that ${lecture.bookingsNumber} students booked a seat for ${lecture.name} of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
                   Thanks,<br/>The PULSeBS Team`;

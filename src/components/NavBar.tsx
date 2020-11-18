@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navbar, Button } from "react-bootstrap";
 import axios from "axios";
 export const NavBar = (props: any) => {

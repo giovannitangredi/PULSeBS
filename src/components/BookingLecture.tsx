@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Button from "react-bootstrap/Button";
 export const BookingLecture = (props: any) => {
   const handleBooking = (evt: any) => {

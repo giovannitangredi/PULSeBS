@@ -4,7 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 
-class Calendarweek extends React.Component {
+class WeeklyCalendar extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -33,4 +33,4 @@ class Calendarweek extends React.Component {
   }
 }
 
-export default Calendarweek;
+export default WeeklyCalendar;

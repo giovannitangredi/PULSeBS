@@ -5,9 +5,9 @@ const emailController = require("./email-controller");
 //Get all available bookings by one student before deadline
 exports.getBookingLectures = async (req, res) => {
   const studentId = req.user && req.user.id;
-  today = moment().format("YYYY-MM-DD HH:mm:ss");
-  deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
-  dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
+  const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
 
   knex
     /*.raw(`select lecture.id,lecture.name as name,course.name as course,user.name as lecturer_name,user.surname as lecturer_surname,start,end,capacity, IFNULL(bookedStudent,0) as booked_students
