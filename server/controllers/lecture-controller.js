@@ -1,5 +1,6 @@
 const moment = require("moment");
 const knex = require("./../db");
+const emailController = require("./email-controller");
 
 //Get all available bookings by one student before deadline
 exports.getBookingLectures = async (req, res) => {
@@ -121,6 +122,40 @@ exports.newBooking = async (req, res) => {
     .then(() => {
       // Send a success message in response
       res.json({ message: `Booking created.` });
+
+      // Get the user information
+      const userQuery = knex
+        .select("name", "surname", "email")
+        .from("user")
+        .where("id", req.user.id);
+
+      // Get the lecture information
+      const lectureQuery = knex
+        .select(
+          { name: "lecture.name" },
+          { courseName: "course.name" },
+          { start: "start" }
+        )
+        .from("lecture")
+        .join("course", "lecture.course", "=", "course.id")
+        .where("lecture.id", req.params.lectureId);
+
+      Promise.all([userQuery, lectureQuery])
+        .then(([userQueryResults, lectureQueryResults]) => {
+          // Send an email confirmation
+          const user = userQueryResults[0];
+          const lecture = lectureQueryResults[0];
+
+          const emailSubject = "Booking confirmation";
+          const emailBody = `Dear ${user.name} ${user.surname},<br/> \
+            You have successfully booked a seat for the lesson ${lecture.name} of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
+            Thanks,<br/>The PULSeBS Team`;
+
+          emailController.sendMail(user.email, emailSubject, emailBody);
+        })
+        .catch((err) => {
+          console.error("There was an error sending the email: " + err);
+        });
     })
     .catch((err) => {
       // Send a error message in response

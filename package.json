@@ -40,7 +40,7 @@
     "test": "cross-env NODE_ENV=testing mocha --exit",
     "test-sonar-report": "cross-env NODE_ENV=testing mocha --reporter mocha-sonarqube-reporter --reporter-options output=xunit.xml --exit || exit 0",
     "test-coverage": "cross-env NODE_ENV=testing nyc --reporter=lcov --reporter=text-lcov mocha test/*.js --exit || exit 0",
-    "test-full-reports" : "concurrently \"npm run test-sonar-report\" \"npm run test-coverage\" --kill-others --kill-others-on-fail"
+    "test-full-reports": "concurrently \"npm run test-sonar-report\" \"npm run test-coverage\" --kill-others --kill-others-on-fail"
   },
   "dependencies": {
     "axios": "0.19.2",
@@ -57,6 +57,7 @@
     "helmet": "3.22.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "0.20.13",
+    "mailslurp-client": "^9.0.1",
     "moment": "^2.29.1",
     "morgan": "^1.10.0",
     "prettier": "^2.1.2",
@@ -65,6 +66,9 @@
     "react-dom": "16.13.1",
     "react-router-bootstrap": "^0.25.0",
     "react-router-dom": "^5.1.6",
+    "nodemailer": "6.4.16",
+    "node-cron": "2.0.3",
+    "imap-simple": "5.0.0",
     "fullcalendar":"5.3.2"
   },
   "devDependencies": {

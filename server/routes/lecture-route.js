@@ -1,7 +1,6 @@
-// Import express
 const express = require("express");
 
-// Import books-controller
+// Import lecture-controller
 const lectureRoutes = require("./../controllers/lecture-controller");
 
 // Create router
@@ -13,4 +12,3 @@ router.get("/previousbooking", lectureRoutes.getExistentBooking);
 router.get("/:lectureid/students", lectureRoutes.getBookedStudents);
 // Export router
 module.exports = router;
-
