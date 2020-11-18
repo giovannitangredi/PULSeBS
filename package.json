@@ -37,8 +37,10 @@
     "start-server": "nodemon server/server.js --watch server/*",
     "start-front": "react-scripts start",
     "start": "concurrently \"npm run start-server\" \"npm run start-front\" --kill-others --kill-others-on-fail",
-    "test": "cross-env NODE_ENV=testing mocha",
-    "test-sonar-report": "test --reporter mocha-sonarqube-reporter --reporter-options output=xunit.xml"
+    "test": "cross-env NODE_ENV=testing mocha --exit",
+    "test-sonar-report": "cross-env NODE_ENV=testing mocha --reporter mocha-sonarqube-reporter --reporter-options output=xunit.xml --exit || exit 0",
+    "test-coverage": "cross-env NODE_ENV=testing nyc --reporter=lcov --reporter=text-lcov mocha test/*.js --exit || exit 0",
+    "test-full-reports" : "concurrently \"npm run test-sonar-report\" \"npm run test-coverage\" --kill-others --kill-others-on-fail"
   },
   "dependencies": {
     "axios": "0.19.2",
@@ -74,13 +76,16 @@
     "mocha": "^8.2.0",
     "mocha-sonarqube-reporter": "^1.0.2",
     "nodemon": "2.0.3",
+    "nyc": "^15.1.0",
     "react-scripts": "3.4.1",
     "sqlite3": "4.1.1",
-    "typescript": "3.8.3",
     "@fullcalendar/react":"5.3.1",
     "@fullcalendar/core":"5.3.1",
     "@fullcalendar/daygrid": "5.3.1",
     "@fullcalendar/interaction":"^5.3.1",
-    "@fullcalendar/timegrid": "5.3.1"
+    "@fullcalendar/timegrid": "5.3.1",
+    "superagent": "^6.1.0",
+    "supertest": "^6.0.1",
+    "typescript": "3.8.3"
   }
 }

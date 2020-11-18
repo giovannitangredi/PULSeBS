@@ -2,7 +2,6 @@
 const path = require("path");
 
 const environment = process.env.NODE_ENV || "development";
-console.log(environment);
 const dbPath = path.resolve(
   __dirname,
   environment === "testing" ? "db/testing.sqlite" : "db/database.sqlite"
