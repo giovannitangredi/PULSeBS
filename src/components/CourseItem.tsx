@@ -20,7 +20,7 @@ const courseItem = (props) => {
           <Button
             variant="primary"
             onClick={() => {
-              loadCourseData(course.id);
+              loadCourseData(course);
             }}
           >
             Select the Course

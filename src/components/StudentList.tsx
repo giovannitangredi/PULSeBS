@@ -19,6 +19,8 @@ class StudentList extends React.Component {
       courses: [],
       selectedLecture: 0,
       selectedCourse: 0,
+      lecturetitle:"",
+      studenttitle:""
     };
   }
 
@@ -37,8 +39,9 @@ class StudentList extends React.Component {
   };
 
   getLecturesList = (courseID) => {
-    axios.get(`/courses/${courseID}/lectures`, {}).then((response) => {
+    axios.get(`/courses/${courseID.id}/lectures`, {}).then((response) => {
       let result = response.data;
+     this.setState({ lecturetitle:courseID.name});
       this.setState({ lectures: result });
     });
   };
@@ -57,7 +60,7 @@ class StudentList extends React.Component {
         extendedProps: {
           capacity: capacity,
           booked_students: booked_students,
-          id,
+          id,name
         },
       };
     });
@@ -82,6 +85,7 @@ class StudentList extends React.Component {
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
     let lectureid = event._def.extendedProps.id;
+    this.setState({studenttitle:event._def.extendedProps.name});
     this.getStudentList(lectureid);
   };
 
@@ -271,14 +275,15 @@ class StudentList extends React.Component {
               </div>
             )}
           </Card>
-          <Card
+          <div id="WeeklyCalendarContainer">
+          <Card  
             border={"secondary"}
-            style={{ width: "100%", height: "100%", margin: "1rem 0rem" }}
+            style={{ width: "100%", margin: "1rem 0rem" }}
           >
-            <Card.Header>Lectures</Card.Header>
+            <Card.Header>  <h4><b>{this.state.lecturetitle}</b> Lectures</h4>  </Card.Header>
             <div className="row" style={{ background: "#e1e1e152" }}>
               <div className="col-12 col-md-8">
-                <div id="WeeklyCalendarContainer" className="col">
+                <div className="col">
                   <WeeklyCalendar
                     handleEventClick={this.handleEventClick}
                     Items={this.formatEvents()}
@@ -304,12 +309,13 @@ class StudentList extends React.Component {
               </div>
             </div>
           </Card>
+          </div>
 
           <Card
             border={"secondary"}
             style={{ width: "100%", margin: "1rem 0rem" }}
           >
-            <Card.Header>Students</Card.Header>
+            <Card.Header>  <h4><b>{this.state.studenttitle}</b> Students</h4> </Card.Header>
             <div className="row">
               <div id="studentlistview" className="col">
                 {this.state.students && (
