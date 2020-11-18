@@ -63,7 +63,7 @@ exports.getBookingLectures = async (req, res) => {
     })
     .catch((err) => {
       res.json({
-        message: `There was an error retrieving the student's lectures: ${err}`,
+        message: `There was an error retrieving the scheduled lectures: ${err}`,
       });
     });
 };
