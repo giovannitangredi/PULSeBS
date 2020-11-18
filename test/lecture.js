@@ -102,6 +102,27 @@ describe("Lecture test", async function() {
             expect(email.body).to.match(/You have successfully booked a seat/);
         });
     });
+
+    describe("teacher email test", async () => {
+        
+        let inbox;
+
+        before(async () => {
+            // use the slurpemail address also for the teacher so that we can check the email is received
+            await knex("user").where("id", teacherTuple.id).update("email", mailSlurpAddress);
+            await knex("lecture_booking").del();
+            await knex("lecture_booking").insert(lectureBookingTuple);
+            
+            inbox = (await mailslurp.getInboxes())[0];
+            mailslurp.emptyInbox(inbox.id);
+        });
+
+        it("should receive an email with the number of the students booked", async () => {
+            emailController.sendTeacherEmailTask();
+            const email = await mailslurp.waitForLatestEmail(inbox.id);
+            expect(email.body).to.match(/1 students booked a seat/);
+        });
+    });
 });
   
     
