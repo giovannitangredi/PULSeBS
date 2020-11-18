@@ -255,7 +255,9 @@ class StudentList extends React.Component {
             border={"secondary"}
             style={{ width: "100%", height: "75vh", margin: "1rem 0rem" }}
           >
-            <Card.Header>Courses</Card.Header>
+            <Card.Header>
+              <h4>Courses</h4>
+            </Card.Header>
             {this.state.courses && (
               <div
                 className=" bg-light "
@@ -276,10 +278,14 @@ class StudentList extends React.Component {
               </div>
             )}
           </Card>
-          <div id="WeeklyCalendarContainer"  >
+          <div id="WeeklyCalendarContainer">
             <Card
               border={"secondary"}
-              style={{ width: "100%", margin: "1rem 0rem" ,background: "#e1e1e152"}}
+              style={{
+                width: "100%",
+                margin: "1rem 0rem",
+                background: "#e1e1e152",
+              }}
             >
               <Card.Header>
                 {" "}
@@ -287,7 +293,7 @@ class StudentList extends React.Component {
                   <b>{this.state.lecturetitle}</b> Lectures
                 </h4>{" "}
               </Card.Header>
-              <div className="row" style={{  margin: "1rem 0rem"}}>
+              <div className="row" style={{ margin: "1rem 0rem" }}>
                 <div className="col-12 col-md-8">
                   <div className="col">
                     <WeeklyCalendar
@@ -304,7 +310,7 @@ class StudentList extends React.Component {
                       <ListGroup
                         as="ul"
                         variant="flush"
-                        style={{ height: "28rem",margin:"1rem 0rem" }}
+                        style={{ height: "28rem", margin: "1rem 0rem" }}
                       >
                         <ListGroup.Item>
                           <div className="d-flex w-100 justify-content-between">
@@ -333,46 +339,46 @@ class StudentList extends React.Component {
               </div>
             </Card>
           </div>
-<div id="studentlistview">
-          <Card
-            border={"secondary"}
-            style={{ width: "100%", margin: "1rem 0rem" }}
-          >
-            <Card.Header>
-              {" "}
-              <h4>
-                <b>{this.state.studenttitle}</b> Students
-              </h4>{" "}
-            </Card.Header>
-            <div className="row">
-              <div  className="col">
-                {this.state.students && (
-                  <ListGroup as="ul" variant="flush">
-                    <ListGroup.Item>
-                      <div className="d-flex w-100 justify-content-between">
-                        <div className="container">
-                          <div className="row">
-                            <div className="col-lg-4">
-                              <label>Name</label>
-                            </div>
-                            <div className="col-lg-4">
-                              <label>LastName</label>
-                            </div>
-                            <div className="col-lg-4">
-                              <label>Email</label>
+          <div id="studentlistview">
+            <Card
+              border={"secondary"}
+              style={{ width: "100%", margin: "1rem 0rem" }}
+            >
+              <Card.Header>
+                {" "}
+                <h4>
+                  <b>{this.state.studenttitle}</b> Students
+                </h4>{" "}
+              </Card.Header>
+              <div className="row">
+                <div className="col">
+                  {this.state.students && (
+                    <ListGroup as="ul" variant="flush">
+                      <ListGroup.Item>
+                        <div className="d-flex w-100 justify-content-between">
+                          <div className="container">
+                            <div className="row">
+                              <div className="col-lg-4">
+                                <label>Name</label>
+                              </div>
+                              <div className="col-lg-4">
+                                <label>LastName</label>
+                              </div>
+                              <div className="col-lg-4">
+                                <label>Email</label>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </ListGroup.Item>
-                    {this.state.students.map((student) => (
-                      <StudentItem key={student.id} student={student} />
-                    ))}
-                  </ListGroup>
-                )}
+                      </ListGroup.Item>
+                      {this.state.students.map((student) => (
+                        <StudentItem key={student.id} student={student} />
+                      ))}
+                    </ListGroup>
+                  )}
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
           </div>
         </div>
       </>
