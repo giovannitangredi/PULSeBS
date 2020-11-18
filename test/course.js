@@ -24,30 +24,29 @@ const userTuple = {
 const userResponseData = { ...userTuple };
 delete userResponseData.password_hash;
 
-//now let's login the user before we run any tests
+
+describe("GET /api/courses/", () => {
+  //now let's login the user before we run any tests
 const authenticatedUser = request.agent(app);
 beforeEach(async () => {
   await knex("user").del();
   await knex("user").insert(userTuple);
+  await knex("course").del();
+  await knex("course").insert({ id: 1, name: "Software Engineering I" ,main_prof:1});
+  await knex("course").insert({ id: 2, name: "Software Engineering II" ,main_prof:2 });
   const res = await authenticatedUser
     .post("/api/auth/login")
     .send(userCredentials);
 
   expect(res.status).to.equal(200);
 });
-describe("GET /api/courses/", () => {
-    beforeEach(async () => {
-      await knex("course").del();
-      await knex("course").insert({ id: 1, name: "Software Engineering I" ,main_prof:1});
-      await knex("course").insert({ id: 2, name: "Software Engineering II" ,main_prof:2 });
-    });
     it("it should return status 200", async () => {
         const res = await authenticatedUser.get("/api/courses/")
-  
       expect(res.status).to.equal(200);
     });
     afterEach(async () => {
       await knex("course").del();
+      await knex("user").del();
     });
   });
   

@@ -24,7 +24,9 @@ const userTuple = {
 const userResponseData = { ...userTuple };
 delete userResponseData.password_hash;
 
-//now let's login the user before we run any tests
+// New Booking 
+describe("POST /api/lectures/:lectureId/book", async () => {
+  //now let's login the user before we run any tests
 const authenticatedUser = request.agent(app);
 beforeEach(async () => {
   await knex("user").del();
@@ -35,39 +37,68 @@ beforeEach(async () => {
 
   expect(res.status).to.equal(200);
 });
-// New Booking 
-describe("POST /api/lecture/:lectureId/book", async () => {
   it("should return 'Booking created.' with status 200", async () => {
-    const res = await authenticatedUser.post("/api/lecture/:lectureId/book")
-    .send({ lecture_id: 1, student_id: 1, booked_at :"2020-11-10 09:00:00" });
+    const res = await authenticatedUser.post("/api/lectures/1/book")
+    //.send({ lecture_id: 1, student_id: 1, booked_at :"2020-11-10 09:00:00" });
      expect(res.status).to.equal(200); 
 });
 it("should return 'Booking created.' with status 200", async () => {
-  const res = await authenticatedUser.post("/api/lecture/:lectureId/book")
-  .send({ lecture_id: 2, student_id: 1, booked_at :"2020-12-10 09:00:00" });
+  const res = await authenticatedUser.post("/api/lectures/1/book")
+  //.send({ lecture_id: 2, student_id: 1, booked_at :"2020-12-10 09:00:00" });
    expect(res.status).to.equal(200);
 });
+afterEach(async () => {
+  await knex("user").del();
+})
 });
 // Get all avaliable booking 
-describe("GET /api/lecture/bookable", async () => {
+describe("GET /api/lectures/bookable", async () => {
+    //now let's login the user before we run any tests
+const authenticatedUser = request.agent(app);
+beforeEach(async () => {
+  await knex("user").del();
+  await knex("user").insert(userTuple);
+  const res = await authenticatedUser
+    .post("/api/auth/login")
+    .send(userCredentials);
+
+  expect(res.status).to.equal(200);
+});
   it("should return  with status 200", async () => {
-    const res = await authenticatedUser.get("/api/lecture/bookable")
+    const res = await authenticatedUser.get("/api/lectures/bookable")
      expect(res.status).to.equal(200); 
 });
 it("should return  with status 200", async () => {
-  const res = await authenticatedUser.get("/api/lecture/bookable")
+  const res = await authenticatedUser.get("/api/lectures/bookable")
    expect(res.status).to.equal(200);
 });
+afterEach(async () => {
+  await knex("user").del();
+})
 });
 // Get the existent Booking 
-describe("GET /api/lecture/previousbooking", async () => {
+describe("GET /api/lectures/previousbooking", async () => {
+    //now let's login the user before we run any tests
+const authenticatedUser = request.agent(app);
+beforeEach(async () => {
+  await knex("user").del();
+  await knex("user").insert(userTuple);
+  const res = await authenticatedUser
+    .post("/api/auth/login")
+    .send(userCredentials);
+
+  expect(res.status).to.equal(200);
+});
   it("should return  with status 200", async () => {
-    const res = await (await authenticatedUser.get("/api/lecture/previousbooking"))
+    const res = await (await authenticatedUser.get("/api/lectures/previousbooking"))
      expect(res.status).to.equal(200); 
 });
 it("should return  with status 200", async () => {
-  const res = await authenticatedUser.get("/api/lecture/previousbooking")
+  const res = await authenticatedUser.get("/api/lectures/previousbooking")
    expect(res.status).to.equal(200);
 });
+afterEach(async () => {
+  await knex("user").del();
+})
 });
 

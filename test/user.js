@@ -56,4 +56,7 @@ describe("GET /api/user", async () => {
     expect(resUserData.status).to.equal(401);
     expect(resUserData.body).to.eql({ message: "Authorization error" });
   });
+  afterEach(async () => {
+    await knex("user").del();
+  })
 });
