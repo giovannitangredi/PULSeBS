@@ -1,0 +1,7 @@
+<testExecutions version="1">
+<file path="test/user.js">
+<testCase name="GET /api/user: should return a 200 response with the user data if the user is logged in." duration="7"/>
+<testCase name="GET /api/user: should return a 401 response when the user is not authenticated." duration="8"/>
+<testCase name="GET /api/user: should return a 401 response after the user logs out." duration="5"/>
+</file>
+</testExecutions>
