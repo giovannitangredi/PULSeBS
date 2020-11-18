@@ -306,7 +306,7 @@ class StudentList extends React.Component {
                 </div>
                 <div className="col-6 col-md-4">
                   <div id="lecturelistview" className="col">
-                    {this.formatEvents().length > 0 && (
+                    {this.formatEvents().length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"
@@ -333,6 +333,17 @@ class StudentList extends React.Component {
                           <LectureItem lecture={lecture} />
                         ))}
                       </ListGroup>
+                    ) : (
+                      <h4
+                        style={{
+                          display: "flex",
+                          alignItems: "stretch",
+                          justifyContent: "center",
+                          margin: "2rem",
+                        }}
+                      >
+                        No Course is selected
+                      </h4>
                     )}
                   </div>
                 </div>
@@ -352,7 +363,7 @@ class StudentList extends React.Component {
               </Card.Header>
               <div className="row">
                 <div className="col">
-                  {this.state.students && (
+                  {this.state.students.length > 0 ? (
                     <ListGroup as="ul" variant="flush">
                       <ListGroup.Item>
                         <div className="d-flex w-100 justify-content-between">
@@ -375,6 +386,17 @@ class StudentList extends React.Component {
                         <StudentItem key={student.id} student={student} />
                       ))}
                     </ListGroup>
+                  ) : (
+                    <h4
+                      style={{
+                        display: "flex",
+                        alignItems: "stretch",
+                        justifyContent: "center",
+                        margin: "2rem",
+                      }}
+                    >
+                      No lecture is selected or there is no students available
+                    </h4>
                   )}
                 </div>
               </div>
