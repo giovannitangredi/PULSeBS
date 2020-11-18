@@ -69,7 +69,7 @@ app.listen(PORT, function () {
 });
 
 function startMailCron() {
-  mail.startScheduler();
+  mail.startScheduler("0 0 0 * * *").then((x) => console.log(x));
 }
 
 module.exports = app;

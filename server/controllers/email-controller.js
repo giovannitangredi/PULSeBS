@@ -4,8 +4,6 @@ let cron = require("node-cron");
 var imaps = require("imap-simple");
 let nodemailer = require("nodemailer");
 
-let listOfEmails = ["pulsebs.softeng@gmail.com"];
-
 exports.sendMail = async (email, subject, body) => {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
@@ -34,7 +32,28 @@ exports.sendMail = async (email, subject, body) => {
   // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
 };
 
+/* output
+[
+   {
+     which: 'HEADER',
+     size: 595,
+     body: {
+       'return-path': [Array],
+       received: [Array],
+       'content-type': [Array],
+       from: [Array],
+       to: [Array],
+       subject: [Array],
+       'message-id': [Array],
+       'content-transfer-encoding': [Array],
+       date: [Array],
+       'mime-version': [Array]
+     }
+   }
+]
+*/
 exports.fetchemails = async (Imapconfig) => {
+  let emailbody;
   imaps.connect(Imapconfig).then(function (connection) {
     return connection.openBox("INBOX").then(function () {
       var searchCriteria = ["UNSEEN"];
@@ -47,55 +66,71 @@ exports.fetchemails = async (Imapconfig) => {
       return connection
         .search(searchCriteria, fetchOptions)
         .then(function (results) {
-          var subjects = results.map(function (res) {
+          emailbody = results.map(function (res) {
             return res.parts.filter(function (part) {
               return part.which === "HEADER";
-            })[0].body.subject[0];
+            })[0].body;
           });
-
-          console.log(subjects);
         });
     });
   });
+  return emailbody;
 };
-
-// 12 at nights scheduler runs this code
-exports.startScheduler = () => {
-  var Imapconfig = {
+// returns a promise when it first calls
+// 12 at nights scheduler runs this code with this pattern "0 0 0 * * *"
+// every second with this pattern "* * * * * *"
+/* * * * * * *
+  | | | | | |
+  | | | | | day of week(1-7)
+  | | | | month (1-12)
+  | | | day of month(1-31)
+  | | hour
+  | minute
+  second ( optional )
+  */
+exports.startScheduler = async (schedulePattern) => {
+  const Imapconfig = {
     imap: {
       user: "pulsebs.softeng@gmail.com",
       password: "xssyjwawrmvrkgag",
       host: "imap.gmail.com",
       port: 993,
       tls: true,
+      tlsOptions: { rejectUnauthorized: false },
       authTimeout: 3000,
     },
   };
+  //checks for unread message
+  this.fetchemails(Imapconfig);
 
-  //this.fetchemails(Imapconfig);
-  // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
-  cron.schedule("0 0 0 * * *", () => {
-    this.sendTeacherEmailTask();
+  return new Promise((resolve, reject) => {
+    let today = null;
+    let tomorrow = null;
+    // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
+    cron.schedule(schedulePattern, () => {
+      
+      const today = moment().format("YYYY-MM-DD HH:mm:ss");
+      const tomorrow = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
+
+      this.getListOfLectures(today, tomorrow)
+        .then((lectures) => {
+          //console.log(res);
+          const emailSubject = "Bookings for the lecture";
+          for (lecture of lectures) {
+            const emailBody = `Dear ${lecture.lecturerName} ${lecture.lecturerSurname},<br/> \
+                  We inform You that ${lecture.bookingsNumber} students booked a seat for ${lecture.name} of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
+                  Thanks,<br/>The PULSeBS Team`;
+            this.sendMail(lecture.lecturerEmail, emailSubject, emailBody);
+          }
+          resolve();
+        })
+        .catch((err) => reject(err));
+
+    });
   });
 };
 
-exports.sendTeacherEmailTask = () => {
-  const today = moment();
- 
-  this.getListOfLectures(today).then((lectures) => {
-    //console.log(res);
-    const emailSubject = "Bookings for the lecture";
-    for (lecture of lectures) {
-      const emailBody = `Dear ${lecture.lecturerName} ${lecture.lecturerSurname},<br/> \
-            We inform You that ${lecture.bookingsNumber} students booked a seat for ${lecture.name} of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
-            Thanks,<br/>The PULSeBS Team`;
-            console.log(emailBody);
-      this.sendMail(lecture.lecturerEmail, emailSubject, emailBody);
-    }
-  });
-}
-
-exports.getListOfLectures = async (date) => {
+exports.getListOfLectures = async (from, to) => {
   //let querystring = `select distinct * from lecture join user where lecture.lecturer==user.id and lecture.start>='${date.format("YYYY-MM-DD HH:mm:ss")}' and  lecture.start<'${date.add(1, "days").format("YYYY-MM-DD HH:mm:ss")}' `;
   const queryResults = await knex
     .select(
@@ -111,9 +146,10 @@ exports.getListOfLectures = async (date) => {
     .join("course", "lecture.course", "=", "course.id")
     .join("user", "lecture.lecturer", "=", "user.id")
     .join("lecture_booking", "lecture.id", "=", "lecture_booking.lecture_id")
-    .where("lecture.start", ">=", date.format("YYYY-MM-DD HH:mm:ss"))
-    .andWhere("lecture.start", "<", date.add(1, "days").format("YYYY-MM-DD HH:mm:ss"))
+    .where("lecture.start", ">=", from)
+    .andWhere("lecture.start", "<", to)
     .groupBy("lecture.id", "lecture.name", "course.name", "lecture.start", "user.name", "user.surname", "user.email");
 
   return queryResults;
 };
+

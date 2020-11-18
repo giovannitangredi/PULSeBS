@@ -6,8 +6,8 @@ const moment = require("moment");
 const emailController = require("../server/controllers/email-controller");
 const MailSlurp = require("mailslurp-client").default;
 
-const apiKey = "550e9641efa0f072e78ce2a7485fcd3ceb91011f4165db1de5dede3ccf0ef042";
-const mailSlurpAddress = "e3cd0975-6be7-4c1d-8d65-0041418e1928@mailslurp.com";
+const apiKey = "ff4ecbf86022042fe17030bc0ff37f0f4a5ff3470d9727218d1945b1862a580c";
+const mailSlurpAddress = "8d0dbfbc-f2b7-4e53-a6dc-7dd32ee45e83@mailslurp.com";
 const mailslurp = new MailSlurp({ apiKey });
 
 //the data we need to pass to the login method
@@ -118,7 +118,9 @@ describe("Lecture test", async function() {
         });
 
         it("should receive an email with the number of the students booked", async () => {
-            emailController.sendTeacherEmailTask();
+            const now = moment().add(2, "seconds");
+            await emailController.startScheduler(`${now.second()} ${now.minute()} * * * *`);
+
             const email = await mailslurp.waitForLatestEmail(inbox.id);
             expect(email.body).to.match(/1 students booked a seat/);
         });
