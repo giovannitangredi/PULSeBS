@@ -58,5 +58,5 @@ describe("GET /api/user", async () => {
   });
   afterEach(async () => {
     await knex("user").del();
-  })
+  });
 });

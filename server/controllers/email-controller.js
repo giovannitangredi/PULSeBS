@@ -108,7 +108,6 @@ exports.startScheduler = async (schedulePattern) => {
     let tomorrow = null;
     // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
     cron.schedule(schedulePattern, () => {
-      
       const today = moment().format("YYYY-MM-DD HH:mm:ss");
       const tomorrow = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
 
@@ -125,7 +124,6 @@ exports.startScheduler = async (schedulePattern) => {
           resolve();
         })
         .catch((err) => reject(err));
-
     });
   });
 };
@@ -141,15 +139,22 @@ exports.getListOfLectures = async (from, to) => {
       { lecturerSurname: "user.surname" },
       { lecturerEmail: "user.email" }
     )
-    .count({ bookingsNumber: "lecture.id"})
+    .count({ bookingsNumber: "lecture.id" })
     .from("lecture")
     .join("course", "lecture.course", "=", "course.id")
     .join("user", "lecture.lecturer", "=", "user.id")
     .join("lecture_booking", "lecture.id", "=", "lecture_booking.lecture_id")
     .where("lecture.start", ">=", from)
     .andWhere("lecture.start", "<", to)
-    .groupBy("lecture.id", "lecture.name", "course.name", "lecture.start", "user.name", "user.surname", "user.email");
+    .groupBy(
+      "lecture.id",
+      "lecture.name",
+      "course.name",
+      "lecture.start",
+      "user.name",
+      "user.surname",
+      "user.email"
+    );
 
   return queryResults;
 };
-

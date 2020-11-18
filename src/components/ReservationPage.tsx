@@ -1,55 +1,57 @@
 import React, { useEffect, useState } from "react";
-import {BookingLectureList} from "./BookingLectureList"
-import {BookedLectureList} from "./BookedLectureList"
-import Container from "react-bootstrap/Container"
+import { BookingLectureList } from "./BookingLectureList";
+import { BookedLectureList } from "./BookedLectureList";
+import Container from "react-bootstrap/Container";
 import axios from "axios";
-export const ReservationPage = (props:any)=>{
-  const getBookedLectures = ()=>{
+export const ReservationPage = (props: any) => {
+  const getBookedLectures = () => {
     axios
-    .get('/lectures/previousbooking')
-    .then((res)=>{
-      let lectures= [...res.data];
-      setBookedLectures(lectures);
-      setLoading(false);
-    }).catch(err =>{
-      console.log(err);
-      setLoading(false);
-    });;
-  }
-    const getReservations = ()=>{
-       axios
-       .get(`/lectures/bookable`)
-       .then(res=>{
+      .get("/lectures/previousbooking")
+      .then((res) => {
+        let lectures = [...res.data];
+        setBookedLectures(lectures);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
+  const getReservations = () => {
+    axios
+      .get(`/lectures/bookable`)
+      .then((res) => {
         let lectures = res.data;
         setLectures(lectures);
         getBookedLectures();
-       }).catch(err =>{
-         console.log(err);
-         setLoading(false);
-       });
-       
-      }
-      const bookLecture = (lectureID : any) =>{
-        setLoading(true);
-        axios
-        .post(`/lectures/${lectureID}/book`,{lecture_id : lectureID})
-        .then(res=>{
-          getReservations();
-        }).catch(err =>{
-          console.log(err);
-          setLoading(false);
-        });;
-      }
-     /* let FacReservations = [{course : "Softwere Engeneering 2", booked_students :20,capacity: 45, id:1 ,start:  "2020-11-11:08:30:00", end : "2020-11-11:11:00:00", lecturer : "Mario Rossi", name : "Lecture 1" },
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
+  const bookLecture = (lectureID: any) => {
+    setLoading(true);
+    axios
+      .post(`/lectures/${lectureID}/book`, { lecture_id: lectureID })
+      .then((res) => {
+        getReservations();
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
+  /* let FacReservations = [{course : "Softwere Engeneering 2", booked_students :20,capacity: 45, id:1 ,start:  "2020-11-11:08:30:00", end : "2020-11-11:11:00:00", lecturer : "Mario Rossi", name : "Lecture 1" },
       {course : "Softwere Engeneering 2",booked_students :3, capacity: 45,id:2 ,start: "2020-11-14:08:30:00",end: "2020-11-14:11:00:00",lecturer:"Mario Rossi",name:"Lecture 2"},
       {course : "Web Application 1",booked_students :43,capacity: 61 ,id:3 ,start: "2020-11-12:08:30:00",end: "2020-11-12:11:00:00",lecturer:"Valeria Verdi",name:"Lecture 1"}];*/
-        const [bookedLectures,setBookedLectures] = useState<any>([]);
-        const [lectures,setLectures] = useState<any>([]);
-        const [loading,setLoading]= useState(false);
-    useEffect(()=>{
-        setLoading(true);
-        getReservations();
-    },[]) 
+  const [bookedLectures, setBookedLectures] = useState<any>([]);
+  const [lectures, setLectures] = useState<any>([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    setLoading(true);
+    getReservations();
+  }, []);
 
   if (loading) return <div>Page is loading...</div>;
   return (

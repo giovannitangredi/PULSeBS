@@ -29,6 +29,7 @@ yarn run format
 ```sh
 yarn run test
 ```
+
 ### Produce coverage and test reports for SonarCube
 
 ```sh
