@@ -10,13 +10,13 @@ const lectureItem = (props) => {
         <div className="container">
           <div className="row">
             <div className="col-lg-4">
-            <label>{lecture.title}</label>
+              <label>{lecture.title}</label>
             </div>
             <div className="col-lg-4">
-              <label>{(lecture.start).toDateString()}</label>
+              <label>{lecture.start.toDateString()}</label>
             </div>
             <div className="col-lg-4">
-              <label>{(lecture.end).toDateString()}</label>
+              <label>{lecture.end.toDateString()}</label>
             </div>
           </div>
         </div>

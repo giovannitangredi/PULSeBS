@@ -13,21 +13,21 @@ class Calendarweek extends React.Component {
     return (
       <div>
         <h3>{this.props.title}</h3>
-      <FullCalendar
-        initialView="timeGridWeek"
-        defaultView="dayGridMonth"
-        eventClick={this.props.handleEventClick}
-        header={{
-          left: "prev,next, today",
-          center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay",
-        }}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        editable={false}
-        events={this.props.Items}
-        eventContent={this.props.renderEventContent}
-        eventLimit={false}
-      />
+        <FullCalendar
+          initialView="timeGridWeek"
+          defaultView="dayGridMonth"
+          eventClick={this.props.handleEventClick}
+          header={{
+            left: "prev,next, today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          editable={false}
+          events={this.props.Items}
+          eventContent={this.props.renderEventContent}
+          eventLimit={false}
+        />
       </div>
     );
   }

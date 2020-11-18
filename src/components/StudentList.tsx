@@ -45,7 +45,7 @@ class StudentList extends React.Component {
 
   formatEvents() {
     return this.state.lectures.map((lecture) => {
-      const { name, end, start, capacity, booked_students,id } = lecture;
+      const { name, end, start, capacity, booked_students, id } = lecture;
 
       let startTime = new Date(start);
       let endTime = new Date(end);
@@ -54,7 +54,11 @@ class StudentList extends React.Component {
         title: name,
         start: startTime,
         end: endTime,
-        extendedProps: { capacity: capacity, booked_students: booked_students,id },
+        extendedProps: {
+          capacity: capacity,
+          booked_students: booked_students,
+          id,
+        },
       };
     });
   }
@@ -77,7 +81,7 @@ class StudentList extends React.Component {
   }
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
-     let lectureid= event._def.extendedProps.id;
+    let lectureid = event._def.extendedProps.id;
     this.getStudentList(lectureid);
   };
 
@@ -242,7 +246,10 @@ class StudentList extends React.Component {
     return (
       <>
         <div className="container">
-          <Card  border={"secondary"} style={{ width: "100%", height: "75vh",margin:"1rem 0rem" }}>
+          <Card
+            border={"secondary"}
+            style={{ width: "100%", height: "75vh", margin: "1rem 0rem" }}
+          >
             <Card.Header>Courses</Card.Header>
             {this.state.courses && (
               <div
@@ -264,52 +271,56 @@ class StudentList extends React.Component {
               </div>
             )}
           </Card>
-          <Card  border={"secondary"} style={{ width: "100%", height: "100%",margin:"1rem 0rem" }}>
+          <Card
+            border={"secondary"}
+            style={{ width: "100%", height: "100%", margin: "1rem 0rem" }}
+          >
             <Card.Header>Lectures</Card.Header>
             <div className="row" style={{ background: "#e1e1e152" }}>
-            <div className="col-12 col-md-8">
-              <div id="WeeklyCalendarContainer" className="col">
-                <WeeklyCalendar
-                  handleEventClick={this.handleEventClick}
-                  Items={this.formatEvents()}
-                  renderEventContent={this.renderEventContent}
-                  title={`Number of Lectures:${this.formatEvents().length}`}
-                />
+              <div className="col-12 col-md-8">
+                <div id="WeeklyCalendarContainer" className="col">
+                  <WeeklyCalendar
+                    handleEventClick={this.handleEventClick}
+                    Items={this.formatEvents()}
+                    renderEventContent={this.renderEventContent}
+                    title={`Number of Lectures:${this.formatEvents().length}`}
+                  />
+                </div>
+              </div>
+              <div className="col-6 col-md-4">
+                <div id="lecturelistview" className="col">
+                  {this.formatEvents().length > 0 && (
+                    <ListGroup
+                      as="ul"
+                      variant="flush"
+                      style={{ height: "28rem" }}
+                    >
+                      {this.formatEvents().map((lecture) => (
+                        <LectureItem lecture={lecture} />
+                      ))}
+                    </ListGroup>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="col-6 col-md-4">
-              <div id="lecturelistview" className="col">
-                
-                {this.formatEvents().length > 0 && (
-                  <ListGroup
-                    as="ul"
-                    variant="flush"
-                    style={{ height: "28rem" }}
-                  >
-                    {this.formatEvents().map((lecture) => (
-                      <LectureItem lecture={lecture} />
+          </Card>
+
+          <Card
+            border={"secondary"}
+            style={{ width: "100%", margin: "1rem 0rem" }}
+          >
+            <Card.Header>Students</Card.Header>
+            <div className="row">
+              <div id="studentlistview" className="col">
+                {this.state.students && (
+                  <ListGroup as="ul" variant="flush">
+                    {this.state.students.map((student) => (
+                      <StudentItem key={student.id} student={student} />
                     ))}
                   </ListGroup>
                 )}
               </div>
             </div>
-          </div>
-            </Card>
-         
-            <Card  border={"secondary"} style={{ width: "100%" ,margin:"1rem 0rem" }}>
-            <Card.Header>Students</Card.Header>
-          <div className="row">
-            <div id="studentlistview" className="col">
-             
-              {this.state.students && (
-                <ListGroup as="ul" variant="flush"  >
-                  {this.state.students.map((student) => (
-                    <StudentItem key={student.id} student={student} />
-                  ))}
-                </ListGroup>
-              )}
-            </div>
-          </div>
           </Card>
         </div>
       </>
