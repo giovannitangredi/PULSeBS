@@ -11,6 +11,8 @@ class Calendarweek extends React.Component {
 
   render() {
     return (
+      <div>
+        <h3>{this.props.title}</h3>
       <FullCalendar
         initialView="timeGridWeek"
         defaultView="dayGridMonth"
@@ -26,6 +28,7 @@ class Calendarweek extends React.Component {
         eventContent={this.props.renderEventContent}
         eventLimit={false}
       />
+      </div>
     );
   }
 }

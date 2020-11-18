@@ -1,13 +1,15 @@
 //import React from 'react';
 import React from "react";
 import ListGroup from "react-bootstrap/ListGroup";
-//import LectureItem from "./LectureItem";
+import LectureItem from "./LectureItem";
 import CourseItem from "./CourseItem";
 import StudentItem from "./StudentItem";
 import axios from "axios";
 import WeeklyCalendar from "./WeeklyCalendar";
+import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
 
-class studentList extends React.Component {
+class StudentList extends React.Component {
   constructor(props) {
     super(props);
 
@@ -43,7 +45,7 @@ class studentList extends React.Component {
 
   formatEvents() {
     return this.state.lectures.map((lecture) => {
-      const { name, end, start, capacity, booked_students } = lecture;
+      const { name, end, start, capacity, booked_students,id } = lecture;
 
       let startTime = new Date(start);
       let endTime = new Date(end);
@@ -52,43 +54,50 @@ class studentList extends React.Component {
         title: name,
         start: startTime,
         end: endTime,
-        extendedProps: { capacity: capacity, booked_students: booked_students },
+        extendedProps: { capacity: capacity, booked_students: booked_students,id },
       };
     });
   }
   renderEventContent(eventInfo) {
-    return (
-      <div>
-        <p>
-          {eventInfo.event.start.getHours()}:
-          {eventInfo.event.start.getMinutes()}-{eventInfo.event.end.getHours()}:
-          {eventInfo.event.start.getMinutes()}
-          <br></br>
-          {eventInfo.event.title} <br></br>
-          Capacity:{eventInfo.event.extendedProps.capacity}{" "}
-        </p>
-      </div>
-    );
+    if (eventInfo)
+      return (
+        <div>
+          <p>
+            {eventInfo.event.start.getHours()}:
+            {eventInfo.event.start.getMinutes()}-
+            {eventInfo.event.end.getHours()}:
+            {eventInfo.event.start.getMinutes()}
+            <br></br>
+            {eventInfo.event.title} <br></br>
+            Capacity:{eventInfo.event.extendedProps.capacity}{" "}
+          </p>
+        </div>
+      );
+    else return null;
   }
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
+     let lectureid= event._def.extendedProps.id;
+    this.getStudentList(lectureid);
   };
 
-  scrolltoview = (elementId) => {
-    var input =
-      typeof elementId == "string" ? elementId : "WeeklyCalendarContainer";
-    document.getElementById(input).scrollIntoView({
+  loadLectureAndScroll = (elementId) => {
+    this.getLecturesList(elementId);
+    this.scrolltoview("WeeklyCalendarContainer");
+  };
+
+  scrolltoview = (elementid) => {
+    document.getElementById(elementid).scrollIntoView({
       behavior: "smooth",
     });
   };
 
   componentDidMount() {
     this.setState({ selectedLecture: 1 });
-    this.getStudentList(1);
-    this.getCourseList(1);
-    this.getLecturesList(1);
 
-    this.setState({
+    this.getCourseList();
+
+    /* this.setState({
       Courses: [{ id: 1, name: "Soft eng II", main_prof: 3 }],
     });
 
@@ -226,49 +235,74 @@ class studentList extends React.Component {
           email: "Loane@gmail.com",
         },
       ],
-    });
+    });*/
   }
 
   render() {
     return (
       <>
         <div className="container">
-          <div className="row">
-            <div className="col">
-              <h3>Courses</h3>
-              {this.state.Courses && (
-                <div style={{ height: "46vh", overflow: "scroll" }}>
-                  <div
-                    className="d-flex align-content-center  flex-wrap bg-light "
-                    style={{ width: "71vw" }}
-                  >
-                    {this.state.Courses.map((course) => (
-                      <CourseItem
-                        key={course.id}
-                        course={course}
-                        loadCourseData={this.scrolltoview}
-                      />
-                    ))}
-                  </div>
+          <Card  border={"secondary"} style={{ width: "100%", height: "75vh",margin:"1rem 0rem" }}>
+            <Card.Header>Courses</Card.Header>
+            {this.state.courses && (
+              <div
+                className=" bg-light "
+                style={{ height: "75vh", overflow: "scroll" }}
+              >
+                <div
+                  className="d-flex align-content-center  flex-wrap bg-light "
+                  style={{ width: "71vw" }}
+                >
+                  {this.state.courses.map((course) => (
+                    <CourseItem
+                      key={course.id}
+                      course={course}
+                      loadCourseData={this.loadLectureAndScroll}
+                    />
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
+          </Card>
+          <Card  border={"secondary"} style={{ width: "100%", height: "100%",margin:"1rem 0rem" }}>
+            <Card.Header>Lectures</Card.Header>
+            <div className="row" style={{ background: "#e1e1e152" }}>
+            <div className="col-12 col-md-8">
+              <div id="WeeklyCalendarContainer" className="col">
+                <WeeklyCalendar
+                  handleEventClick={this.handleEventClick}
+                  Items={this.formatEvents()}
+                  renderEventContent={this.renderEventContent}
+                  title={`Number of Lectures:${this.formatEvents().length}`}
+                />
+              </div>
             </div>
-
-            <div className="w-100" style={{ height: "5vh" }}></div>
-            <div id="WeeklyCalendarContainer" className="col">
-              <WeeklyCalendar
-                handleEventClick={this.handleEventClick}
-                Items={this.formatEvents()}
-                renderEventContent={this.renderEventContent}
-              />
+            <div className="col-6 col-md-4">
+              <div id="lecturelistview" className="col">
+                
+                {this.formatEvents().length > 0 && (
+                  <ListGroup
+                    as="ul"
+                    variant="flush"
+                    style={{ height: "28rem" }}
+                  >
+                    {this.formatEvents().map((lecture) => (
+                      <LectureItem lecture={lecture} />
+                    ))}
+                  </ListGroup>
+                )}
+              </div>
             </div>
-
-            <div className="w-100" style={{ height: "5vh" }}></div>
-
+          </div>
+            </Card>
+         
+            <Card  border={"secondary"} style={{ width: "100%" ,margin:"1rem 0rem" }}>
+            <Card.Header>Students</Card.Header>
+          <div className="row">
             <div id="studentlistview" className="col">
-              <h3>Students</h3>
+             
               {this.state.students && (
-                <ListGroup as="ul" variant="flush" style={{ height: "28rem" }}>
+                <ListGroup as="ul" variant="flush"  >
                   {this.state.students.map((student) => (
                     <StudentItem key={student.id} student={student} />
                   ))}
@@ -276,10 +310,11 @@ class studentList extends React.Component {
               )}
             </div>
           </div>
+          </Card>
         </div>
       </>
     );
   }
 }
 
-export default studentList;
+export default StudentList;
