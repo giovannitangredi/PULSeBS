@@ -1,6 +1,7 @@
 // Import deps
 import React, { useEffect, useState } from "react";
 import { ReservationPage } from "./ReservationPage";
+import StudentList from "./StudentList";
 import {NavBar} from "./NavBar";
 import {
   BrowserRouter as Router,
@@ -62,7 +63,7 @@ export const App = () => {
         </Route>
         <Route path="/teacher">
         {!authUser.id && <Redirect to ="/login"></Redirect>}
-          <h1>TEACHER PAGE PLACEHOLDER</h1>
+        <StudentList  user={authUser} userid={authUser.id}/>
         </Route>
         <Route path="/">
           {!authUser.id && <Redirect to ="/login"></Redirect>}
