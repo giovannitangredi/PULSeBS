@@ -22,12 +22,7 @@ exports.getBookingLectures = async (req, res) => {
       { capacity: "capacity" }
     )
     .from("lecture")
-    .join(
-      "lecture_booking",
-      "lecture.id",
-      "=",
-      "lecture_booking.lecture_id"
-    )
+    .join("lecture_booking", "lecture.id", "=", "lecture_booking.lecture_id")
     .join(
       "course_available_student",
       "lecture.course",
@@ -73,12 +68,7 @@ exports.getExistentBooking = async (req, res) => {
       { booked_at: "booked_at" }
     )
     .from("lecture")
-    .join(
-      "lecture_booking",
-      "lecture.id",
-      "=",
-      "lecture_booking.lecture_id"
-    )
+    .join("lecture_booking", "lecture.id", "=", "lecture_booking.lecture_id")
     .where("lecture.student_id", studentId)
     .andWhere("start", ">", today) //show only future lectures
     .andWhere("start", "<", dateShown) //show only lecture in two weeks

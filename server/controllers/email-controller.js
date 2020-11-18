@@ -4,9 +4,6 @@ let cron = require("node-cron");
 var imaps = require("imap-simple");
 let nodemailer = require("nodemailer");
 
-const today = moment().format("YYYY-MM-DD HH:mm:ss");
-const dateShown = moment(today).add(2, "weeks");
-
 let listOfEmails = ["pulsebs.softeng@gmail.com"];
 
 exports.sendMail = async (email, subject, body) => {
@@ -37,7 +34,28 @@ exports.sendMail = async (email, subject, body) => {
   // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
 };
 
+/* output
+[
+   {
+     which: 'HEADER',
+     size: 595,
+     body: {
+       'return-path': [Array],
+       received: [Array],
+       'content-type': [Array],
+       from: [Array],
+       to: [Array],
+       subject: [Array],
+       'message-id': [Array],
+       'content-transfer-encoding': [Array],
+       date: [Array],
+       'mime-version': [Array]
+     }
+   }
+]
+*/
 exports.fetchemails = async (Imapconfig) => {
+  let emailbody;
   imaps.connect(Imapconfig).then(function (connection) {
     return connection.openBox("INBOX").then(function () {
       var searchCriteria = ["UNSEEN"];
@@ -50,43 +68,61 @@ exports.fetchemails = async (Imapconfig) => {
       return connection
         .search(searchCriteria, fetchOptions)
         .then(function (results) {
-          var subjects = results.map(function (res) {
+          emailbody = results.map(function (res) {
             return res.parts.filter(function (part) {
               return part.which === "HEADER";
-            })[0].body.subject[0];
+            })[0].body;
           });
-
-          console.log(subjects);
         });
     });
   });
+  return emailbody;
 };
-
-// 12 at nights scheduler runs this code
-exports.startScheduler = () => {
-  var Imapconfig = {
+// returns a promise when it first calls
+// 12 at nights scheduler runs this code with this pattern "0 0 0 * * *"
+// every second with this pattern "* * * * * *"
+/* * * * * * *
+  | | | | | |
+  | | | | | day of week(1-7)
+  | | | | month (1-12)
+  | | | day of month(1-31)
+  | | hour
+  | minute
+  second ( optional )
+  */
+exports.startScheduler = async (schedulePattern) => {
+  const Imapconfig = {
     imap: {
       user: "pulsebs.softeng@gmail.com",
       password: "xssyjwawrmvrkgag",
       host: "imap.gmail.com",
       port: 993,
       tls: true,
+      tlsOptions: { rejectUnauthorized: false },
       authTimeout: 3000,
     },
   };
+  //checks for unread message
+  this.fetchemails(Imapconfig);
 
-  //this.fetchemails(Imapconfig);
-  // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
-  cron.schedule("0 0 0 * * *", () => {
-    this.getlistofemails(today).then((res) => {
-      console.log(res);
-      if (listOfEmails) for (email of listOfEmails) this.sendMail(email);
+  return new Promise((resolve, reject) => {
+    let today = null;
+    let tomorrow = null;
+    // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
+    cron.schedule(schedulePattern, () => {
+      today = moment().format("YYYY-MM-DD HH:mm:ss");
+      tomorrow = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
+      this.getlistofemails(today, tomorrow).then((res) => {
+        if (listOfEmails) for (email of listOfEmails) this.sendMail(email);
+        if (today) resolve(today);
+        else reject("error");
+      });
     });
   });
 };
 
-exports.getlistofemails = async (date) => {
-  let querystring = `select distinct * from lecture join user where lecture.lecturer==user.id  and lecture.start>='${date}' and  lecture.start<'${date.getDate() + 1}' `;
+exports.getlistofemails = async (startDate, endDate) => {
+  let querystring = `select distinct * from lecture join user where lecture.lecturer==user.id  and lecture.start>='${startDate}' and  lecture.start<'${endDate}' `;
 
   knex
     .raw(querystring)
@@ -95,7 +131,7 @@ exports.getlistofemails = async (date) => {
     })
     .catch((err) => {
       res.json({
-        message: `There was an error`,
+        message: `There was an error getting lecturers email who will have lecture today`,
       });
     });
 };
