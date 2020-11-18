@@ -13,9 +13,9 @@ const courseItem = (props) => {
         border={"secondary"}
         style={{ width: "20rem" }}
       >
-        <Card.Header>{course.name}</Card.Header>
+        <Card.Header> Course ID: {course.id} </Card.Header>
         <Card.Body>
-          <Card.Title> Course ID: {course.id} </Card.Title>
+          <Card.Title>{course.name}</Card.Title>
           <Card.Text>Course Description.</Card.Text>
           <Button
             variant="primary"
