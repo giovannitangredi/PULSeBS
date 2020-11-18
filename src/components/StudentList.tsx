@@ -19,8 +19,8 @@ class StudentList extends React.Component {
       courses: [],
       selectedLecture: 0,
       selectedCourse: 0,
-      lecturetitle:"",
-      studenttitle:""
+      lecturetitle: "",
+      studenttitle: "",
     };
   }
 
@@ -41,7 +41,7 @@ class StudentList extends React.Component {
   getLecturesList = (courseID) => {
     axios.get(`/courses/${courseID.id}/lectures`, {}).then((response) => {
       let result = response.data;
-     this.setState({ lecturetitle:courseID.name});
+      this.setState({ lecturetitle: courseID.name });
       this.setState({ lectures: result });
     });
   };
@@ -60,7 +60,8 @@ class StudentList extends React.Component {
         extendedProps: {
           capacity: capacity,
           booked_students: booked_students,
-          id,name
+          id,
+          name,
         },
       };
     });
@@ -85,7 +86,7 @@ class StudentList extends React.Component {
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
     let lectureid = event._def.extendedProps.id;
-    this.setState({studenttitle:event._def.extendedProps.name});
+    this.setState({ studenttitle: event._def.extendedProps.name });
     this.getStudentList(lectureid);
   };
 
@@ -275,51 +276,95 @@ class StudentList extends React.Component {
               </div>
             )}
           </Card>
-          <div id="WeeklyCalendarContainer">
-          <Card  
-            border={"secondary"}
-            style={{ width: "100%", margin: "1rem 0rem" }}
-          >
-            <Card.Header>  <h4><b>{this.state.lecturetitle}</b> Lectures</h4>  </Card.Header>
-            <div className="row" style={{ background: "#e1e1e152" }}>
-              <div className="col-12 col-md-8">
-                <div className="col">
-                  <WeeklyCalendar
-                    handleEventClick={this.handleEventClick}
-                    Items={this.formatEvents()}
-                    renderEventContent={this.renderEventContent}
-                    title={`Number of Lectures:${this.formatEvents().length}`}
-                  />
+          <div id="WeeklyCalendarContainer"  >
+            <Card
+              border={"secondary"}
+              style={{ width: "100%", margin: "1rem 0rem" ,background: "#e1e1e152"}}
+            >
+              <Card.Header>
+                {" "}
+                <h4>
+                  <b>{this.state.lecturetitle}</b> Lectures
+                </h4>{" "}
+              </Card.Header>
+              <div className="row" style={{  margin: "1rem 0rem"}}>
+                <div className="col-12 col-md-8">
+                  <div className="col">
+                    <WeeklyCalendar
+                      handleEventClick={this.handleEventClick}
+                      Items={this.formatEvents()}
+                      renderEventContent={this.renderEventContent}
+                      title={`Number of Lectures:${this.formatEvents().length}`}
+                    />
+                  </div>
+                </div>
+                <div className="col-6 col-md-4">
+                  <div id="lecturelistview" className="col">
+                    {this.formatEvents().length > 0 && (
+                      <ListGroup
+                        as="ul"
+                        variant="flush"
+                        style={{ height: "28rem",margin:"1rem 0rem" }}
+                      >
+                        <ListGroup.Item>
+                          <div className="d-flex w-100 justify-content-between">
+                            <div className="container">
+                              <div className="row">
+                                <div className="col-lg-4">
+                                  <label>Lecture Name</label>
+                                </div>
+                                <div className="col-lg-4">
+                                  <label>Start</label>
+                                </div>
+                                <div className="col-lg-4">
+                                  <label>End</label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </ListGroup.Item>
+                        {this.formatEvents().map((lecture) => (
+                          <LectureItem lecture={lecture} />
+                        ))}
+                      </ListGroup>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="col-6 col-md-4">
-                <div id="lecturelistview" className="col">
-                  {this.formatEvents().length > 0 && (
-                    <ListGroup
-                      as="ul"
-                      variant="flush"
-                      style={{ height: "28rem" }}
-                    >
-                      {this.formatEvents().map((lecture) => (
-                        <LectureItem lecture={lecture} />
-                      ))}
-                    </ListGroup>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card>
+            </Card>
           </div>
-
+<div id="studentlistview">
           <Card
             border={"secondary"}
             style={{ width: "100%", margin: "1rem 0rem" }}
           >
-            <Card.Header>  <h4><b>{this.state.studenttitle}</b> Students</h4> </Card.Header>
+            <Card.Header>
+              {" "}
+              <h4>
+                <b>{this.state.studenttitle}</b> Students
+              </h4>{" "}
+            </Card.Header>
             <div className="row">
-              <div id="studentlistview" className="col">
+              <div  className="col">
                 {this.state.students && (
                   <ListGroup as="ul" variant="flush">
+                    <ListGroup.Item>
+                      <div className="d-flex w-100 justify-content-between">
+                        <div className="container">
+                          <div className="row">
+                            <div className="col-lg-4">
+                              <label>Name</label>
+                            </div>
+                            <div className="col-lg-4">
+                              <label>LastName</label>
+                            </div>
+                            <div className="col-lg-4">
+                              <label>Email</label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ListGroup.Item>
                     {this.state.students.map((student) => (
                       <StudentItem key={student.id} student={student} />
                     ))}
@@ -328,6 +373,7 @@ class StudentList extends React.Component {
               </div>
             </div>
           </Card>
+          </div>
         </div>
       </>
     );
