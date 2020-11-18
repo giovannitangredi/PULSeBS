@@ -2,6 +2,7 @@
 const knex = require("./../db");
 const jsonwebtoken = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const moment = require("moment");
 require("dotenv").config();
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -26,6 +27,7 @@ exports.get = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+  console.log(email);
   console.log(password);
   knex
     .select("id", "name", "surname", "email", "password_hash", "role")
