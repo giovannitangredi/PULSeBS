@@ -4,9 +4,6 @@ let cron = require("node-cron");
 var imaps = require("imap-simple");
 let nodemailer = require("nodemailer");
 
-const today = moment().format("YYYY-MM-DD HH:mm:ss");
-const dateShown = moment(today).add(2, "weeks");
-
 let listOfEmails = ["pulsebs.softeng@gmail.com"];
 
 exports.sendMail = async (email, subject, body) => {
@@ -78,24 +75,45 @@ exports.startScheduler = () => {
   //this.fetchemails(Imapconfig);
   // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
   cron.schedule("0 0 0 * * *", () => {
-    this.getlistofemails(today).then((res) => {
-      console.log(res);
-      if (listOfEmails) for (email of listOfEmails) this.sendMail(email);
-    });
+    this.sendTeacherEmailTask();
   });
 };
 
-exports.getlistofemails = async (date) => {
-  let querystring = `select distinct * from lecture join user where lecture.lecturer==user.id  and lecture.start>='${date}' and  lecture.start<'${date.getDate() + 1}' `;
+exports.sendTeacherEmailTask = () => {
+  const today = moment();
+ 
+  this.getListOfLectures(today).then((lectures) => {
+    //console.log(res);
+    const emailSubject = "Bookings for the lecture";
+    for (lecture of lectures) {
+      const emailBody = `Dear ${lecture.lecturerName} ${lecture.lecturerSurname},<br/> \
+            We inform You that ${lecture.bookingsNumber} students booked a seat for ${lecture.name} of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
+            Thanks,<br/>The PULSeBS Team`;
+            console.log(emailBody);
+      this.sendMail(lecture.lecturerEmail, emailSubject, emailBody);
+    }
+  });
+}
 
-  knex
-    .raw(querystring)
-    .then((queryResults) => {
-      res = queryResults;
-    })
-    .catch((err) => {
-      res.json({
-        message: `There was an error`,
-      });
-    });
+exports.getListOfLectures = async (date) => {
+  //let querystring = `select distinct * from lecture join user where lecture.lecturer==user.id and lecture.start>='${date.format("YYYY-MM-DD HH:mm:ss")}' and  lecture.start<'${date.add(1, "days").format("YYYY-MM-DD HH:mm:ss")}' `;
+  const queryResults = await knex
+    .select(
+      { name: "lecture.name" },
+      { courseName: "course.name" },
+      { start: "lecture.start" },
+      { lecturerName: "user.name" },
+      { lecturerSurname: "user.surname" },
+      { lecturerEmail: "user.email" }
+    )
+    .count({ bookingsNumber: "lecture.id"})
+    .from("lecture")
+    .join("course", "lecture.course", "=", "course.id")
+    .join("user", "lecture.lecturer", "=", "user.id")
+    .join("lecture_booking", "lecture.id", "=", "lecture_booking.lecture_id")
+    .where("lecture.start", ">=", date.format("YYYY-MM-DD HH:mm:ss"))
+    .andWhere("lecture.start", "<", date.add(1, "days").format("YYYY-MM-DD HH:mm:ss"))
+    .groupBy("lecture.id", "lecture.name", "course.name", "lecture.start", "user.name", "user.surname", "user.email");
+
+  return queryResults;
 };
