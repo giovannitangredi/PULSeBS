@@ -13,6 +13,7 @@ const jwtSecret = process.env.JWT_SECRET;
 const authRouter = require("./routes/auth-route");
 const userRouter = require("./routes/user-route");
 const lectureRouter = require("./routes/lecture-route");
+const courseRouter = require("./routes/course-route");
 const mail = require("./controllers/email-controller");
 
 // Set default port for express app
@@ -43,6 +44,7 @@ app.use(
   })
 );
 app.use("/api/user", userRouter);
+app.use("/api/courses", courseRouter);
 app.use("/api/lectures", lectureRouter);
 
 // To return a better object in case of errors
@@ -69,7 +71,7 @@ app.listen(PORT, function () {
 });
 
 function startMailCron() {
-  mail.startScheduler("0 0 0 * * *").then((x) => console.log(x));
+  mail.startScheduler("0 0 0 * * *");
 }
 
 module.exports = app;
