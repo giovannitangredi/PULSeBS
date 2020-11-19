@@ -7,7 +7,6 @@ import StudentItem from "./StudentItem";
 import axios from "axios";
 import WeeklyCalendar from "./WeeklyCalendar";
 import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
 
 class StudentList extends React.Component {
   constructor(props) {

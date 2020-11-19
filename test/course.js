@@ -21,6 +21,17 @@ const userTuple = {
   role: "student",
 };
 
+const course1Tuple = {
+  id: 1,
+  name: "Software Engineering I",
+  main_prof: 1,
+}
+const course2Tuple = {
+  id: 2,
+  name: "Software Engineering II",
+  main_prof: 2,
+}
+
 const userResponseData = { ...userTuple };
 delete userResponseData.password_hash;
 
@@ -31,16 +42,8 @@ describe("GET /api/courses/", () => {
     await knex("user").del();
     await knex("user").insert(userTuple);
     await knex("course").del();
-    await knex("course").insert({
-      id: 1,
-      name: "Software Engineering I",
-      main_prof: 1,
-    });
-    await knex("course").insert({
-      id: 2,
-      name: "Software Engineering II",
-      main_prof: 2,
-    });
+    await knex("course").insert(course1Tuple);
+    await knex("course").insert(course2Tuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
       .send(userCredentials);
@@ -50,6 +53,11 @@ describe("GET /api/courses/", () => {
   it("it should return status 200", async () => {
     const res = await authenticatedUser.get("/api/courses/");
     expect(res.status).to.equal(200);
+  });
+  it("it should return 1 course associated to main_prof 1", async () => {
+    const res = await authenticatedUser.get("/api/courses/");
+    expect(res.body.length).to.equal(1);
+    expect(res.body).to.have.deep.members([course1Tuple])
   });
   afterEach(async () => {
     await knex("course").del();

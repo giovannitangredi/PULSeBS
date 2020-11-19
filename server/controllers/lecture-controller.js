@@ -22,9 +22,9 @@ exports.getBookingLectures = async (req, res) => {
   select lecture_id from lecture_booking where student_id = ?
   )
   and course_available_student.student_id = ?
-  and start > "2020-11-17 05:30:53"
-  and start < "2020-11-30 17:30:53"
-  `, [studentId,studentId])*/
+  and start > ?
+  and start < ?
+  `, [studentId,studentId,deadline,dateShown])*/
     .select(
       { id: "lecture.id" },
       { name: "lecture.name" },
@@ -110,7 +110,7 @@ exports.newBooking = async (req, res) => {
   // Insert new booking from table lecture_booking
   const studentId = req.user && req.user.id;
   //console.log(req.user);
-  today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
 
   knex("lecture_booking")
     .insert({
