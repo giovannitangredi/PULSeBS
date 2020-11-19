@@ -2,7 +2,6 @@
 const path = require("path");
 
 const environment = process.env.NODE_ENV || "development";
-console.log(environment);
 const dbPath = path.resolve(
   __dirname,
   environment === "testing" ? "db/testing.sqlite" : "db/database.sqlite"
@@ -51,7 +50,7 @@ initTable("user", (table) => {
 
   table.string("surname").notNullable();
 
-  table.string("password").notNullable();
+  table.string("password_hash").notNullable();
 
   table.string("email").notNullable();
 
@@ -92,6 +91,14 @@ initTable("lecture_booking", (table) => {
   table.foreign("student_id").references("user.id");
 
   table.datetime("booked_at").notNullable();
+});
+
+initTable("course_available_student", (table) => {
+  table.integer("course_id").notNullable();
+  table.foreign("course_id").references("course.id");
+
+  table.integer("student_id").notNullable();
+  table.foreign("student_id").references("user.id");
 });
 
 // Export the database
