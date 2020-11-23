@@ -163,6 +163,32 @@ exports.newBooking = async (req, res) => {
     });
 };
 
+// Cancel booking from table lecture_booking
+
+exports.cancelBooking = async (req, res) => {
+	const lectureId = req.params.lectureid;
+	//const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  
+  // Delete booking lecture in lecture_booking table
+	const cancelQuery = knex("lecture_booking")
+		.where("lecture_id",lectureId)
+		.del();
+    
+  // Insert new log in the log table 	
+	const insertLogQuery = knex 
+	.insert({    
+	  // insert new log      
+    })
+	Promise.all([cancelQuery, insertLogQuery])
+        .then(() => {
+		res.json({ message: `Booking canceled.` });
+    })
+    .catch((err) => {
+      // Send a error message in response
+      res.json({ message: `There was an error canceling the booking` });
+    });
+};
+
 // Get the list of lectures scheduled for a course
 exports.getScheduledLectures = async (req, res) => {
   const courseId = req.params.courseid;
