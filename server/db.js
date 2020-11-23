@@ -101,5 +101,43 @@ initTable("course_available_student", (table) => {
   table.foreign("student_id").references("user.id");
 });
 
+initTable("stats_time", (table) => {
+  table.increments("tid").primary();
+
+  table.date("date").notNullable();
+  table.string("week").notNullable();
+  table.string("month").notNullable();
+  table.integer("year").notNullable();
+});
+
+initTable("stats_lecture", (table) => {
+  table.increments("lid").primary();
+
+  table.string("lecture_id").notNullable();
+  table.string("lecture_name").notNullable();
+
+  table.integer("course_id").notNullable();
+  table.string("course_name").notNullable();
+});
+
+initTable("stats_fact", (table) => {
+  table.integer("tid").notNullable();
+  table.foreign("tid").references("stats_time.tid");
+
+  table.integer("lid").notNullable();
+  table.foreign("lid").references("stats_lecture.lid");
+  
+  table.integer("booking").notNullable();
+  table.integer("cancellations").notNullable();
+  table.integer("attendance").notNullable();
+});
+
+initTable("_Variables", (table) => {
+  table.string("name").primary();
+
+  table.integer("int_value");
+  table.date("date_value");
+  table.string("string_value");
+});
 // Export the database
 module.exports = knex;
