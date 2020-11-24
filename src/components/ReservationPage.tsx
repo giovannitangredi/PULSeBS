@@ -45,7 +45,7 @@ export const ReservationPage = (props: any) => {
   const cancelBooking = (lectureID : any)=>{
     setLoading(true);
     axios
-    .post(`/${lectureID}/cancelbook`)
+    .delete(`/lectures/${lectureID}/cancelbook`)
     .then((res)=>{
       getReservations();
     }).catch((err) => {
