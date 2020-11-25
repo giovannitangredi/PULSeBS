@@ -59,6 +59,7 @@ exports.getBookingLectures = async (req, res) => {
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
     .andWhere("start", "<", dateShown) //show only lecture in two weeks
+    .andWhere("status", "presence") //show only presence lecture
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -176,7 +177,8 @@ exports.getScheduledLectures = async (req, res) => {
       { capacity: "l.capacity" },
       { lecturer_id: "u.id" },
       { lecturer_name: "u.name" },
-      { lecturer_surname: "u.surname" }
+      { lecturer_surname: "u.surname" },
+      { status: "l.status"}
     )
     .from({ l: "lecture" })
     .join({ u: "user" }, "l.lecturer", "=", "u.id")
@@ -204,6 +206,7 @@ exports.getBookedStudents = async (req, res) => {
     .from("lecture_booking")
     .join("user", "lecture_booking.student_id", "=", "user.id")
     .where("lecture_booking.lecture_id", lectureId)
+    .andWhere("status", "presence") //show only presence lecture
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -212,4 +215,50 @@ exports.getBookedStudents = async (req, res) => {
         message: `There was an error retrieving the students list`,
       });
     });
+};
+
+// Turn a presence lecture into a distance one 
+
+exports.convertDistanceLecture = async (req, res) => {
+  const lectureId = req.params.lectureid;
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const deadline = moment(today).add(30, "minutes").format("YYYY-MM-DD HH:mm:ss");
+  knex
+  .select(
+    { name: "name" },
+    { start: "start" }
+  )
+  .from("lecture")
+  .where("id", lectureId)
+  .then(([lectureQueryResults]) => {
+    const lecture = lectureQueryResults[0];
+    if(moment(deadline).isBefore(lecture.start)) {
+        knex("lecture")
+        .where("id", lectureId)
+        .update({
+            status: "distance"
+            })
+        .then(() => {
+        res.json({
+          message: `Presence lecture "${lecture.name}" turned into a distance one`,
+        });
+      })
+      .catch((err) => {
+         res.json({
+        message: `There was an error converting the lecture into a distance one`,
+      });
+    });
+    }
+    else {
+      res.json({
+        message: `Presence lecture "${lecture.name}" can't be turned into a distance one: Lecture starting in 30 minutes!`,
+      });
+    }
+      
+  })
+  .catch((err) => {
+    res.json({
+      message: `There was an error searching the lecture`,
+    });
+  });
 };
