@@ -7,16 +7,22 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 const moment = require("moment");
 const emailController = require("../server/controllers/email-controller");
-const MailSlurp = require("mailslurp-client").default;
 
-const apiKey =
-  "ff4ecbf86022042fe17030bc0ff37f0f4a5ff3470d9727218d1945b1862a580c";
-const mailSlurpAddress = "8d0dbfbc-f2b7-4e53-a6dc-7dd32ee45e83@mailslurp.com";
-const mailslurp = new MailSlurp({ apiKey });
+const testEmailAddress = "test.pulsebs.softeng@gmail.com";
+const testEmailPassword = "JRLeumcuc5N8K3S";
+const imap = {
+    user: testEmailAddress,
+    password: testEmailPassword,
+    host: "imap.gmail.com",
+    port: 993,
+    tls: true,
+    tlsOptions: { rejectUnauthorized: false },
+    authTimeout: 3000
+};
 
 //the data we need to pass to the login method
 const userCredentials = {
-  email: mailSlurpAddress,
+  email: testEmailAddress,
   password: "password",
 };
 
@@ -25,7 +31,7 @@ const userTuple = {
   name: "Enrico",
   surname: "Carraro",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
-  email: mailSlurpAddress,
+  email: testEmailAddress,
   role: "student",
 };
 
@@ -101,7 +107,7 @@ const expectedBookableLectures = [{
 
 describe("Lecture test", async function () {
   const authenticatedUser = request.agent(app);
-  this.timeout(10000);
+  this.timeout(15000);
   before(async () => {
     await knex("user").del();
     await knex("course").del();
@@ -116,15 +122,16 @@ describe("Lecture test", async function () {
   });
 
   describe("reservation test", async () => {
-    let inbox;
+    let newEmailPromise;
 
     before(async () => {
       const res = await authenticatedUser
         .post("/api/auth/login")
         .send(userCredentials)
         .expect(200);
-      inbox = (await mailslurp.getInboxes())[0];
-      mailslurp.emptyInbox(inbox.id);
+
+      await emailController.deleteEmails(imap);
+      newEmailPromise = emailController.waitForNewEmail(imap);
     });
 
     it("book a seat: should return a 200 response", async () => {
@@ -134,24 +141,24 @@ describe("Lecture test", async function () {
     });
 
     it("should receive an email", async () => {
-      const email = await mailslurp.waitForLatestEmail(inbox.id);
+      const email = await newEmailPromise;
       expect(email.body).to.match(/You have successfully booked a seat/);
     });
   });
 
   describe("teacher email test", async () => {
-    let inbox;
-
+    let newEmailPromise;
+    
     before(async () => {
       // use the slurpemail address also for the teacher so that we can check the email is received
       await knex("user")
         .where("id", teacherTuple.id)
-        .update("email", mailSlurpAddress);
+        .update("email", testEmailAddress);
       await knex("lecture_booking").del();
       await knex("lecture_booking").insert(lectureBookingTuple);
 
-      inbox = (await mailslurp.getInboxes())[0];
-      mailslurp.emptyInbox(inbox.id);
+      await emailController.deleteEmails(imap);
+      newEmailPromise = emailController.waitForNewEmail(imap);
     });
 
     it("should receive an email with the number of the students booked", async () => {
@@ -160,7 +167,7 @@ describe("Lecture test", async function () {
         `${now.second()} ${now.minute()} * * * *`
       );
 
-      const email = await mailslurp.waitForLatestEmail(inbox.id);
+      const email = await newEmailPromise;
       expect(email.body).to.match(/1 students booked a seat/);
     });
   });
@@ -268,7 +275,7 @@ describe("List of students booked for a lecture", async () => {
   it("should return one student booked", async () => {
     const res = await authenticatedUser.get(`/api/lectures/${lectureBookingTuple.lecture_id}/students`);
     expect(res.body.length).to.equal(1);
-    expect(res.body).to.have.deep.members([{ id: userTuple.id, name: userTuple.name , surname: userTuple.surname , email: mailSlurpAddress }])
+    expect(res.body).to.have.deep.members([{ id: userTuple.id, name: userTuple.name , surname: userTuple.surname , email: testEmailAddress }])
    
   });
   after(async () => {
