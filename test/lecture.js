@@ -254,6 +254,7 @@ describe("List of students booked for a lecture", async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
+    await knex("lecture").insert(lectureTuple)
     await knex("lecture_booking").insert(lectureBookingTuple);    
     const res = await authenticatedUser
       .post("/api/auth/login")
