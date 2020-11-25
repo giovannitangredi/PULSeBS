@@ -31,6 +31,8 @@ exports.getBookingStats = async (req, res) => {
         .join({st: "stats_time"}, "su.tid", "=", "st.tid")
         .where("sl.course_id", courseId)
         .andWhere("st.week", week)
+        .andWhere(knex.raw("su.booking - su.cancellations"), ">", 0)
+        .andWhere("st.date", "<", "date('now')")
         .groupBy("course_id", "course_name", "week")
         .then((queryResults) => {
           res.json(queryResults);
@@ -55,6 +57,8 @@ exports.getBookingStats = async (req, res) => {
         .join({st: "stats_time"}, "su.tid", "=", "st.tid")
         .where("sl.course_id", courseId)
         .andWhere("st.month", month)
+        .andWhere(knex.raw("su.booking - su.cancellations"), ">", 0)
+        .andWhere("st.date", "<", "date('now')")
         .groupBy("course_id", "course_name", "month")
         .then((queryResults) => {
           res.json(queryResults);
@@ -78,7 +82,10 @@ exports.getBookingStats = async (req, res) => {
         )
         .from({su: "stats_usage"})
         .join({sl: "stats_lecture"}, "su.lid", "=", "sl.lid")
+        .join({st: "stats_time"}, "su.tid", "=", "st.tid")
         .where("sl.course_id", courseId)
+        .andWhere(knex.raw("su.booking - su.cancellations"), ">", 0)
+        .andWhere("st.date", "<", "date('now')")
         .then((queryResults) => {
           res.json(queryResults);
         })
