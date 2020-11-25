@@ -125,7 +125,7 @@ describe("Usage test", async function () {
         expect(res.body[1].booking).to.equal(1);
       });
 
-      it("Should return the total number of booking (1 for lecture 1, 0 for lecture 2) after delete in lecture_booking", async () => {
+      it("Should return the total number of booking (1 for lecture 1) after delete in lecture_booking", async () => {
            //delete one record in lecture_booking         
             await knex("lecture_booking")                                    //-1 Lecture 1 (user 2)
                 .where("lecture_id",lectureTuple.id)
@@ -138,9 +138,8 @@ describe("Usage test", async function () {
           
          const res = await authenticatedUser
              .get(`/api/courses/${courseTuple.id}/bookings`).expect(200);
-             expect(res.body.length).to.equal(2);   
+             expect(res.body.length).to.equal(1);   
              expect(res.body[0].booking).to.equal(1); 
-             expect(res.body[1].booking).to.equal(0); 
     });  
     after(async () => {
         await knex("lecture_booking").del();
@@ -184,7 +183,7 @@ describe("Usage test", async function () {
              const res = await authenticatedUser
                  .get(`/api/courses/${courseTuple.id}/bookings?week=${year}-${week}`).expect(200);
              expect(res.body.length).to.equal(1);
-             expect(res.body[0].booking).to.equal(0.5);   
+             expect(res.body[0].booking).to.equal(1);   
     
         }); 
         after(async () => {
@@ -229,7 +228,7 @@ describe("Usage test", async function () {
          const res = await authenticatedUser
              .get(`/api/courses/${courseTuple.id}/bookings?month=${year}-${month}`).expect(200);
              expect(res.body.length).to.equal(1);
-         expect(res.body[0].booking).to.equal(0.5);  //how many?
+         expect(res.body[0].booking).to.equal(1);  
 
     });
     after(async () => {
