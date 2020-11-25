@@ -54,8 +54,8 @@ const lectureTuple = {
   name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
-  start: moment().subtract(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
-  end: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  start: moment().subtract(1, "days").subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
 };
 
@@ -64,26 +64,26 @@ const lecture2Tuple = {
     name: "Lecture 2",
     course: courseTuple.id,
     lecturer: teacherTuple.id,
-    start: moment().subtract(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
-    end: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+    start: moment().subtract(1, "days").subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+    end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
     capacity: 25,
   };
 
   const lectureBookingTuple = {
     lecture_id: lectureTuple.id,
     student_id: userTuple.id,
-    booked_at: moment().subtract(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+    booked_at: moment().subtract(2, "days").format("YYYY-MM-DD HH:mm:ss"),
   };
 
   const lectureBookingTuple2 = {
     lecture_id: lectureTuple.id,
     student_id: "2",
-    booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+    booked_at: moment().subtract(2, "days").format("YYYY-MM-DD HH:mm:ss"),
   };
   const lecture2BookingTuple = {
     lecture_id: lecture2Tuple.id,
     student_id: userTuple.id,
-    booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+    booked_at: moment().subtract(2, "days").format("YYYY-MM-DD HH:mm:ss"),
   };
 
 describe("Usage test", async function () {
