@@ -23,9 +23,9 @@ exports.getBookingStats = async (req, res) => {
         .select( 
           {course_id: "sl.course_id"}, 
           {course_name: "sl.course_name"},
-          {week: "st.week"}
+          {week: "st.week"},
+          knex.raw("avg(su.booking - su.cancellations) as booking")
         )
-        .avg(knex.raw("(su.booking - su.cancellations) as booking"))
         .from({su: "stats_usage"})
         .join({sl: "stats_lecture"}, "su.lid", "=", "sl.lid")
         .join({st: "stats_time"}, "su.tid", "=", "st.tid")
@@ -47,9 +47,9 @@ exports.getBookingStats = async (req, res) => {
         .select( 
           {course_id: "sl.course_id"}, 
           {course_name: "sl.course_name"}, 
-          {month: "st.month"}
+          {month: "st.month"},
+          knex.raw("avg(su.booking - su.cancellations) as booking")
         )
-        .avg(knex.raw("(su.booking - su.cancellations) as booking"))
         .from({su: "stats_usage"})
         .join({sl: "stats_lecture"}, "su.lid", "=", "sl.lid")
         .join({st: "stats_time"}, "su.tid", "=", "st.tid")
@@ -61,7 +61,7 @@ exports.getBookingStats = async (req, res) => {
         })
         .catch((err) => {
           res.json({
-            message: `There was an error retrieving the bookings`,
+            message: `There was an error retrieving the bookings ${err}`,
           });
         });
 
