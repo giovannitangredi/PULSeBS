@@ -15,10 +15,11 @@ export const BookingLectureList = (props) => {
           <th style = {styles.head}>Course</th>
           <th style = {styles.head}>Lecture</th>
           <th style = {styles.head}>Professor</th>
+          <th style = {styles.head}>Status</th>
           <th style = {styles.head}>Start</th>
           <th style = {styles.head}>End</th>
           <th style = {styles.head}>Capacity</th>
-          <th></th>
+          <th style = {styles.head}></th>
         </tr>
       </thead>
       <tbody>

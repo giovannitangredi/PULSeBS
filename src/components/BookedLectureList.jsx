@@ -18,12 +18,13 @@ export const BookedLectureList = (props) => {
           <th style = {styles.head}>Status</th>
           <th style = {styles.head}>Start</th>
           <th style = {styles.head}>End</th>
+          <th style = {styles.head}></th>
         </tr>
       </thead>
       <tbody>
         {props.lectures.length > 0 &&
           props.lectures.map((lecture) => (
-            <BookedLecture key={lecture.id} lecture={lecture}></BookedLecture>
+            <BookedLecture key={lecture.id} lecture={lecture} cancelBooking={props.cancelBooking}></BookedLecture>
           ))}
       </tbody>
     </Table>

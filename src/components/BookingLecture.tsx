@@ -18,6 +18,7 @@ export const BookingLecture = (props: any) => {
       <td style= {styles.col}>
         {props.lecture.lecturer_name + " " + props.lecture.lecturer_surname}
       </td>
+      <td style= {styles.col}>{props.lecture.status}</td>
       <td style= {styles.col}>{props.lecture.start}</td>
       <td style= {styles.col}>{props.lecture.end}</td>
       <td style= {styles.col}>
@@ -25,9 +26,12 @@ export const BookingLecture = (props: any) => {
       </td>
       <td style= {styles.col}>
         {" "}
-        <Button variant="primary" onClick={(event) => handleBooking(event)}>
+      {props.lecture.booked_students < props.lecture.capacity && props.lecture.status!="distance" && <Button variant="primary" onClick={(event) => handleBooking(event)}>
           Book a Seat
-        </Button>
+          </Button> }
+          {props.lecture.booked_students >= props.lecture.capacity && props.lecture.status!="distance" &&  <Button variant="warning">
+          Full
+          </Button> }
       </td>
     </tr>
   );
