@@ -1,5 +1,6 @@
 // Import path module
 const path = require("path");
+const triggers = require("./triggers");
 
 const environment = process.env.NODE_ENV || "development";
 const dbPath = path.resolve(
@@ -16,7 +17,7 @@ const knex = require("knex")({
   useNullAsDefault: true,
 });
 
-const initTable = (name, attribute_declaration_cb) => {
+const initTable = (name, attribute_declaration_cb, ...triggers) => {
   knex.schema
     // Make sure the table doesn't exists
     // before trying to create a new one
@@ -32,6 +33,17 @@ const initTable = (name, attribute_declaration_cb) => {
           .catch((error) => {
             console.error(`There was an error creating table: ${error}`);
           });
+      }
+    })  
+    .then(() => {
+      for(let t of triggers) {
+        knex.raw(t)
+        .then(() => {
+          console.log(`New trigger added`);
+        })
+        .catch((error) => {
+          console.log(`There was an error creating trigger: ${error}`);
+        });
       }
     })
     .then(() => {
@@ -81,7 +93,10 @@ initTable("lecture", (table) => {
   table.dateTime("end").notNullable();
 
   table.integer("capacity").unsigned().notNullable();
-});
+  table.string("status");
+}, 
+triggers.convert_trigger
+);
 
 initTable("lecture_booking", (table) => {
   table.integer("lecture_id").notNullable();
@@ -91,7 +106,10 @@ initTable("lecture_booking", (table) => {
   table.foreign("student_id").references("user.id");
 
   table.datetime("booked_at").notNullable();
-});
+}, 
+triggers.booking_trigger, 
+triggers.cancellation_trigger 
+);
 
 initTable("course_available_student", (table) => {
   table.integer("course_id").notNullable();
@@ -99,6 +117,50 @@ initTable("course_available_student", (table) => {
 
   table.integer("student_id").notNullable();
   table.foreign("student_id").references("user.id");
+});
+
+initTable("stats_time", (table) => {
+  table.increments("tid").primary();
+
+  table.date("date").notNullable();
+  table.string("week").notNullable();
+  table.string("month").notNullable();
+  table.integer("year").notNullable();
+});
+
+initTable("stats_lecture", (table) => {
+  table.increments("lid").primary();
+
+  table.string("lecture_id").notNullable();
+  table.string("lecture_name").notNullable();
+
+  table.integer("course_id").notNullable();
+  table.string("course_name").notNullable();
+});
+
+initTable("stats_usage", (table) => {
+  table.integer("tid").notNullable();
+  table.foreign("tid").references("stats_time.tid");
+
+  table.integer("lid").notNullable();
+  table.foreign("lid").references("stats_lecture.lid");
+  
+  table.integer("booking").notNullable();
+  table.integer("cancellations").notNullable();
+  table.integer("attendance").notNullable();
+});
+
+initTable("_Variables", (table) => {
+  table.string("name").primary();
+
+  table.integer("int_value");
+  table.date("date_value");
+  table.string("string_value");
+});
+
+initTable("_Trigger", (table) => {
+  table.string("name").primary();
+  table.string("trigger_status");
 });
 
 // Export the database

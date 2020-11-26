@@ -223,16 +223,19 @@ exports.convertDistanceLecture = async (req, res) => {
   const lectureId = req.params.lectureid;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(30, "minutes").format("YYYY-MM-DD HH:mm:ss");
+  console.log("lecture",lectureId)
   knex
   .select(
     { name: "name" },
-    { start: "start" }
+    { start: "start" },
+    { status: "status" }
   )
   .from("lecture")
   .where("id", lectureId)
   .then(([lectureQueryResults]) => {
-    const lecture = lectureQueryResults[0];
-    if(moment(deadline).isBefore(lecture.start)) {
+    const lecture = lectureQueryResults;
+    console.log("lecture",lecture)
+    if(moment(deadline).isBefore(lecture.start) && (lecture.status === "presence")) {
         knex("lecture")
         .where("id", lectureId)
         .update({
@@ -240,7 +243,7 @@ exports.convertDistanceLecture = async (req, res) => {
             })
         .then(() => {
         res.json({
-          message: `Presence lecture "${lecture.name}" turned into a distance one`,
+          message: `Presence lecture '${lecture.name}' turned into a distance one`,
         });
       })
       .catch((err) => {
@@ -249,9 +252,14 @@ exports.convertDistanceLecture = async (req, res) => {
       });
     });
     }
+    else if (lecture.status === "distance"){
+      res.json({
+        message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Already a distance one!`,
+      });
+    }
     else {
       res.json({
-        message: `Presence lecture "${lecture.name}" can't be turned into a distance one: Lecture starting in 30 minutes!`,
+        message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Lecture starting in 30 minutes!`,
       });
     }
       
