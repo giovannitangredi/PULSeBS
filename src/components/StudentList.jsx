@@ -47,7 +47,7 @@ class StudentList extends React.Component {
 
   formatEvents() {
     return this.state.lectures.map((lecture) => {
-      const { name, end, start, capacity, booked_students, id } = lecture;
+      const { name, end, start, capacity, booked_students, id, status } = lecture;
 
       let startTime = new Date(start);
       let endTime = new Date(end);
@@ -56,11 +56,13 @@ class StudentList extends React.Component {
         title: name,
         start: startTime,
         end: endTime,
+        backgroundColor: (status == 'distance'? 'red' : 'dodgerblue'),
         extendedProps: {
           capacity: capacity,
           booked_students: booked_students,
+          status: status,
           id,
-          name,
+          name
         },
       };
     });
@@ -76,7 +78,7 @@ class StudentList extends React.Component {
             {eventInfo.event.start.getMinutes()}
             <br></br>
             {eventInfo.event.title} <br></br>
-            Capacity:{eventInfo.event.extendedProps.capacity}{" "}
+            {eventInfo.event.extendedProps.status == "presence" && `Capacity: ${eventInfo.event.extendedProps.capacity}`}
           </p>
         </div>
       );
@@ -104,152 +106,12 @@ class StudentList extends React.Component {
     this.setState({ selectedLecture: 1 });
 
     this.getCourseList();
-
-    /* this.setState({
-      Courses: [{ id: 1, name: "Soft eng II", main_prof: 3 }],
-    });
-
-    this.setState({
-      lectures: [
-        {
-          id: 2323,
-          lecturer_name: "Software 2",
-          start: Date.parse("11/9/2020 13:00:00 GMT"),
-          end: Date.parse("11/9/2020 14:00:00 GMT"),
-          capacity: 84,
-          booked_students: "20",
-          course: "84",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2423,
-          lecturer_name: "Data Science and Database Technology",
-          start: Date.parse("13/9/2020 12:00:00 GMT"),
-          end: Date.parse("13/9/2020 14:00:00 GMT"),
-          capacity: 170,
-          booked_students: "20",
-          course: "170",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2623,
-          lecturer_name: "Compiler",
-          start: Date.parse("14/9/2020 09:00:00 GMT"),
-          end: Date.parse("14/9/2020 11:00:00 GMT"),
-          capacity: 60,
-          booked_students: "20",
-          course: "60",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2253,
-          lecturer_name: "Computer Architectures",
-          start: Date.parse("15/9/2020 12:00:00 GMT"),
-          end: Date.parse("15/9/2020 13:00:00 GMT"),
-          capacity: 210,
-          booked_students: "20",
-          course: "210",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2293,
-          lecturer_name: "System and Device Programming",
-          start: Date.parse("16/9/2020 13:00:00 GMT"),
-          end: Date.parse("16/9/2020 14:00:00 GMT"),
-          capacity: 130,
-          booked_students: "20",
-          course: "130",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2393,
-          lecturer_name: "Computer Networks",
-          start: Date.parse("17/9/2020 13:00:00 GMT"),
-          end: Date.parse("17/9/2020 14:00:00 GMT"),
-          capacity: 129,
-          booked_students: "20",
-          course: "129",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2723,
-          lecturer_name: "Mobile application development",
-          start: Date.parse("18/9/2020 13:00:00 GMT"),
-          end: Date.parse("18/9/2020 14:00:00 GMT"),
-          capacity: 83,
-          booked_students: "20",
-          course: "32",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-      ],
-    });
-    this.setState({
-      students: [
-        {
-          id: 2223,
-          name: "Mithridates",
-          surename: "Theophylaktos",
-          email: "Mithridates@gmail.com",
-        },
-        { id: 2213, name: "Ajay", surename: "Phoibe", email: "Ajay@gmail.com" },
-        {
-          id: 4253,
-          name: "Valeri",
-          surename: "Sabina",
-          email: "Sabina@gmail.com",
-        },
-        {
-          id: 2263,
-          name: "Mithridates",
-          surename: "Theophylaktos",
-          email: "Theophylaktos@gmail.com",
-        },
-        {
-          id: 2273,
-          name: "Ajay",
-          surename: "Phoibe",
-          email: "Phoibe@gmail.com",
-        },
-        {
-          id: 4283,
-          name: "Valeri",
-          surename: "Sabina",
-          email: "Valeri@gmail.com",
-        },
-        {
-          id: 2593,
-          name: "Loane",
-          surename: "Aeson",
-          email: "Loane@gmail.com",
-        },
-      ],
-    });*/
   }
 
   render() {
     return (
       <>
-        <div className="container">
+        <div className="container col-10">
           <Card
             border={"secondary"}
             style={{ width: "100%", height: "75vh", margin: "1rem 0rem" }}
@@ -293,7 +155,7 @@ class StudentList extends React.Component {
                 </h4>{" "}
               </Card.Header>
               <div className="row" style={{ margin: "1rem 0rem" }}>
-                <div className="col-12 col-md-8">
+                <div className="col-12 col-md-7">
                   <div className="col">
                     <WeeklyCalendar
                       handleEventClick={this.handleEventClick}
@@ -303,26 +165,42 @@ class StudentList extends React.Component {
                     />
                   </div>
                 </div>
-                <div className="col-6 col-md-4">
-                  <div id="lecturelistview" className="col">
+                <div className="col-6 col-md-5">
+                <div className='d-flex flex-row align-items-center justify-content-end' id="legendView">
+                    <ListGroup>
+                      <ListGroup.Item className="d-flex flex-row align-items-center">
+                        <span className="mx-2" style={{height:"10px", width:"10px", display:"block", float:"left", background:"red"}}></span>
+                        Remote lecture
+                      </ListGroup.Item>
+                      <ListGroup.Item className="d-flex flex-row align-items-center">
+                        <span className="mx-2" style={{height:"10px", width:"10px", display:"block", float:"left", background:"dodgerblue"}}></span>
+                        Presence lecture
+                      </ListGroup.Item>
+                    </ListGroup>
+                  </div>
+
+                  <div id="lecturelistview">
                     {this.formatEvents().length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"
-                        style={{ height: "28rem", margin: "1rem 0rem" }}
+                        style={{ margin: "1rem 0rem" }}
                       >
                         <ListGroup.Item>
                           <div className="d-flex w-100 justify-content-between">
                             <div className="container">
                               <div className="row">
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>Lecture Name</label>
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>Start</label>
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>End</label>
+                                </div>
+                                <div className="col-lg-3">
+                                  <label>Status</label>
                                 </div>
                               </div>
                             </div>

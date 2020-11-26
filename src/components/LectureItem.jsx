@@ -9,14 +9,17 @@ const lectureItem = (props) => {
       <div className="d-flex w-100 justify-content-between">
         <div className="container">
           <div className="row">
-            <div className="col-lg-4">
+            <div className="col-lg-3">
               <label>{lecture.title}</label>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-3">
               <label>{lecture.start.toDateString()}</label>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-3">
               <label>{lecture.end.toDateString()}</label>
+            </div>
+            <div className="col-lg-3">
+              <label>{lecture.extendedProps.status}</label>
             </div>
           </div>
         </div>
