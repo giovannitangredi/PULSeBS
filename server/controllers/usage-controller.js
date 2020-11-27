@@ -97,3 +97,81 @@ exports.getBookingStats = async (req, res) => {
     }
   };
   
+  exports.getSystemStats = async (req,res)=>{
+    // Get the sum of all stats
+    knex("stats_usage")
+    .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
+    .then((queryResults)=>{
+      res.json(queryResults);
+    })
+    .catch((err)=>{
+      res.json({
+        message: `There was an error retrieving the system stats: ${err}`,
+      });
+    });
+  }
+
+  exports.getAllLecturesStats = async (req,res)=>{
+    knex
+    .select(
+      {lecture : "sl.lecture_name"},
+      {course : "sl.course_name"},
+      {cancellations :"su.cancellations"},
+      {attendance : "su.attendance"},
+      {booking : "su.booking"},
+      {date : "st.date"}
+    )
+    .from({su: "stats_usage"})
+    .join({sl: "stats_lecture"}, "su.lid", "=", "sl.lid")
+    .join({st: "stats_time"}, "st.tid", "=", "su.tid")
+    .then((queryResults)=>{
+      res.json(queryResults);
+    })
+    .catch((err)=>{
+      res.json({
+        message: `There was an error retrieving the all the lectures stats: ${err}`,
+      });
+    });
+  }
+  
+  exports.getCourseTotalStats = async (req,res)=>{
+    // Get the sum of all stats for a single course with id = courseid
+    const courseid= req.params.courseid
+    knex("stats_usage")
+    .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
+    .join({sl: "stats_lecture"}, "su.lid", "=", "sl.lid")
+    .where("sl.course_id",courseid)
+    .then((queryResults)=>{
+      res.json(queryResults);
+    })
+    .catch((err)=>{
+      res.json({
+        message: `There was an error retrieving the course  stats: ${err}`,
+      });
+    });
+  }
+
+  exports.getCourseLecturesStats = async (req,res)=>{
+    const courseid= req.params.courseid
+    knex
+    .select(
+      {lecture : "sl.lecture_name"},
+      {course : "sl.course_name"},
+      {cancellations :"su.cancellations"},
+      {attendance : "su.attendance"},
+      {booking : "su.booking"},
+      {date : "st.date"}
+    )
+    .from({su: "stats_usage"})
+    .join({sl: "stats_lecture"}, "su.lid", "=", "sl.lid")
+    .join({st: "stats_time"}, "st.tid", "=", "su.tid")
+    .where("sl.course_id",courseid)
+    .then((queryResults)=>{
+      res.json(queryResults);
+    })
+    .catch((err)=>{
+      res.json({
+        message: `There was an error retrieving the all the course lectures stats: ${err}`,
+      });
+    });
+  }
