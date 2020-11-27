@@ -33,6 +33,7 @@ exports.getBookingLectures = async (req, res) => {
       { lecturer_surname: "user.surname" },
       { start: "start" },
       { end: "end" },
+      { status: "l.status"},
       { capacity: "capacity" },
       knex.raw(`IFNULL(bookedStudent,0) as booked_students`)
     )
@@ -59,7 +60,6 @@ exports.getBookingLectures = async (req, res) => {
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
     .andWhere("start", "<", dateShown) //show only lecture in two weeks
-    .andWhere("status", "presence") //show only presence lecture
     .then((queryResults) => {
       res.json(queryResults);
     })
