@@ -89,7 +89,7 @@ exports.convert_trigger =
     INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.id));
 
     UPDATE stats_usage 
-        SET booking = 0, cancellations = (SELECT int_value FROM _Variables WHERE name = 'lecture'), attendance = 0 
+        SET booking = 0, cancellations = cancellations + (SELECT int_value FROM _Variables WHERE name = 'lecture'), attendance = 0 
         WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid');
     
     UPDATE _Trigger

@@ -239,7 +239,8 @@ exports.convertDistanceLecture = async (req, res) => {
         knex("lecture")
         .where("id", lectureId)
         .update({
-            status: "distance"
+            status: "distance",
+            capacity: "0"
             })
         .then(() => {
         res.json({
