@@ -38,44 +38,30 @@ export const CourseDetail = (props) => {
             ],
             averageMonthBookingList: [
                 {
-                    month: 1,
+                    month: 2020-11,
                     average: 100
                 },
                 {
-                    month: 2,
+                    month: 2020-12,
                     average: 120
                 },
-                {
-                    month: 3,
-                    average: 110
-                },
-                {
-                    month: 4,
-                    average: 110
-                },
+                
             ],
             averageWeekBookingList: [
                 {
-                    week: 1,
+                    week: 2020-47,
                     average: 10
                 },
                 {
-                    week: 2,
+                    week: 2020-48,
                     average: 25
                 },
-                {
-                    week: 3,
-                    average: 17
-                },
-                {
-                    week: 4,
-                    average: 13
-                }
+                
             ]
         },
         {
             courseId: 2,
-            courseName: 'Node.js',
+            courseName: 'Web App 1',
             bookingList: [
                 {
                     lectureId: 1,
@@ -88,31 +74,24 @@ export const CourseDetail = (props) => {
             ],
             averageMonthBookingList: [
                 {
-                    month: 1,
+                    month: 2020-11,
                     average: 170
                 },
                 {
-                    month: 2,
+                    month: 2020-12,
                     average: 130
                 },
-                {
-                    month: 3,
-                    average: 140
-                }
+               
             ],
             averageWeekBookingList: [
                 {
-                    week: 1,
+                    week: 2020-47,
                     average: 10
                 },
                 {
-                    week: 2,
+                    week: 2020-48,
                     average: 25
                 },
-                {
-                    week: 3,
-                    average: 21
-                }
             ]
         }
     ])
