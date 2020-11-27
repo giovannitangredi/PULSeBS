@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 import { LoginPage } from "./LoginPage";
+import { CourseDetail } from './CourseDetail'
 // Import styles
 import "./../styles/styles.css";
 // Create App component
@@ -69,7 +70,7 @@ export const App = () => {
             {!authUser.id && <Redirect to="/login"></Redirect>}
             <StudentList user={authUser} userid={authUser.id} />
           </Route>
-          <Route path="/">
+          <Route path="/" exact>
             {!authUser.id && <Redirect to="/login"></Redirect>}
             {authUser.id && authUser.role === "student" && (
               <Redirect to="/student"></Redirect>
@@ -77,6 +78,9 @@ export const App = () => {
             {authUser.id && authUser.role === "teacher" && (
               <Redirect to="/teacher"></Redirect>
             )}
+          </Route>
+          <Route path="/courseId/detail">
+            <CourseDetail></CourseDetail>
           </Route>
         </Switch>
       </div>
