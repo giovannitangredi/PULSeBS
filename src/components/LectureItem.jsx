@@ -19,7 +19,7 @@ const lectureItem = (props) => {
               <label>{lecture.end.toDateString()}</label>
             </div>
             <div className="col-lg-3">
-              <label>{lecture.extendedProps.status}</label>
+              <label style={{textTransform: "capitalize"}}>{lecture.extendedProps.status}</label>
             </div>
           </div>
         </div>

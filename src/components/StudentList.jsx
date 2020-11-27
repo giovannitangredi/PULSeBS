@@ -40,8 +40,13 @@ class StudentList extends React.Component {
   getLecturesList = (courseID) => {
     axios.get(`/courses/${courseID.id}/lectures`, {}).then((response) => {
       let result = response.data;
-      this.setState({ lecturetitle: courseID.name });
-      this.setState({ lectures: result });
+      this.setState({ 
+        lecturetitle: courseID.name, 
+        selectedCourse: courseID, 
+        selectedLecture: undefined,
+        students: [],
+        lectures: result
+      });
     });
   };
 
@@ -67,15 +72,21 @@ class StudentList extends React.Component {
       };
     });
   }
+  
   renderEventContent(eventInfo) {
+    
+    function format(n){
+      return n > 9 ? "" + n: "0" + n;
+    };
+    
     if (eventInfo)
       return (
         <div>
           <p>
-            {eventInfo.event.start.getHours()}:
-            {eventInfo.event.start.getMinutes()}-
-            {eventInfo.event.end.getHours()}:
-            {eventInfo.event.start.getMinutes()}
+            {format(eventInfo.event.start.getHours())}:
+            {format(eventInfo.event.start.getMinutes())}-
+            {format(eventInfo.event.end.getHours())}:
+            {format(eventInfo.event.start.getMinutes())}
             <br></br>
             {eventInfo.event.title} <br></br>
             {eventInfo.event.extendedProps.status == "presence" && `Capacity: ${eventInfo.event.extendedProps.capacity}`}
@@ -87,7 +98,7 @@ class StudentList extends React.Component {
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
     let lectureid = event._def.extendedProps.id;
-    this.setState({ studenttitle: event._def.extendedProps.name });
+    this.setState({ studenttitle: event._def.extendedProps.name, selectedLecture: event._def  });
     this.getStudentList(lectureid);
   };
 
@@ -103,8 +114,6 @@ class StudentList extends React.Component {
   };
 
   componentDidMount() {
-    this.setState({ selectedLecture: 1 });
-
     this.getCourseList();
   }
 
@@ -272,7 +281,15 @@ class StudentList extends React.Component {
                         margin: "2rem",
                       }}
                     >
-                      No lecture is selected or there is no students available
+                      {
+                        !this.state.selectedLecture? 
+                            "No lecture is selected" 
+                          : 
+                            this.state.selectedLecture.extendedProps.status == "distance"?
+                                "Remote lecture selected: no students list available"
+                              :
+                                "no students booked for this lecture"
+                      }
                     </h4>
                   )}
                 </div>
