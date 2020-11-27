@@ -8,7 +8,7 @@ exports.getBookingLectures = async (req, res) => {
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
   const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
-
+  console.log(studentId)
   knex
     /*.raw(`select lecture.id,lecture.name as name,course.name as course,user.name as lecturer_name,user.surname as lecturer_surname,start,end,capacity, IFNULL(bookedStudent,0) as booked_students
   from  lecture,user,course
@@ -33,7 +33,7 @@ exports.getBookingLectures = async (req, res) => {
       { lecturer_surname: "user.surname" },
       { start: "start" },
       { end: "end" },
-      { status: "l.status"},
+      { status: "lecture.status"},
       { capacity: "capacity" },
       knex.raw(`IFNULL(bookedStudent,0) as booked_students`)
     )
@@ -61,6 +61,7 @@ exports.getBookingLectures = async (req, res) => {
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
     .andWhere("start", "<", dateShown) //show only lecture in two weeks
     .then((queryResults) => {
+      console.log("PROVAAAAAAAA",queryResults)
       res.json(queryResults);
     })
     .catch((err) => {
@@ -75,7 +76,6 @@ exports.getExistentBooking = async (req, res) => {
   const studentId = req.user && req.user.id;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
-
   knex
     .select(
       { id: "lecture.id" },
@@ -86,7 +86,8 @@ exports.getExistentBooking = async (req, res) => {
       { start: "start" },
       { end: "end" },
       { capacity: "capacity" },
-      { booked_at: "booked_at" }
+      { booked_at: "booked_at" },
+      { status: "status"}
     )
     .from("lecture")
     .join("lecture_booking", "lecture.id", "=", "lecture_booking.lecture_id")
@@ -110,13 +111,24 @@ exports.getExistentBooking = async (req, res) => {
 exports.newBooking = async (req, res) => {
   // Insert new booking from table lecture_booking
   const studentId = req.user && req.user.id;
+  const lectureId = req.params.lectureId
   //console.log(req.user);
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
-
+  knex
+  .select(
+    { name: "name" },
+    { start: "start" },
+    { status: "status" }
+  )
+  .from("lecture")
+  .where("id", lectureId)
+  .then(([lectureQueryResults]) => {
+    const lecture = lectureQueryResults;
+    if(lecture.status === "presence") {
   knex("lecture_booking")
     .insert({
       // insert new record
-      lecture_id: req.params.lectureId,
+      lecture_id: lectureId,
       student_id: studentId, //idstudent
       booked_at: today, //time
     })
@@ -161,7 +173,20 @@ exports.newBooking = async (req, res) => {
     .catch((err) => {
       // Send a error message in response
       res.json({ message: `There was an error creating the booking` });
+    })
+  }
+  else {
+    res.json({
+      message: `Lecture '${lecture.name}' is a remote one, can't be bookable`,
     });
+  }
+    
+  })
+  .catch((err) => {
+    res.json({
+      message: `There was an error searching the lecture`,
+    });
+  });
 };
 
 // Get the list of lectures scheduled for a course
@@ -205,6 +230,7 @@ exports.getBookedStudents = async (req, res) => {
     )
     .from("lecture_booking")
     .join("user", "lecture_booking.student_id", "=", "user.id")
+    .join("lecture", "lecture.id", "lecture_booking.lecture_id")
     .where("lecture_booking.lecture_id", lectureId)
     .andWhere("status", "presence") //show only presence lecture
     .then((queryResults) => {
@@ -223,7 +249,6 @@ exports.convertDistanceLecture = async (req, res) => {
   const lectureId = req.params.lectureid;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(30, "minutes").format("YYYY-MM-DD HH:mm:ss");
-  console.log("lecture",lectureId)
   knex
   .select(
     { name: "name" },
@@ -234,7 +259,6 @@ exports.convertDistanceLecture = async (req, res) => {
   .where("id", lectureId)
   .then(([lectureQueryResults]) => {
     const lecture = lectureQueryResults;
-    console.log("lecture",lecture)
     if(moment(deadline).isBefore(lecture.start) && (lecture.status === "presence")) {
         knex("lecture")
         .where("id", lectureId)
