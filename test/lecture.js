@@ -321,3 +321,35 @@ describe("list of lectures scheduled for a course", async () => {
     await knex("course").del();
   });
 });
+//Cancel a lecture booked by a student
+describe("List of students booked for a lecture", async () => {
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture_booking").del();
+    await knex("user").insert(userTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple);    
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(userCredentials);
+
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
+    expect(res.status).to.equal(200);
+  });
+  it("should return with status 200 ", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
+    expect(res.status).to.equal(200);
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+
