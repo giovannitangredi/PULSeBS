@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BookingLectureList } from "./BookingLectureList";
 import { BookedLectureList } from "./BookedLectureList";
+import ReservationCalendar from "./ReservationCalendar";
 import Container from "react-bootstrap/Container";
 import axios from "axios";
 export const ReservationPage = (props: any) => {
@@ -64,6 +65,10 @@ export const ReservationPage = (props: any) => {
       <hr></hr>
       <h1>Booked Lectures</h1>
       <BookedLectureList lectures={bookedLectures}></BookedLectureList>
+      <ReservationCalendar
+        bookedLectures={bookedLectures}
+        lectures={lectures}
+      />
     </Container>
   );
 };
