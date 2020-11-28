@@ -163,6 +163,36 @@ exports.newBooking = async (req, res) => {
     });
 };
 
+exports.cancelBooking = async (req, res) => {
+  const lectureId = req.params.lectureId
+  const result = await knex
+    .select(
+      { id: "user.id" },
+      { name: "user.name" },
+      { surname: "user.surname" },
+      { email: "user.email" },
+      { lectureName: "lecture.name" },
+      { lectureCourseName: "course.name" },
+      { lectureStart: "lecture.start" }
+    )
+    .from("lecture_booking")
+    .join("user", "lecture_booking.student_id", "=", "user.id")
+    .join("lecture", "lecture.id", "=", "lecture_booking.lecture_id")
+    .join("course", "lecture.course", "=", "course.id")
+    .where("lecture_booking.lecture_id", lectureId)
+  const emailSubject = "Lecture cancel information";
+  const emailBody = (name, surname, lectureName, lectureCourseName, lectureStart) => `Dear ${name} ${surname},<br/> \
+  Your booked lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} is canceled by the teacher,<br/>The PULSeBS Team`;
+  const queue = result.map(item => emailController.sendMail(item.email, emailSubject, emailBody(item.name, item.surname, item.lectureName, item.lectureCourseName, item.lectureStart)))
+  const data = result.map(item => emailBody(item.name, item.surname, item.lectureName, item.lectureCourseName, item.lectureStart))
+  try {
+    const data = await Promise.all(queue)
+    res.json(data)
+  } catch (err) {
+    res.json(err)
+  }
+}
+
 // Get the list of lectures scheduled for a course
 exports.getScheduledLectures = async (req, res) => {
   const courseId = req.params.courseid;
@@ -194,7 +224,19 @@ exports.getScheduledLectures = async (req, res) => {
 // Get the list of students booked for a lecture
 exports.getBookedStudents = async (req, res) => {
   const lectureId = req.params.lectureid;
-  knex
+  try {
+    const students = await getBookedStudentsByLectureId(lectureId)
+    res.json(students);
+  } catch (err) {
+    res.json({
+      message: `There was an error retrieving the students list`,
+    });
+  }
+};
+
+
+getBookedStudentsByLectureId = async (lectureId) => {
+  const students = await knex
     .select(
       { id: "user.id" },
       { name: "user.name" },
@@ -204,12 +246,5 @@ exports.getBookedStudents = async (req, res) => {
     .from("lecture_booking")
     .join("user", "lecture_booking.student_id", "=", "user.id")
     .where("lecture_booking.lecture_id", lectureId)
-    .then((queryResults) => {
-      res.json(queryResults);
-    })
-    .catch((err) => {
-      res.json({
-        message: `There was an error retrieving the students list`,
-      });
-    });
-};
+  return students
+}
