@@ -44,6 +44,11 @@ const teacherTuple = {
   role: "teacher",
 };
 
+const teacherCredentials = {
+  email: teacherTuple.email,
+  password: "password",
+};
+
 const courseTuple = {
   id: 1,
   name: "Software Engineering II",
@@ -150,7 +155,7 @@ describe("Lecture test", async function () {
     let newEmailPromise;
     
     before(async () => {
-      // use the slurpemail address also for the teacher so that we can check the email is received
+      // use the gmail test address also for the teacher so that we can check the email is received
       await knex("user")
         .where("id", teacherTuple.id)
         .update("email", testEmailAddress);
@@ -326,5 +331,46 @@ describe("list of lectures scheduled for a course", async () => {
     await knex("lecture").del();
     await knex("lecture_booking").del();
     await knex("course").del();
+  });
+});
+
+describe("Lecture cancellation test", async function () {
+  const authenticatedUser = request.agent(app);
+  this.timeout(15000);
+  
+  let newEmailPromise;
+
+  before(async () => {
+    await knex("user").del();
+    await knex("course").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course_available_student").del();
+    await knex("user").insert(userTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(lectureTuple);
+    await knex("course_available_student").insert(courseStudentTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple);
+
+    await authenticatedUser
+      .post("/api/auth/login")
+      .send(teacherCredentials)
+      .expect(200);
+    
+    await emailController.deleteEmails(imap);
+    newEmailPromise = emailController.waitForNewEmail(imap);
+  });
+
+  it("should return with status 200", async () => {
+    const res = await authenticatedUser
+      .post(`/api/lectures/${lectureTuple.id}/cancelBook`)
+      .expect(200);
+  });
+
+  it("student booked should receive an email", async () => {
+    const email = await newEmailPromise;
+    expect(email.subject).to.match(/Lecture cancel information/);
+    expect(email.body).to.match(/is canceled by the teacher/);
   });
 });
