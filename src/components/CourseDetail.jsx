@@ -1,7 +1,52 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Form, Row, Col } from 'react-bootstrap';
+import axios from "axios";
 
-export const CourseDetail = (props) => {
+
+export const CourseDetail =  (props)  => {
+    const getReservations = (courseid) => {
+        axios
+          .get(`/courses/${courseid}/bookings`)
+          .then((res) => {
+            let lectures = res.data; 
+            //bookedLectures
+          })
+          .catch((err) => {
+            console.log(err);     
+          });
+      };
+      const getLecturesPerWeek = (courseid,weekDate) => {
+        axios
+          .get(`/courses/${courseid}/bookings=?week=${weekDate}`)
+          .then((res) => {
+            let lectures = res.data;
+           // weeklyBooked
+          })
+          .catch((err) => {
+            console.log(err);  
+          });
+      };
+      const getLecturesPerMonth = (courseid,monthDate) => {
+        axios
+          .get(`/courses/${courseid}/bookings=?month=${monthDate}`)
+          .then((res) => {
+            let lectures = res.data;
+            //monthlyBooked
+          })
+          .catch((err) => {
+            console.log(err);
+            
+          });
+      };
+      useEffect(() => {
+        getLecturesPerWeek (courseId,'2020-47');
+        getLecturesPerMonth(courseId,'2020-11');
+        getReservations(courseId);
+      }, []);
+      const [courseId, setcourseId] = useState(1);
+      const [bookedLectures, setBookedLectures] = useState([]);
+      const [weeklyBooked, setweeklyBooked] = useState([]);
+      const [monthlyBooked, setmonthlyBooked] = useState([]);
     const [courseList, setCourseList] = useState([
         {
             courseId: 1,
