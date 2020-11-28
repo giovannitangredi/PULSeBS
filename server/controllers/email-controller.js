@@ -7,18 +7,18 @@ let nodemailer = require("nodemailer");
 exports.sendMail = async (email, subject, body) => {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    host: "smtp.qq.com",
-    port: 587,
+    host: "smtp.gmail.com",
+    port: 25,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: "1297320697@qq.com",
-      pass: "jzfymzgdbzvzhaha",
+      user: "pulsebs.softeng@gmail.com",
+      pass: "xssyjwawrmvrkgag",
     },
   });
 
   // send mail with defined transport object
   let info = await transporter.sendMail({
-    from: "1297320697@qq.com", // sender address
+    from: "pulsebs.softeng@gmail.com", // sender address
     to: email, // reciever mail of receivers
     subject: subject, // Subject line
     html: body, // html body
@@ -30,6 +30,7 @@ exports.sendMail = async (email, subject, body) => {
   // Preview only available when sending through an Ethereal account
   console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+
   return info
 };
 
