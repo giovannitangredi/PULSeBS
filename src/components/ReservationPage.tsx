@@ -68,6 +68,7 @@ export const ReservationPage = (props: any) => {
       <ReservationCalendar
         bookedLectures={bookedLectures}
         lectures={lectures}
+        bookLecture={bookLecture}
       />
     </Container>
   );

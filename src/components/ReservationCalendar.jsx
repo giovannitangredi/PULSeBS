@@ -1,25 +1,26 @@
 //import React from 'react';
 import React from "react";
-import ListGroup from "react-bootstrap/ListGroup";
-import LectureItem from "./LectureItem";
-import CourseItem from "./CourseItem";
-import StudentItem from "./StudentItem";
-import axios from "axios";
 import WeeklyCalendar from "./WeeklyCalendar";
 import Card from "react-bootstrap/Card";
 
 class ReservationCalendar extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      greenColor: "#37ecd8", // 3788d8 is blue and 37ecd8 is green
+      blueColor: "#3788d8",
+    };
   }
 
   /* returns prepared information for calendar */
   formatEvents = () => {
-    // 3788d8 is blue and 37ecd8 is green
     return this.props.lectures
-      .map((obj) => ({ ...obj, color: `#3788d8` }))
+      .map((obj) => ({ ...obj, color: `${this.state.blueColor}` }))
       .concat(
-        this.props.bookedLectures.map((obj) => ({ ...obj, color: `#37ecd8` }))
+        this.props.bookedLectures.map((obj) => ({
+          ...obj,
+          color: `${this.state.greenColor}`,
+        }))
       )
       .map((lecture) => {
         const {
@@ -87,12 +88,11 @@ class ReservationCalendar extends React.Component {
       );
     else return null;
   }
-  /* load students list for the lecture and focus */
+  /* if bookable try to book it */
   handleEventClick = ({ event }) => {
-    this.scrolltoview("studentlistview");
-    let lectureid = event._def.extendedProps.id;
-    this.setState({ studenttitle: event._def.extendedProps.name });
-    this.getStudentList(lectureid);
+    if (event._def.extendedProps.color == this.state.blueColor)
+      if (window.confirm("Do you want to book this lecture?"))
+        this.props.bookLecture(event._def.extendedProps.id);
   };
 
   render() {
@@ -122,12 +122,11 @@ class ReservationCalendar extends React.Component {
                       width="30"
                       height="30"
                       style={{
-                        fill: "#37ecd8",
+                        fill: `${this.state.greenColor}`,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    {/* 3788d8 is blue and 37ecd8 is green */}
                     <text font-size="14" font-family="Verdana" x="169" y="22">
                       UnBooked Lectures
                     </text>
@@ -137,7 +136,7 @@ class ReservationCalendar extends React.Component {
                       width="30"
                       height="30"
                       style={{
-                        fill: "#3788d8",
+                        fill: `${this.state.blueColor}`,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
