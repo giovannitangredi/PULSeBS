@@ -34,16 +34,17 @@ const initTable = (name, attribute_declaration_cb, ...triggers) => {
             console.error(`There was an error creating table: ${error}`);
           });
       }
-    })  
+    })
     .then(() => {
-      for(let t of triggers) {
-        knex.raw(t)
-        .then(() => {
-          console.log(`New trigger added`);
-        })
-        .catch((error) => {
-          console.log(`There was an error creating trigger: ${error}`);
-        });
+      for (let t of triggers) {
+        knex
+          .raw(t)
+          .then(() => {
+            console.log(`New trigger added`);
+          })
+          .catch((error) => {
+            console.log(`There was an error creating trigger: ${error}`);
+          });
       }
     })
     .then(() => {
@@ -78,37 +79,42 @@ initTable("course", (table) => {
   table.foreign("main_prof").references("user.id");
 });
 
-initTable("lecture", (table) => {
-  table.increments("id").primary();
+initTable(
+  "lecture",
+  (table) => {
+    table.increments("id").primary();
 
-  table.string("name").notNullable();
+    table.string("name").notNullable();
 
-  table.integer("course").unsigned().notNullable();
-  table.foreign("course").references("course.id");
+    table.integer("course").unsigned().notNullable();
+    table.foreign("course").references("course.id");
 
-  table.integer("lecturer").unsigned().notNullable();
-  table.foreign("lecturer").references("user.id");
+    table.integer("lecturer").unsigned().notNullable();
+    table.foreign("lecturer").references("user.id");
 
-  table.dateTime("start").notNullable();
-  table.dateTime("end").notNullable();
+    table.dateTime("start").notNullable();
+    table.dateTime("end").notNullable();
 
-  table.integer("capacity").unsigned().notNullable();
-  table.string("status");
-}, 
-triggers.convert_trigger
+    table.integer("capacity").unsigned().notNullable();
+
+    table.string("status").notNullable();
+  },
+  triggers.convert_trigger
 );
 
-initTable("lecture_booking", (table) => {
-  table.integer("lecture_id").notNullable();
-  table.foreign("lecture_id").references("lecture.id");
+initTable(
+  "lecture_booking",
+  (table) => {
+    table.integer("lecture_id").notNullable();
+    table.foreign("lecture_id").references("lecture.id");
 
-  table.integer("student_id").notNullable();
-  table.foreign("student_id").references("user.id");
+    table.integer("student_id").notNullable();
+    table.foreign("student_id").references("user.id");
 
-  table.datetime("booked_at").notNullable();
-}, 
-triggers.booking_trigger, 
-triggers.cancellation_trigger 
+    table.datetime("booked_at").notNullable();
+  },
+  triggers.booking_trigger,
+  triggers.cancellation_trigger
 );
 
 initTable("course_available_student", (table) => {
@@ -144,7 +150,7 @@ initTable("stats_usage", (table) => {
 
   table.integer("lid").notNullable();
   table.foreign("lid").references("stats_lecture.lid");
-  
+
   table.integer("booking").notNullable();
   table.integer("cancellations").notNullable();
   table.integer("attendance").notNullable();
