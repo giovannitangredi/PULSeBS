@@ -10,6 +10,6 @@ router.get("/bookable", lectureRoutes.getBookingLectures);
 router.post("/:lectureId/book", lectureRoutes.newBooking);
 router.get("/previousbooking", lectureRoutes.getExistentBooking);
 router.get("/:lectureid/students", lectureRoutes.getBookedStudents);
-router.post("/:lectureid/convert", lectureRoutes.convertDistanceLecture);
+router.put("/:lectureid/convert", lectureRoutes.convertDistanceLecture);
 // Export router
 module.exports = router;
