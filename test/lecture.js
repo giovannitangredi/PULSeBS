@@ -60,8 +60,8 @@ const lectureTuple = {
   name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
-  start: moment().add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
-  end: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  start: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
 };
 
@@ -362,10 +362,10 @@ describe("Lecture cancellation test", async function () {
     newEmailPromise = emailController.waitForNewEmail(imap);
   });
 
-  it("should return with status 200", async () => {
+  it("should return with status 202", async () => {
     const res = await authenticatedUser
-      .post(`/api/lectures/${lectureTuple.id}/cancelBook`)
-      .expect(200);
+      .delete(`/api/lectures/${lectureTuple.id}`)
+      .expect(202);
   });
 
   it("student booked should receive an email", async () => {
