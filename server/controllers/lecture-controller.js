@@ -213,3 +213,42 @@ exports.getBookedStudents = async (req, res) => {
       });
     });
 };
+
+exports.deleteLecture = async (req, res) => {
+  const lectureId = req.params.lectureId;
+  try {
+    const lectureQuery = await knex
+      .select(
+        { id: "l.id" },
+        { course: "l.course" },
+        { start: "l.start" },
+        { lecturer: "l.lecturer" }
+      )
+      .from({ l: "lecture" })
+      .where("l.id", lectureId);
+    if (lectureQuery.length == 1) {
+      const lecture = lectureQuery[0];
+      const deadlineToCancel = moment()
+        .add(1, "hours")
+        .format("YYYY-MM-DD HH:mm:ss");
+      if (
+        lecture.lecturer == req.user.id &&
+        lecture.start.localeCompare(deadlineToCancel) > 0
+      ) {
+        await knex("lecture").where("id", lectureId).del();
+        res.status(202).send();
+      } else {
+        throw new Error("The lecture can't be cancelled.");
+      }
+    } else {
+      throw new Error("The lecture doesn't exist.");
+    }
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: `There was an error cancelling the lecture: ${err}` });
+  }
+
+  let string =
+    "select lecture from lectures where lesson starts in more than 1 hour, which this teacher owns and teaches.";
+};
