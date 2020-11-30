@@ -342,7 +342,7 @@ describe("Cancel a booked lecture ", async () => {
     expect(res.status).to.equal(200);
 
   });
-  it("should return with status 200 ", async () => {
+  it("should return message ", async () => {
     const res = await authenticatedUser.delete(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
     expect(res).to.have.property('body');
     expect(res.body.message ).to.equal( `Booking canceled.`);
