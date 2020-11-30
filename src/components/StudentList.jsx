@@ -7,6 +7,7 @@ import StudentItem from "./StudentItem";
 import axios from "axios";
 import WeeklyCalendar from "./WeeklyCalendar";
 import Card from "react-bootstrap/Card";
+import Alert from "react-bootstrap/Alert";
 
 class StudentList extends React.Component {
   constructor(props) {
@@ -22,6 +23,9 @@ class StudentList extends React.Component {
       lectureColor:"",
       lecturetitle: "",
       studenttitle: "",
+      alertText:"",
+      alertType:"success",
+      alertShow:false
     };
   }
 
@@ -112,15 +116,44 @@ class StudentList extends React.Component {
     });
   };
 
+  handleBooking = ()=> {
+    this.setState({alertShow:true});
+
+    setTimeout(() => {  this.setState({alertShow:false})}, 3000);
+    this.scrolltoview("CoursesElement");
+  }
+  cancelBookingHandle = (lecture)=> {
+    this.handleBooking();
+
+    console.log(lecture.extendedProps.id);
+     axios.delete(`/lectures/${lecture.extendedProps.id}`, {}).then((response) => {
+      this.setState({alertType:"success"});
+      this.setState({alertText:"Lecture has canceled sucssesfully"});
+
+     }).catch(error => {
+      this.setState({alertType:"danger"});
+      this.setState({alertText:"There is a problem in removing Leture"});
+     });
+    
+     
+   }
+
   componentDidMount() {
     this.setState({ selectedLecture: 1 });
     this.getCourseList();
   }
 
+
   render() {
     return (
       <>
-        <div className="container">
+      { this.state.alertShow && (
+                     <Alert  variant={this.state.alertType} >
+                       {this.state.alertText}
+                     </Alert>        
+       )}
+          
+        <div  id="CoursesElement" className="container">
           <Card
             border={"secondary"}
             style={{ width: "100%", maxHeight: "75vh", margin: "1rem 0rem" }}
@@ -164,7 +197,7 @@ class StudentList extends React.Component {
                 </h4>{" "}
               </Card.Header>
               <div className="row" style={{ margin: "1rem 0rem" }}>
-                <div className="col-12 col-md-8">
+                <div className="col-12">
                   <div className="col">
                     <WeeklyCalendar
                       handleEventClick={this.handleEventClick}
@@ -174,33 +207,36 @@ class StudentList extends React.Component {
                     />
                   </div>
                 </div>
-                <div className="col-6 col-md-4">
+                <div className="col-12">
                   <div id="lecturelistview" className="col">
                     {this.formatEvents().length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"
-                        style={{ height: "28rem", margin: "1rem 0rem" }}
+                        style={{  margin: "1rem 0rem" }}
                       >
                         <ListGroup.Item>
                           <div className="d-flex w-100 justify-content-between">
                             <div className="container">
                               <div className="row">
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>Lecture Name</label>
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>Start</label>
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>End</label>
+                                </div>
+                                 <div className="col-lg-3">
+                                 
                                 </div>
                               </div>
                             </div>
                           </div>
                         </ListGroup.Item>
                         {this.formatEvents().map((lecture) => (
-                          <LectureItem lecture={lecture} />
+                          <LectureItem lecture={lecture} handleBooking={this.cancelBookingHandle} />
                         ))}
                       </ListGroup>
                     ) : (
