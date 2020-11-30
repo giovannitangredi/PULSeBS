@@ -322,7 +322,7 @@ describe("list of lectures scheduled for a course", async () => {
   });
 });
 //Cancel a lecture booked by a student
-describe("List of students booked for a lecture", async () => {
+describe("Cancel a booked lecture ", async () => {
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
   before(async () => {
@@ -337,12 +337,16 @@ describe("List of students booked for a lecture", async () => {
     expect(res.status).to.equal(200);
   });
   it("should return  with status 200", async () => {
-    const res = await authenticatedUser.get(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
+    expect(res).to.be.json;
     expect(res.status).to.equal(200);
+
   });
   it("should return with status 200 ", async () => {
     const res = await authenticatedUser.delete(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
-    expect(res.status).to.equal(200);
+    expect(res).to.have.property('body');
+    expect(res.body.message ).to.equal( `Booking canceled.`);
+   
   });
   after(async () => {
     await knex("user").del();
