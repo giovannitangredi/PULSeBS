@@ -19,7 +19,10 @@ const userCredentials = {
   email: mailSlurpAddress,
   password: "password",
 };
-
+const teacherCredentials = {
+  email: "john.doe@polito.it",
+  password: "password",
+}
 const userTuple = {
   id: 1,
   name: "Enrico",
@@ -329,22 +332,17 @@ describe("Teacher cancel a lecture 1 hour before  ", async () => {
   before(async () => {
     await knex("user").del();
     await knex("lecture").del();
-    await knex("user").insert(userTuple);
-    await knex("lecture").insert(lectureTuple);    
+    await knex("user").insert(teacherTuple);
+    await knex("lecture").insert(futureLectureTuple);    
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(userCredentials);
+      .send(teacherCredentials);
 
     expect(res.status).to.equal(200);
   });
   it("should return  with status 200", async () => {
     const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
-    expect(res.status).to.equal(200);
-  });
-  it("should return with status 200 ", async () => {
-    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
-    //expect(res.status).to.equal(200);
-   
+    expect(res.status).to.equal(202);
   });
   after(async () => {
     await knex("user").del();
