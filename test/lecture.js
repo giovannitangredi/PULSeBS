@@ -321,3 +321,38 @@ describe("list of lectures scheduled for a course", async () => {
     await knex("course").del();
   });
 });
+
+//Teacher cancel a lecture 1h before  
+describe("Teacher cancel a lecture 1 hour before  ", async () => {
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("user").insert(userTuple);
+    await knex("lecture").insert(lectureTuple);    
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(userCredentials);
+
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+    expect(res.status).to.equal(200);
+  });
+  it("should return with status 200 ", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+    //expect(res.status).to.equal(200);
+   
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+
+
