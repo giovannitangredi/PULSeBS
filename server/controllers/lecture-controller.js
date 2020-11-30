@@ -8,23 +8,7 @@ exports.getBookingLectures = async (req, res) => {
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
   const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
-
   knex
-    /*.raw(`select lecture.id,lecture.name as name,course.name as course,user.name as lecturer_name,user.surname as lecturer_surname,start,end,capacity, IFNULL(bookedStudent,0) as booked_students
-  from  lecture,user,course
-  LEFT JOIN (	select lecture_booking.lecture_id as l_id,count(*) as bookedStudent
-        from lecture_booking
-        group by lecture_booking.lecture_id) countbook  ON countbook.l_id=lecture.id
-  INNER JOIN course_available_student ON
-      course_available_student.course_id=lecture.course		
-  where lecture.lecturer=user.id and course.id=lecture.course
-    and lecture.id not in (
-  select lecture_id from lecture_booking where student_id = ?
-  )
-  and course_available_student.student_id = ?
-  and start > ?
-  and start < ?
-  `, [studentId,studentId,deadline,dateShown])*/
     .select(
       { id: "lecture.id" },
       { name: "lecture.name" },
@@ -58,7 +42,6 @@ exports.getBookingLectures = async (req, res) => {
     })
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
-    .andWhere("start", "<", dateShown) //show only lecture in two weeks
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -92,8 +75,6 @@ exports.getExistentBooking = async (req, res) => {
     .join("user", "lecture.lecturer", "user.id")
     .join("course", "lecture.course", "course.id")
     .where("lecture_booking.student_id", studentId)
-    .andWhere("start", ">", today) //show only future lectures
-    .andWhere("start", "<", dateShown) //show only lecture in two weeks
     .then((queryResults) => {
       res.json(queryResults);
     })

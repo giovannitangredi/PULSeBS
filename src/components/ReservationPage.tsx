@@ -71,11 +71,11 @@ export const ReservationPage = (props: any) => {
       <h1>Book a Lecture</h1>
       <BookingLectureList
         lectures={lectures}
-        bookLecture={bookLecture}
+        bookLecture={bookLecture}    
       ></BookingLectureList>
       <hr></hr>
       <h1>Booked Lectures</h1>
-      <BookedLectureList lectures={bookedLectures}></BookedLectureList>
+      <BookedLectureList lectures={bookedLectures} cancelBooking = {cancelBooking}></BookedLectureList>
       <ReservationCalendar
         bookedLectures={bookedLectures}
         lectures={lectures}
