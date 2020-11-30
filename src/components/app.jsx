@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ReservationPage } from "./ReservationPage";
 import StudentList from "./StudentList";
+import {  ManagerPage} from "./ManagerPage"
 import { NavBar } from "./NavBar";
 import {
   BrowserRouter as Router,
@@ -56,6 +57,9 @@ export const App = () => {
             {authUser.id && authUser.role === "teacher" && (
               <Redirect to="/teacher"></Redirect>
             )}
+            {authUser.id && authUser.role === "manager" && (
+              <Redirect to="/manager"></Redirect>
+            )}
             <LoginPage login={login} user={authUser}></LoginPage>
           </Route>
           <Route path="/student">
@@ -69,6 +73,10 @@ export const App = () => {
             {!authUser.id && <Redirect to="/login"></Redirect>}
             <StudentList user={authUser} userid={authUser.id} />
           </Route>
+           <Route path="/manager">
+            {!authUser.id && <Redirect to="/login"></Redirect>}
+            <ManagerPage />
+          </Route>
           <Route path="/">
             {!authUser.id && <Redirect to="/login"></Redirect>}
             {authUser.id && authUser.role === "student" && (
@@ -76,6 +84,9 @@ export const App = () => {
             )}
             {authUser.id && authUser.role === "teacher" && (
               <Redirect to="/teacher"></Redirect>
+            )}
+             {authUser.id && authUser.role === "manager" && (
+              <Redirect to="/manager"></Redirect>
             )}
           </Route>
         </Switch>
