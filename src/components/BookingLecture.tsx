@@ -19,9 +19,12 @@ export const BookingLecture = (props: any) => {
       </td>
       <td>
         {" "}
-        <Button variant="primary" onClick={(event) => handleBooking(event)}>
+      {props.lecture.booked_students < props.lecture.capacity && <Button variant="primary" onClick={(event) => handleBooking(event)}>
           Book a Seat
-        </Button>
+          </Button> }
+          {props.lecture.booked_students >= props.lecture.capacity && <Button variant="warning">
+          Full
+          </Button> }
       </td>
     </tr>
   );
