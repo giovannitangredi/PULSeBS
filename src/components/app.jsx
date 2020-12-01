@@ -2,22 +2,25 @@
 import React, { useEffect, useState } from "react";
 import { ReservationPage } from "./ReservationPage";
 import StudentList from "./StudentList";
-import {  ManagerPage} from "./ManagerPage"
+import { ManagerPage } from "./ManagerPage";
 import { NavBar } from "./NavBar";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
+  useLocation,
 } from "react-router-dom";
 import axios from "axios";
 import { LoginPage } from "./LoginPage";
 // Import styles
 import "./../styles/styles.css";
 // Create App component
-export const App = () => {
+
+export const App = (props) => {
   const [authUser, setAuthUser] = useState({});
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const getUser = () => {
     axios
       .get("/user/")
@@ -39,10 +42,19 @@ export const App = () => {
     setAuthUser({});
     setLoading(false);
   };
+  
   useEffect(() => {
     setLoading(true);
     getUser();
   }, []);
+
+  const redirectToIfLoggedIn = () => {
+    const redirect = authUser.id ? `/${authUser.role}` : "/login";
+    if (redirect !== location.pathname)
+      return <Redirect to={redirect}></Redirect>;
+    return null;
+  };
+
   if (loading) return <p>Page is Loading...</p>;
   return (
     <Router>
@@ -51,44 +63,22 @@ export const App = () => {
         <hr></hr>
         <Switch>
           <Route path="/login">
-            {authUser.id && authUser.role === "student" && (
-              <Redirect to="/student"></Redirect>
-            )}
-            {authUser.id && authUser.role === "teacher" && (
-              <Redirect to="/teacher"></Redirect>
-            )}
-            {authUser.id && authUser.role === "manager" && (
-              <Redirect to="/manager"></Redirect>
-            )}
+            {redirectToIfLoggedIn()}
             <LoginPage login={login} user={authUser}></LoginPage>
           </Route>
           <Route path="/student">
-            {!authUser.id && <Redirect to="/login"></Redirect>}
-            {authUser.id && authUser.role === "teacher" && (
-              <Redirect to="/teacher"></Redirect>
-            )}
+            {redirectToIfLoggedIn()}
             <ReservationPage user={authUser}></ReservationPage>
           </Route>
           <Route path="/teacher">
-            {!authUser.id && <Redirect to="/login"></Redirect>}
+            {redirectToIfLoggedIn()}
             <StudentList user={authUser} userid={authUser.id} />
           </Route>
-           <Route path="/manager">
-            {!authUser.id && <Redirect to="/login"></Redirect>}
+          <Route path="/manager">
+            {redirectToIfLoggedIn()}
             <ManagerPage />
           </Route>
-          <Route path="/">
-            {!authUser.id && <Redirect to="/login"></Redirect>}
-            {authUser.id && authUser.role === "student" && (
-              <Redirect to="/student"></Redirect>
-            )}
-            {authUser.id && authUser.role === "teacher" && (
-              <Redirect to="/teacher"></Redirect>
-            )}
-             {authUser.id && authUser.role === "manager" && (
-              <Redirect to="/manager"></Redirect>
-            )}
-          </Route>
+          <Route path="/">{redirectToIfLoggedIn()}</Route>
         </Switch>
       </div>
     </Router>
