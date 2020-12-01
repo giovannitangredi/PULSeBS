@@ -228,44 +228,50 @@ exports.convertDistanceLecture = async (req, res) => {
     .add(30, "minutes")
     .format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select({ name: "name" }, { start: "start" }, { status: "status" })
+    .select({ name: "name" }, { start: "start" }, { status: "status" }, { lecturer: "lecturer"})
     .from("lecture")
     .where("id", lectureId)
     .then(([lectureQueryResults]) => {
       const lecture = lectureQueryResults;
       if (
         moment(deadline).isBefore(lecture.start) &&
-        lecture.status === "presence"
+        lecture.status === "presence" && lecture.lecturer === req.user.id
       ) {
         knex("lecture")
           .where("id", lectureId)
           .update({
             status: "distance",
-            capacity: "0",
+            capacity: "0"
           })
           .then(() => {
             res.status(204).json({
-              message: `Presence lecture '${lecture.name}' turned into a distance one`,
+              message: `Presence lecture '${lecture.name}' turned into a distance one`
             });
           })
           .catch((err) => {
             res.status(304).json({
-              message: `There was an error converting the lecture into a distance one`,
+              message: `There was an error converting the lecture into a distance one`
             });
           });
-      } else if (lecture.status === "distance") {
+      } 
+      else if (lecture.lecturer != req.user.id) {
+        res.status(401).json({
+          message: `Professor can convert only his lecture`
+        });
+      }  
+          else if (lecture.status === "distance") {
         res.status(304).json({
-          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Already a distance one!`,
+          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Already a distance one!`
         });
       } else {
         res.status(304).json({
-          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Lecture starting in 30 minutes!`,
+          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Lecture starting in 30 minutes!`
         });
       }
     })
     .catch((err) => {
       res.status(404).json({
-        message: `There was an error searching the lecture`,
+        message: `There was an error searching the lecture`
       });
     });
 };

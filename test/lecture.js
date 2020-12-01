@@ -111,7 +111,7 @@ const expectedBookableLectures = [{
 
 describe("Lecture test", async function () {
   const authenticatedUser = request.agent(app);
-  this.timeout(10000);
+  this.timeout(15000);
   before(async () => {
     await knex("user").del();
     await knex("course").del();
@@ -331,6 +331,7 @@ describe("list of lectures scheduled for a course", async () => {
 describe("Presence Lecture into distance one ", async () => {
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
+  const authenticatedStudent = request.agent(app);
   before(async () => {
     await knex("user").del();
     await knex("lecture").del();
@@ -340,16 +341,29 @@ describe("Presence Lecture into distance one ", async () => {
     await knex("lecture_booking").insert(lectureBookingTuple);  
     const res = await authenticatedUser
       .post("/api/auth/login")
+      .send( teacherCredentials);
+      const resStudent = await authenticatedStudent
+      .post("/api/auth/login")
       .send( userCredentials);
-
     expect(res.status).to.equal(200);
   });
-  it("should return status ", async () => {
+  it("should return status 204", async () => {
     const res = await authenticatedUser.put(`/api/lectures/${lectureTuple.id}/convert`)
-    .send( {status: "distance",capacity: "0"});
+    .send();
      expect(res.status).to.equal(204);
+
+    const lectureChanged = await knex.select("id","status").from("lecture").where("id",lectureTuple.id);
+    expect(lectureChanged).to.have.deep.members([{ id: lectureTuple.id, status: "distance" }])
      expect(res.body.message).to.not.be.null;
+
   });
+
+  it("should return status 401 ", async () => {
+    const resStudent = await authenticatedStudent.put(`/api/lectures/${lectureTuple.id}/convert`)
+    .send();
+     expect(resStudent.status).to.equal(401);
+  });
+
   after(async () => {
     await knex("user").del();
     await knex("lecture").del();

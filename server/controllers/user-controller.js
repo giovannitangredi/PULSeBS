@@ -27,8 +27,6 @@ exports.get = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  console.log(email);
-  console.log(password);
   knex
     .select("id", "name", "surname", "email", "password_hash", "role")
     .from("user")
@@ -60,7 +58,6 @@ exports.login = async (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err);
       res.json({ message: `There was an error checking credentials: ${err}` });
     });
 };
