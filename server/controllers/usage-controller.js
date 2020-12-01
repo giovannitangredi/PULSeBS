@@ -78,6 +78,7 @@ exports.getBookingStats = async (req, res) => {
           {lecture_name: "sl.lecture_name"}, 
           {course_id: "sl.course_id"}, 
           {course_name: "sl.course_name"}, 
+          {date: "st.date" },
           knex.raw("(su.booking - su.cancellations) as booking")
         )
         .from({su: "stats_usage"})
