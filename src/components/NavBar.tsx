@@ -14,18 +14,18 @@ export const NavBar = (props: any) => {
         console.log("error in logout:" + err);
       });
   };
-  const styles = {
-    navbar: {
-      backgroundColor: "#47FF4E",
-    },
-  };
 
   return (
     <Navbar>
-        <Navbar.Brand >Welcome, {props.user.name + " " + props.user.surname}</Navbar.Brand>
-        <Navbar.Collapse className="justify-content-end">
-             <Button variant="primary" onClick={(ev)=> handleLogout(ev)}> Logout</Button>
-        </Navbar.Collapse>
+      <Navbar.Brand>
+        Welcome, {props.user.name + " " + props.user.surname}
+      </Navbar.Brand>
+      <Navbar.Collapse className="justify-content-end">
+        <Button variant="primary" onClick={(ev) => handleLogout(ev)}>
+          {" "}
+          Logout
+        </Button>
+      </Navbar.Collapse>
     </Navbar>
   );
 };
