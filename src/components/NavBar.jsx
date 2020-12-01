@@ -1,5 +1,6 @@
 import React from "react";
-import { Navbar, Button } from "react-bootstrap";
+import { Navbar, Button, Nav } from "react-bootstrap";
+import { NavLink } from "react-router-dom";
 import axios from "axios";
 export const NavBar = (props: any) => {
   const handleLogout = (ev: any) => {
@@ -23,6 +24,12 @@ export const NavBar = (props: any) => {
   return (
     <Navbar>
         <Navbar.Brand >Welcome, {props.user.name + " " + props.user.surname}</Navbar.Brand>
+        <Nav >
+        {props.user.role === "teacher"? <NavLink to="/teacher" className="nav-link" >Home</NavLink>: <NavLink to="/student">Home</NavLink>}
+        
+        </Nav>
+        <Nav>
+        {props.user.role === "teacher" && <NavLink to="/courseId/detail" className="nav-link">Statistics</NavLink>}</Nav>
         <Navbar.Collapse className="justify-content-end">
              <Button variant="primary" onClick={(ev)=> handleLogout(ev)}> Logout</Button>
         </Navbar.Collapse>

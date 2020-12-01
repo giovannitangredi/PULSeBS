@@ -17,7 +17,7 @@ export const CourseDetail = (props) => {
   };
   const getLecturesPerWeek = (courseid, weekDate) => {
     axios
-      .get(`/courses/${courseid}/bookings=?week=${weekDate}`)
+      .get(`/courses/${courseid}/bookings?week=${weekDate}`)
       .then((res) => {
         let lectures = res.data;
         // weeklyBooked
@@ -28,7 +28,7 @@ export const CourseDetail = (props) => {
   };
   const getLecturesPerMonth = (courseid, monthDate) => {
     axios
-      .get(`/courses/${courseid}/bookings=?month=${monthDate}`)
+      .get(`/courses/${courseid}/bookings?month=${monthDate}`)
       .then((res) => {
         let lectures = res.data;
         //monthlyBooked
