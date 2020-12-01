@@ -5,19 +5,14 @@ import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 
 class WeeklyCalendar extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     return (
       <div>
         <h5>{this.props.title}</h5>
         <FullCalendar
           initialView="timeGridWeek"
-          defaultView="dayGridMonth"
           eventClick={this.props.handleEventClick}
-          header={{
+          headerToolbar={{
             left: "prev,next, today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
@@ -26,7 +21,7 @@ class WeeklyCalendar extends React.Component {
           editable={false}
           events={this.props.Items}
           eventContent={this.props.renderEventContent}
-          eventLimit={false}
+          dayMaxEventRows={false}
         />
       </div>
     );
