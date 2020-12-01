@@ -61,14 +61,6 @@ const lectureTuple = {
   status:"presence",
 };
 
-const statsUsageTuple = {
-  tid: 1,
-  lid:8,
-  booking:1,
-  cancellations:1,
-  attendance:2,
-};
-
 const futureLectureTuple = {
   id: 1,
   name: "Lecture 1",
@@ -271,9 +263,12 @@ describe("List of students booked for a lecture", async () => {
   before(async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
+    await knex("lecture").del();
     await knex("user").insert(userTuple);
-    await knex("stats_usage").insert(statsUsageTuple); 
-   await knex("lecture_booking").insert(lectureBookingTuple);    
+    await knex("user").insert(teacherTuple);
+    await knex("lecture").insert(lectureTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple);  
+     
     const res = await authenticatedUser
       .post("/api/auth/login")
       .send(userCredentials);
@@ -339,19 +334,21 @@ describe("Presence Lecture into distance one ", async () => {
   before(async () => {
     await knex("user").del();
     await knex("lecture").del();
+    await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
-    await knex("lecture").insert(lectureTuple);    
+    await knex("lecture").insert(lectureTuple);  
+    await knex("lecture_booking").insert(lectureBookingTuple);  
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(teacherCredentials);
+      .send( userCredentials);
 
     expect(res.status).to.equal(200);
   });
-  it("should return a json", async () => {
+  it("should return status ", async () => {
     const res = await authenticatedUser.put(`/api/lectures/${lectureTuple.id}/convert`)
     .send( {status: "distance",capacity: "0"});
-     expect(res).to.be.json 
-     expect(res.status).to.equal(200);   
+     expect(res.status).to.equal(204);
+     expect(res.body.message).to.not.be.null;
   });
   after(async () => {
     await knex("user").del();
