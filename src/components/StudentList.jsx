@@ -37,22 +37,30 @@ class StudentList extends React.Component {
     });
   };
 
-  getLecturesList = (courseID) => {
-    axios.get(`/courses/${courseID.id}/lectures`, {}).then((response) => {
+  getLecturesList = (course) => {
+    axios.get(`/courses/${course.id}/lectures`, {}).then((response) => {
       let result = response.data;
-      this.setState({ 
-        lecturetitle: courseID.name, 
-        selectedCourse: courseID, 
+      this.setState({
+        lecturetitle: course.name,
+        selectedCourse: course,
         selectedLecture: undefined,
         students: [],
-        lectures: result
+        lectures: result,
       });
     });
   };
 
   formatEvents() {
     return this.state.lectures.map((lecture) => {
-      const { name, end, start, capacity, booked_students, id, status } = lecture;
+      const {
+        name,
+        end,
+        start,
+        capacity,
+        booked_students,
+        id,
+        status,
+      } = lecture;
 
       let startTime = new Date(start);
       let endTime = new Date(end);
@@ -61,24 +69,23 @@ class StudentList extends React.Component {
         title: name,
         start: startTime,
         end: endTime,
-        backgroundColor: (status == 'distance'? 'red' : 'dodgerblue'),
+        backgroundColor: status === "distance" ? "red" : "dodgerblue",
         extendedProps: {
           capacity: capacity,
           booked_students: booked_students,
           status: status,
           id,
-          name
+          name,
         },
       };
     });
   }
-  
+
   renderEventContent(eventInfo) {
-    
-    function format(n){
-      return n > 9 ? "" + n: "0" + n;
-    };
-    
+    function format(n) {
+      return n > 9 ? "" + n : "0" + n;
+    }
+
     if (eventInfo)
       return (
         <div>
@@ -89,17 +96,31 @@ class StudentList extends React.Component {
             {format(eventInfo.event.start.getMinutes())}
             <br></br>
             {eventInfo.event.title} <br></br>
-            {eventInfo.event.extendedProps.status == "presence" && `Capacity: ${eventInfo.event.extendedProps.capacity}`}
+            {eventInfo.event.extendedProps.status === "presence" &&
+              `Capacity: ${eventInfo.event.extendedProps.capacity}`}
           </p>
         </div>
       );
     else return null;
   }
+
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
     let lectureid = event._def.extendedProps.id;
-    this.setState({ studenttitle: event._def.extendedProps.name, selectedLecture: event._def  });
+    this.setState({
+      studenttitle: event._def.extendedProps.name,
+      selectedLecture: event._def,
+    });
     this.getStudentList(lectureid);
+  };
+
+  handleConvertLecture = (lectureId) => {
+    const course = this.state.selectedCourse;
+    course &&
+      course.id &&
+      axios
+        .put(`/lectures/${lectureId}/convert`, {})
+        .then((res) => res.status === 204 && this.getLecturesList(course));
   };
 
   loadLectureAndScroll = (elementId) => {
@@ -175,14 +196,35 @@ class StudentList extends React.Component {
                   </div>
                 </div>
                 <div className="col-6 col-md-5">
-                <div className='d-flex flex-row align-items-center justify-content-end' id="legendView">
+                  <div
+                    className="d-flex flex-row align-items-center justify-content-end"
+                    id="legendView"
+                  >
                     <ListGroup>
                       <ListGroup.Item className="d-flex flex-row align-items-center">
-                        <span className="mx-2" style={{height:"10px", width:"10px", display:"block", float:"left", background:"red"}}></span>
+                        <span
+                          className="mx-2"
+                          style={{
+                            height: "10px",
+                            width: "10px",
+                            display: "block",
+                            float: "left",
+                            background: "red",
+                          }}
+                        ></span>
                         Remote lecture
                       </ListGroup.Item>
                       <ListGroup.Item className="d-flex flex-row align-items-center">
-                        <span className="mx-2" style={{height:"10px", width:"10px", display:"block", float:"left", background:"dodgerblue"}}></span>
+                        <span
+                          className="mx-2"
+                          style={{
+                            height: "10px",
+                            width: "10px",
+                            display: "block",
+                            float: "left",
+                            background: "dodgerblue",
+                          }}
+                        ></span>
                         Presence lecture
                       </ListGroup.Item>
                     </ListGroup>
@@ -195,7 +237,7 @@ class StudentList extends React.Component {
                         variant="flush"
                         style={{ margin: "1rem 0rem" }}
                       >
-                        <ListGroup.Item>
+                        <ListGroup.Item key="head">
                           <div className="d-flex w-100 justify-content-between">
                             <div className="container">
                               <div className="row">
@@ -216,7 +258,11 @@ class StudentList extends React.Component {
                           </div>
                         </ListGroup.Item>
                         {this.formatEvents().map((lecture) => (
-                          <LectureItem lecture={lecture} />
+                          <LectureItem
+                            key={lecture.extendedProps.id}
+                            lecture={lecture}
+                            handleConvert={this.handleConvertLecture}
+                          />
                         ))}
                       </ListGroup>
                     ) : (
@@ -281,15 +327,12 @@ class StudentList extends React.Component {
                         margin: "2rem",
                       }}
                     >
-                      {
-                        !this.state.selectedLecture? 
-                            "No lecture is selected" 
-                          : 
-                            this.state.selectedLecture.extendedProps.status == "distance"?
-                                "Remote lecture selected: no students list available"
-                              :
-                                "no students booked for this lecture"
-                      }
+                      {!this.state.selectedLecture
+                        ? "No lecture is selected"
+                        : this.state.selectedLecture.extendedProps.status ===
+                          "distance"
+                        ? "Remote lecture selected: no students list available"
+                        : "no students booked for this lecture"}
                     </h4>
                   )}
                 </div>
