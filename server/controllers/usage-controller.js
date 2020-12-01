@@ -99,6 +99,11 @@ exports.getBookingStats = async (req, res) => {
   
   exports.getSystemStats = async (req,res)=>{
     // Get the sum of all stats
+    const userAuth = req.user && req.user.role;
+    if(userAuth != "manager")
+    {
+      res.status(401).end();
+    }
     knex("stats_usage")
     .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
     .then((queryResults)=>{
@@ -112,6 +117,11 @@ exports.getBookingStats = async (req, res) => {
   }
 
   exports.getAllLecturesStats = async (req,res)=>{
+    const userAuth = req.user && req.user.role;
+    if(userAuth != "manager")
+    {
+      res.status(401).end();
+    }
     knex
     .select(
       {lecture : "sl.lecture_name"},
@@ -136,6 +146,11 @@ exports.getBookingStats = async (req, res) => {
   
   exports.getCourseTotalStats = async (req,res)=>{
     // Get the sum of all stats for a single course with id = courseid
+    const userAuth = req.user && req.user.role;
+    if(userAuth != "manager")
+    {
+      res.status(401).end();
+    }
     const courseid= req.params.courseid
     knex("stats_usage")
     .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
@@ -152,6 +167,11 @@ exports.getBookingStats = async (req, res) => {
   }
 
   exports.getCourseLecturesStats = async (req,res)=>{
+    const userAuth = req.user && req.user.role;
+    if(userAuth != "manager")
+    {
+      res.status(401).end();
+    }
     const courseid= req.params.courseid
     knex
     .select(

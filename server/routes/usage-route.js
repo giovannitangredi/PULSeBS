@@ -7,8 +7,8 @@ const usageRoutes = require("../controllers/usage-controller");
 // Create router
 const router = express.Router();
 
-router.get("/systemStats", usageRoutes.getSystemStats);
-router.get("/lecturesStats", usageRoutes.getAllLecturesStats);
+router.get("/system", usageRoutes.getSystemStats);
+router.get("/lectures", usageRoutes.getAllLecturesStats);
 
 // Export router
 module.exports = router;
