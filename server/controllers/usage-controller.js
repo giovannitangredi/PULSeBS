@@ -99,10 +99,12 @@ exports.getBookingStats = async (req, res) => {
   
   exports.getSystemStats = async (req,res)=>{
     // Get the sum of all stats
-    const userAuth = req.user && req.user.role;
-    if(userAuth != "manager")
+    const role = req.user && req.user.role;
+    if(role != "manager")
     {
-      res.status(401).end();
+      res.status(401).json({
+        message : "Unauthorize acces only managers can acces this query"
+      });
     }
     knex("stats_usage")
     .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
@@ -118,9 +120,11 @@ exports.getBookingStats = async (req, res) => {
 
   exports.getAllLecturesStats = async (req,res)=>{
     const userAuth = req.user && req.user.role;
-    if(userAuth != "manager")
+    if(role != "manager")
     {
-      res.status(401).end();
+      res.status(401).json({
+        message : "Unauthorize acces only managers can acces this query"
+      });
     }
     knex
     .select(
@@ -146,10 +150,12 @@ exports.getBookingStats = async (req, res) => {
   
   exports.getCourseTotalStats = async (req,res)=>{
     // Get the sum of all stats for a single course with id = courseid
-    const userAuth = req.user && req.user.role;
-    if(userAuth != "manager")
+    const role = req.user && req.user.role;
+    if(role != "manager")
     {
-      res.status(401).end();
+      res.status(401).json({
+        message : "Unauthorize acces only managers can acces this query"
+      });
     }
     const courseid= req.params.courseid
     knex("stats_usage")
@@ -167,10 +173,12 @@ exports.getBookingStats = async (req, res) => {
   }
 
   exports.getCourseLecturesStats = async (req,res)=>{
-    const userAuth = req.user && req.user.role;
-    if(userAuth != "manager")
+    const role = req.user && req.user.role;
+    if(role != "manager")
     {
-      res.status(401).end();
+      res.status(401).json({
+        message : "Unauthorize acces only managers can acces this query"
+      });
     }
     const courseid= req.params.courseid
     knex
