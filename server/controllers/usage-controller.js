@@ -105,7 +105,7 @@ exports.getBookingStats = async (req, res) => {
       res.json(queryResults);
     })
     .catch((err)=>{
-      res.json({
+      res.status(501).json({
         message: `There was an error retrieving the system stats: ${err}`,
       });
     });
@@ -128,7 +128,7 @@ exports.getBookingStats = async (req, res) => {
       res.json(queryResults);
     })
     .catch((err)=>{
-      res.json({
+      res.status(501).json({
         message: `There was an error retrieving the all the lectures stats: ${err}`,
       });
     });
@@ -139,13 +139,13 @@ exports.getBookingStats = async (req, res) => {
     const courseid= req.params.courseid
     knex("stats_usage")
     .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
-    .join({sl: "stats_lecture"}, "su.lid", "=", "sl.lid")
+    .join({sl: "stats_lecture"}, "stats_usage.lid", "=", "sl.lid")
     .where("sl.course_id",courseid)
     .then((queryResults)=>{
       res.json(queryResults);
     })
     .catch((err)=>{
-      res.json({
+      res.status(501).json({
         message: `There was an error retrieving the course  stats: ${err}`,
       });
     });
@@ -170,7 +170,7 @@ exports.getBookingStats = async (req, res) => {
       res.json(queryResults);
     })
     .catch((err)=>{
-      res.json({
+      res.status(501).json({
         message: `There was an error retrieving the all the course lectures stats: ${err}`,
       });
     });
