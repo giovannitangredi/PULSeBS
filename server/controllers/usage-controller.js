@@ -1,3 +1,4 @@
+const { where } = require("../db");
 const knex = require("../db");
 
 /**
@@ -99,13 +100,24 @@ exports.getBookingStats = async (req, res) => {
   
   exports.getSystemStats = async (req,res)=>{
     // Get the sum of all stats
-    const role = req.user && req.user.role;
-    if(role != "manager")
-    {
-      res.status(401).json({
+    const user = req.user && req.user.id;
+    knex
+    .select({id:"id",role : "role"})
+    .from("user")
+    .where("id",user)
+    .then((result)=>{
+      if(result[0].role != "manager")
+      {
+        console.log(result.role);
+       res.status(401).json({
         message : "Unauthorize acces only managers can acces this query"
       });
     }
+    }).catch((err)=>{
+      res.status(501).json({
+        message: `There was an error retrieving the system stats: ${err}`,
+      });
+    });
     knex("stats_usage")
     .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
     .then((queryResults)=>{
@@ -119,13 +131,21 @@ exports.getBookingStats = async (req, res) => {
   }
 
   exports.getAllLecturesStats = async (req,res)=>{
-    const userAuth = req.user && req.user.role;
-    if(role != "manager")
-    {
-      res.status(401).json({
+    const user = req.user && req.user.id;
+    knex
+    .select({id:"id",role : "role"})
+    .from("user")
+    .where("id",user)
+    .then((result)=>{
+      if(result[0].role != "manager")
+       res.status(401).json({
         message : "Unauthorize acces only managers can acces this query"
       });
-    }
+    }).catch((err)=>{
+      res.status(501).json({
+        message: `There was an error retrieving the system stats: ${err}`,
+      });
+    });
     knex
     .select(
       {lecture : "sl.lecture_name"},
@@ -150,13 +170,21 @@ exports.getBookingStats = async (req, res) => {
   
   exports.getCourseTotalStats = async (req,res)=>{
     // Get the sum of all stats for a single course with id = courseid
-    const role = req.user && req.user.role;
-    if(role != "manager")
-    {
-      res.status(401).json({
+    const user = req.user && req.user.id;
+    knex
+    .select({id:"id",role : "role"})
+    .from("user")
+    .where("id",user)
+    .then((result)=>{
+      if(result[0].role != "manager")
+       res.status(401).json({
         message : "Unauthorize acces only managers can acces this query"
       });
-    }
+    }).catch((err)=>{
+      res.status(501).json({
+        message: `There was an error retrieving the system stats: ${err}`,
+      });
+    });
     const courseid= req.params.courseid
     knex("stats_usage")
     .sum({cancellations: "cancellations",bookings:"booking",attendances:"attendance"})
@@ -173,13 +201,21 @@ exports.getBookingStats = async (req, res) => {
   }
 
   exports.getCourseLecturesStats = async (req,res)=>{
-    const role = req.user && req.user.role;
-    if(role != "manager")
-    {
-      res.status(401).json({
+    const user = req.user && req.user.id;
+    knex
+    .select({id:"id",role : "role"})
+    .from("user")
+    .where("id",user)
+    .then((result)=>{
+      if(result.role[0] != "manager")
+       res.status(401).json({
         message : "Unauthorize acces only managers can acces this query"
       });
-    }
+    }).catch((err)=>{
+      res.status(501).json({
+        message: `There was an error retrieving the system stats: ${err}`,
+      });
+    });
     const courseid= req.params.courseid
     knex
     .select(

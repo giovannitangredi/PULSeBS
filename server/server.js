@@ -15,7 +15,7 @@ const userRouter = require("./routes/user-route");
 const lectureRouter = require("./routes/lecture-route");
 const courseRouter = require("./routes/course-route");
 const mail = require("./controllers/email-controller");
-const statsRouter = require("./routes/stats-route");
+const statsRouter = require("./routes/usage-route");
 
 // Set default port for express app
 const PORT = process.env.PORT || 4001;
