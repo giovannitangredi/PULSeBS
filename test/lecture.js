@@ -340,10 +340,15 @@ describe("Teacher cancel a lecture 1 hour before  ", async () => {
 
     expect(res.status).to.equal(200);
   });
-  it("should return  with status 200", async () => {
+  it("should return  with status 202", async () => {
     const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
     expect(res.status).to.equal(202);
   });
+  it("should return  with one of the message and not status 400 ", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+    expect(res.body.message).to.not.be.null
+  });
+
   after(async () => {
     await knex("user").del();
     await knex("lecture").del();
