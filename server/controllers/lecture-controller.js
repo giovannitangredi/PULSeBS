@@ -43,7 +43,6 @@ exports.getBookingLectures = async (req, res) => {
     })
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
-    .andWhere("start", "<", dateShown) //show only lecture in two weeks
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -77,8 +76,6 @@ exports.getExistentBooking = async (req, res) => {
     .join("user", "lecture.lecturer", "user.id")
     .join("course", "lecture.course", "course.id")
     .where("lecture_booking.student_id", studentId)
-    .andWhere("start", ">", today) //show only future lectures
-    .andWhere("start", "<", dateShown) //show only lecture in two weeks
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -163,6 +160,26 @@ exports.newBooking = async (req, res) => {
         message: `There was an error searching the lecture`,
       });
     });
+};
+
+// Cancel booking from table lecture_booking
+
+exports.cancelBooking = async (req, res) => {
+  const lectureId = req.params.lectureid;
+  const studentId = req.user && req.user.id;
+  
+  // Delete booking lecture in lecture_booking table
+	knex("lecture_booking")
+    .where("lecture_id",lectureId)
+    .andWhere("student_id",studentId)
+		.del()
+    .then(() => {
+      res.json({ message: `Booking canceled.` });
+      })
+      .catch((err) => {
+        // Send a error message in response
+        res.json({ message: `There was an error canceling the booking` });
+      });
 };
 
 // Get the list of lectures scheduled for a course
