@@ -3,6 +3,15 @@ import { Navbar, Button, Nav } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
 export const NavBar = (props) => {
+  const links = {
+    teacher: [
+      { title: "Home", path: "/teacher" },
+      { title: "Statistics", path: "/teacher/statistics" },
+    ],
+    student: [{ title: "Home", path: "/student" }],
+    manager: [{ title: "Home", path: "/manager" }],
+  };
+
   const handleLogout = (ev) => {
     ev.preventDefault();
     axios
@@ -21,22 +30,13 @@ export const NavBar = (props) => {
       <Navbar.Brand>
         Welcome, {props.user.name + " " + props.user.surname}
       </Navbar.Brand>
-      <Nav>
-        {props.user.role === "teacher" ? (
-          <NavLink to="/teacher" className="nav-link">
-            Home
-          </NavLink>
-        ) : (
-          <NavLink to="/student">Home</NavLink>
-        )}
-      </Nav>
-      <Nav>
-        {props.user.role === "teacher" && (
-          <NavLink to="/teacher/statistics" className="nav-link">
-            Statistics
-          </NavLink>
-        )}
-      </Nav>
+      <Nav>{props.user &&
+      links[props.user.role].map((link) => (
+        <NavLink key={link.title} to={link.path} exact className="nav-link">
+          {link.title}
+        </NavLink>
+      ))}</Nav>
+  
       <Navbar.Collapse className="justify-content-end">
         <Button variant="primary" onClick={(ev) => handleLogout(ev)}>
           {" "}
