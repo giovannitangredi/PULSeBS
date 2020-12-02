@@ -168,7 +168,7 @@ initTable("_Variables", (table) => {
 initTable("_Trigger", (table) => {
   table.string("name").primary();
   table.string("trigger_status");
-}, "insert into _Trigger values('cancellation_trigger', 'on') ");
+});
 
 
 

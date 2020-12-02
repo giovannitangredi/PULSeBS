@@ -26,6 +26,8 @@ const userCredentials = {
   password: "password",
 };
 
+
+
 const userTuple = {
   id: 1,
   name: "Enrico",
@@ -194,8 +196,9 @@ describe("GET /api/lectures/bookable", async () => {
     await knex("course_available_student").del();
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
-    await knex("lecture").insert(futureLectureTuple);
     await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    
     await knex("course_available_student").insert(courseStudentTuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
@@ -271,6 +274,7 @@ describe("List of students booked for a lecture", async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
+    await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);    
     await knex("lecture_booking").insert(lectureBookingTuple);    
@@ -287,7 +291,7 @@ describe("List of students booked for a lecture", async () => {
   it("should return one student booked", async () => {
     const res = await authenticatedUser.get(`/api/lectures/${lectureBookingTuple.lecture_id}/students`);
     expect(res.body.length).to.equal(1);
-    expect(res.body).to.have.deep.members([{ id: userTuple.id, name: userTuple.name , surname: userTuple.surname , email: mailSlurpAddress }])
+    expect(res.body).to.have.deep.members([{ id: userTuple.id, name: userTuple.name , surname: userTuple.surname , email: testEmailAddress }])
    
   });
   after(async () => {
@@ -346,23 +350,46 @@ describe("list of lectures scheduled for a course", async () => {
 
 //Teacher cancel a lecture 1h before  
 describe("Teacher cancel a lecture 1 hour before  ", async () => {
-  await knex("lecture").del();
-  await knex("user").insert(teacherTuple);
-  await knex("lecture").insert(futureLectureTuple);    
-  const res = await authenticatedUser
-    .post("/api/auth/login")
-    .send(teacherCredentials);
+  const authenticatedUser = request.agent(app);
 
-  expect(res.status).to.equal(200);
+   before(async () => {
+    await knex("user").del();
+    await knex("course").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course_available_student").del();
+    await knex("user").insert(userTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    await knex("course_available_student").insert(courseStudentTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple);
+
+    await authenticatedUser
+      .post("/api/auth/login")
+      .send(teacherCredentials)
+      .expect(200);
+      let newEmailPromise;
+    await emailController.deleteEmails(imap);
+    newEmailPromise = emailController.waitForNewEmail(imap);
+  });
+  
+  it("should return  with status 202", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+    expect(res.status).to.equal(202);
+  });
+  it("should return  with one of the message and not status 400 ", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+    expect(res.body.message).to.not.be.null
+  });
+  it("student booked should receive an email", async () => {
+    const email = await newEmailPromise;
+    expect(email.subject).to.match(/Lecture cancel information/);
+    expect(email.body).to.match(/is canceled by the teacher/);
+  });
+
 });
-it("should return  with status 202", async () => {
-  const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
-  expect(res.status).to.equal(202);
-});
-it("should return  with one of the message and not status 400 ", async () => {
-  const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
-  expect(res.body.message).to.not.be.null
-});
+
 
 //Cancel a lecture booked by a student
 describe("Cancel a booked lecture ", async () => {
@@ -372,6 +399,7 @@ describe("Cancel a booked lecture ", async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
+    await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple); 
     await knex("lecture_booking").insert(lectureBookingTuple);    
@@ -410,6 +438,8 @@ describe("Presence Lecture into distance one ", async () => {
   before(async () => {
     await knex("user").del();
     await knex("lecture").del();
+    await knex("course").del();
+    await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
@@ -449,43 +479,3 @@ describe("Presence Lecture into distance one ", async () => {
 });
 
 
-describe("Lecture cancellation test", async function () {
-  const authenticatedUser = request.agent(app);
-  this.timeout(15000);
-  
-  let newEmailPromise;
-
-  before(async () => {
-    await knex("user").del();
-    await knex("course").del();
-    await knex("lecture").del();
-    await knex("lecture_booking").del();
-    await knex("course_available_student").del();
-    await knex("user").insert(userTuple);
-    await knex("user").insert(teacherTuple);
-    await knex("course").insert(courseTuple);
-    await knex("lecture").insert(lectureTuple);
-    await knex("course_available_student").insert(courseStudentTuple);
-    await knex("lecture_booking").insert(lectureBookingTuple);
-
-    await authenticatedUser
-      .post("/api/auth/login")
-      .send(teacherCredentials)
-      .expect(200);
-    
-    await emailController.deleteEmails(imap);
-    newEmailPromise = emailController.waitForNewEmail(imap);
-  });
-
-  it("should return with status 202", async () => {
-    const res = await authenticatedUser
-      .delete(`/api/lectures/${lectureTuple.id}`)
-      .expect(202);
-  });
-
-  it("student booked should receive an email", async () => {
-    const email = await newEmailPromise;
-    expect(email.subject).to.match(/Lecture cancel information/);
-    expect(email.body).to.match(/is canceled by the teacher/);
-  });
-});
