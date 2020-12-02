@@ -17,23 +17,23 @@ export const CourseDetail = (props) => {
   const [courseFilter, setcourseFilter] = useState([]);
   const [bookedLectures, setBookedLectures] = useState([]);
   const [reserved, setReserved] = useState([]);
-  const [startDate, setStartDate] = useState(new Date("2014/02/08"));
-  const [endDate, setEndDate] = useState(new Date("2014/02/10"));
+  const [startDate, setStartDate] = useState(new Date("2020/10/08"));
+  const [endDate, setEndDate] = useState(new Date("2014/12/10"));
   const [weeksBetween, setWeeksBetween] = useState([]);
   const [monthsBetween, setMonthsBetween] = useState([]);
 
   /* get http call */
-  let GetFromServer = (url) => {
-    axios
-      .get(url)
-      .then((res) => {
-        return res.data;
+  function GetFromServer(URL) {
+    return axios
+      .get(URL)
+      .then(function (response) {
+        return response.data;
       })
-      .catch((err) => {
-        return null;
-        console.log(err);
+      .catch(function (error) {
+        return { success: false };
       });
-  };
+  }
+
   /*get CourseList */
   const getCourseList = () => {
     axios.get(`/courses/`, {}).then((response) => {
@@ -65,8 +65,6 @@ export const CourseDetail = (props) => {
   const getrelateddatafromserver = () => {
     let weekdays = [];
     let listofweeks = evaluatelistofDates(startDate, endDate);
-    console.log("list of weeks");
-    console.log(listofweeks);
     listofweeks.forEach((week) => {
       weekdays.push(
         week.startDate.getFullYear().toString() +
@@ -79,49 +77,53 @@ export const CourseDetail = (props) => {
     getMonthList(startDate, endDate).forEach((month) => {
       months.push(month);
     });
-    console.log(listofweeks);
     setMonthsBetween(months);
 
     let promiseArray = [];
+    let promiseArray2 = [];
     let lectures = [];
     let reservations = [];
 
     weeksBetween.forEach((weekStartDate) => {
-      console.log(weekStartDate);
       courseFilter.forEach((id) => {
         promiseArray.push(
-          new Promise((resolve, reject) => {
-            lectures.push(
-              GetFromServer(`/courses/${id}/bookings?week=${weekStartDate}`)
-            );
-          })
+          GetFromServer(`/courses/${id}/bookings?week=${weekStartDate}`)
         );
       });
     });
 
     monthsBetween.forEach((monthStartDate) => {
-      console.log(monthStartDate);
       courseFilter.forEach((id) => {
         promiseArray.push(
-          new Promise((resolve, reject) => {
-            lectures.push(
-              GetFromServer(`/courses/${id}/bookings?month=${monthStartDate}`)
-            );
-          })
+          GetFromServer(`/courses/${id}/bookings?month=${monthStartDate}`)
         );
       });
     });
     courseFilter.forEach((id) => {
-      promiseArray.push(
-        new Promise((resolve, reject) => {
-          reservations.push(GetFromServer(`/courses/${id}/bookings`));
-        })
-      );
+      promiseArray2.push(GetFromServer(`/courses/${id}/bookings`));
     });
 
     Promise.all(promiseArray)
       .then((values) => {
+        values.forEach((lecture) => {
+          lecture.forEach((lecture2) => {
+            lectures.push(lecture2);
+          });
+        });
         setBookedLectures(lectures);
+      })
+      .catch((reason) => {
+        console.log(reason);
+      });
+    Promise.all(promiseArray2)
+      .then((values) => {
+        values.forEach((reservation) => {
+          reservation.forEach((reservation2) => {
+            console.log(reservation2);
+            reservations.push(reservation2);
+          });
+        });
+
         setReserved(reservations);
       })
       .catch((reason) => {
@@ -252,9 +254,7 @@ export const CourseDetail = (props) => {
             className="shadow-sm py-3 mb-5 bg-white rounded col-md-3  p-4 m-4 "
           >
             <div className="col-sm-2">
-              <span className="badge BackgroundThemeColor">
-                Courses (Booking Number):
-              </span>
+              <span className="badge BackgroundThemeColor">Courses:</span>
             </div>
             {myCourses && myCourses.map((item) => CourslistRenderer(item))}
           </ListGroup>
