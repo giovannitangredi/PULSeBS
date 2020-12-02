@@ -17,8 +17,8 @@ export const CourseDetail = (props) => {
   const [courseFilter, setcourseFilter] = useState([]);
   const [bookedLectures, setBookedLectures] = useState([]);
   const [reserved, setReserved] = useState([]);
-  const [startDate, setStartDate] = useState(new Date("2020/10/08"));
-  const [endDate, setEndDate] = useState(new Date("2014/12/10"));
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [weeksBetween, setWeeksBetween] = useState([]);
   const [monthsBetween, setMonthsBetween] = useState([]);
 
@@ -156,12 +156,9 @@ export const CourseDetail = (props) => {
     var dateEnd = moment(endDate);
     var timeValues = [];
 
-    while (
-      dateEnd > dateStart ||
-      dateStart.format("M") === dateEnd.format("M")
-    ) {
+    while (dateStart.format("YYYY-MM") <= dateEnd.format("YYYY-MM")) {
       timeValues.push(dateStart.format("YYYY-MM"));
-      dateStart.add(1, "month");
+      dateStart.add(1, "months");
     }
 
     return timeValues;
@@ -199,8 +196,10 @@ export const CourseDetail = (props) => {
     return weeknum;
   };
   /* this is called when end start of datepicker is changed */
-  const datePickerHandle = (sdate, edate) => {
+  const datePickerHandle = (sdate) => {
     setStartDate(sdate);
+  };
+  const datePickerHandle2 = (edate) => {
     setEndDate(edate);
   };
 
@@ -209,8 +208,8 @@ export const CourseDetail = (props) => {
     let sDate;
     let eDate;
     let dateArr = [];
-    let tempstart = startd;
-    let tempend = endd;
+    let tempstart = new Date(startd);
+    let tempend = new Date(endd);
 
     while (tempstart <= tempend) {
       if (tempstart.getDay() == 1 || (dateArr.length == 0 && !sDate)) {
@@ -242,7 +241,7 @@ export const CourseDetail = (props) => {
           <DatePickerComponent
             className="mx-3"
             startDateHandle={datePickerHandle}
-            endDateHandle={datePickerHandle}
+            endDateHandle={datePickerHandle2}
           />
           <Button variant="primary mx-3" onClick={getrelateddatafromserver}>
             Apply
@@ -259,12 +258,10 @@ export const CourseDetail = (props) => {
             {myCourses && myCourses.map((item) => CourslistRenderer(item))}
           </ListGroup>
           <div className="shadow-sm p-4  mt-4 ml-4 bg-white rounded col-md-8">
-            <Table size="sm">
+            <Table size="sm" className="pb-4 mb-4 shadow-sm">
               <thead>
                 <tr>
-                  <th></th>
                   <th>Course Name</th>
-                  <th>Lecture Name</th>
                   <th>Week</th>
                   <th>Month</th>
                   <th>NumberOfBooking</th>
@@ -276,22 +273,31 @@ export const CourseDetail = (props) => {
                     return (
                       <React.Fragment key={index}>
                         <tr>
-                          <td></td>
                           <td>{item.course_name}</td>
-                          <td>{item.week}</td>
-                          <td>{item.month}</td>
+                          <td>{item.week ? item.week : "-"}</td>
+                          <td>{item.month ? item.month : "-"}</td>
                           <td>{item.booking}</td>
                         </tr>
                       </React.Fragment>
                     );
                   })}
+                {!reserved || reserved.length > 0 ? (
+                  ""
+                ) : (
+                  <tr>
+                    <td colspan="4">
+                      <div className="w-100 d-flex justify-content-center">
+                        <h4>No Record to show</h4>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </Table>
 
-            <Table size="sm">
+            <Table size="sm" className="  my-4   shadow-sm">
               <thead>
                 <tr>
-                  <th></th>
                   <th>Course Name</th>
                   <th>Lecture Name</th>
                   <th>NumberOfBooking</th>
@@ -303,7 +309,6 @@ export const CourseDetail = (props) => {
                     return (
                       <React.Fragment key={index}>
                         <tr>
-                          <td></td>
                           <td>{item.course_name}</td>
                           <td>{item.lecture_name}</td>
                           <td>{item.booking}</td>
@@ -311,6 +316,17 @@ export const CourseDetail = (props) => {
                       </React.Fragment>
                     );
                   })}
+                {!reserved || reserved.length > 0 ? (
+                  ""
+                ) : (
+                  <tr>
+                    <td colspan="4">
+                      <div className="w-100 d-flex justify-content-center">
+                        <h4>No Record to show</h4>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </Table>
           </div>

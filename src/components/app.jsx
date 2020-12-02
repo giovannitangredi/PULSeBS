@@ -12,7 +12,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import axios from "axios";
-import { CourseDetail } from './TeacherStatistics'
+import { CourseDetail } from "./TeacherStatistics";
 import { LoginPage } from "./LoginPage";
 // Import styles
 import "./../styles/styles.css";
@@ -77,7 +77,7 @@ export const App = (props) => {
           </Route>
           <Route exact path="/teacher/statistics">
             {redirectToIfLoggedIn()}
-            <CourseDetail user={authUser} userid={authUser.id}/>
+            <CourseDetail user={authUser} userid={authUser.id} />
           </Route>
           <Route path="/manager">
             {redirectToIfLoggedIn()}
