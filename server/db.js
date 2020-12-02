@@ -99,7 +99,8 @@ initTable(
 
     table.string("status").notNullable();
   },
-  triggers.convert_trigger
+  triggers.convert_trigger,
+  triggers.deleteLecture_trigger
 );
 
 initTable(

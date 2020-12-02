@@ -96,3 +96,28 @@ exports.convert_trigger =
         SET trigger_status = 'on'
         WHERE name = 'cancellation_trigger';
     END;`;
+
+    exports.deleteLecture_trigger = 
+    `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFORE DELETE ON lecture
+    BEGIN
+    DELETE FROM _Variables;
+
+    UPDATE _Trigger
+        SET trigger_status = 'off'
+        WHERE name = 'cancellation_trigger';
+
+    DELETE FROM lecture_booking
+        WHERE lecture_id = OLD.id;
+    
+    INSERT INTO _Variables(name,int_value) VALUES('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.id));
+
+    DELETE FROM stats_usage
+        WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid');   
+
+    DELETE FROM stats_lecture
+        WHERE lecture_id = OLD.id;
+    
+    UPDATE _Trigger
+        SET trigger_status = 'on'
+        WHERE name = 'cancellation_trigger';
+    END;`;
