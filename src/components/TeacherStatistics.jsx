@@ -21,7 +21,7 @@ export const CourseDetail = (props) => {
   const [endDate, setEndDate] = useState(new Date());
   const [weeksBetween, setWeeksBetween] = useState([]);
   const [monthsBetween, setMonthsBetween] = useState([]);
-  const [monthLectures,setMonthLectures] = useState([]);
+  const [monthLectures, setMonthLectures] = useState([]);
 
   /* get http call */
   function GetFromServer(URL) {
@@ -87,21 +87,34 @@ export const CourseDetail = (props) => {
     let reservations = [];
     let lecturesMonth = [];
 
-    weekdays.forEach((weekStartDate) => {
-      courseFilter.forEach((id) => {
-        promiseArray.push(
-          GetFromServer(`/courses/${id}/bookings?week=${weekStartDate}`)
-        );
-      });
+    courseFilter.forEach((id) => {
+      promiseArray.push(
+        GetFromServer(
+          `/courses/${id}/bookings?fromWeek=${startDate
+            .getFullYear()
+            .toString()}-${startDate
+            .getWeek()
+            .toString()}&toWeek=${endDate
+            .getFullYear()
+            .toString()}-${endDate.getWeek().toString()}`
+        )
+      );
     });
 
-    months.forEach((monthStartDate) => {
-      courseFilter.forEach((id) => {
-        promiseArray3.push(
-          GetFromServer(`/courses/${id}/bookings?month=${monthStartDate}`)
-        );
-      });
+    courseFilter.forEach((id) => {
+      promiseArray3.push(
+        GetFromServer(
+          `/courses/${id}/bookings?fromMonth=${startDate
+            .getFullYear()
+            .toString()}-${startDate
+            .getMonth()
+            .toString()}&toMonth=${endDate
+            .getFullYear()
+            .toString()}-${endDate.getMonth().toString()}`
+        )
+      );
     });
+
     courseFilter.forEach((id) => {
       promiseArray2.push(GetFromServer(`/courses/${id}/bookings`));
     });
@@ -132,7 +145,7 @@ export const CourseDetail = (props) => {
       .catch((reason) => {
         console.log(reason);
       });
-      Promise.all(promiseArray3)
+    Promise.all(promiseArray3)
       .then((values) => {
         values.forEach((lecture) => {
           lecture.forEach((lecture2) => {
