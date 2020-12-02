@@ -32,7 +32,7 @@ export const NavBar = (props) => {
       </Nav>
       <Nav>
         {props.user.role === "teacher" && (
-          <NavLink to="/courseId/detail" className="nav-link">
+          <NavLink to="/teacher/statistics" className="nav-link">
             Statistics
           </NavLink>
         )}

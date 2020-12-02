@@ -12,6 +12,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import axios from "axios";
+import { CourseDetail } from './TeacherStatistics'
 import { LoginPage } from "./LoginPage";
 // Import styles
 import "./../styles/styles.css";
@@ -50,7 +51,7 @@ export const App = (props) => {
 
   const redirectToIfLoggedIn = () => {
     const redirect = authUser.id ? `/${authUser.role}` : "/login";
-    if (redirect !== location.pathname)
+    if (!location.pathname.startsWith(redirect))
       return <Redirect to={redirect}></Redirect>;
     return null;
   };
@@ -70,9 +71,13 @@ export const App = (props) => {
             {redirectToIfLoggedIn()}
             <ReservationPage user={authUser}></ReservationPage>
           </Route>
-          <Route path="/teacher">
+          <Route exact path="/teacher">
             {redirectToIfLoggedIn()}
             <StudentList user={authUser} userid={authUser.id} />
+          </Route>
+          <Route exact path="/teacher/statistics">
+            {redirectToIfLoggedIn()}
+            <CourseDetail user={authUser} userid={authUser.id}/>
           </Route>
           <Route path="/manager">
             {redirectToIfLoggedIn()}
