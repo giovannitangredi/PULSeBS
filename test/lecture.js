@@ -7,21 +7,22 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 const moment = require("moment");
 const emailController = require("../server/controllers/email-controller");
-const MailSlurp = require("mailslurp-client").default;
 
-const apiKey =
-  "ff4ecbf86022042fe17030bc0ff37f0f4a5ff3470d9727218d1945b1862a580c";
-const mailSlurpAddress = "8d0dbfbc-f2b7-4e53-a6dc-7dd32ee45e83@mailslurp.com";
-const mailslurp = new MailSlurp({ apiKey });
+const testEmailAddress = "test.pulsebs.softeng@gmail.com";
+const testEmailPassword = "JRLeumcuc5N8K3S";
+const imap = {
+    user: testEmailAddress,
+    password: testEmailPassword,
+    host: "imap.gmail.com",
+    port: 993,
+    tls: true,
+    tlsOptions: { rejectUnauthorized: false },
+    authTimeout: 3000
+};
 
 //the data we need to pass to the login method
 const userCredentials = {
-  email: mailSlurpAddress,
-  password: "password",
-};
-
-const teacherCredentials = {
-  email: "john.doe@polito.it",
+  email: testEmailAddress,
   password: "password",
 };
 
@@ -30,7 +31,7 @@ const userTuple = {
   name: "Enrico",
   surname: "Carraro",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
-  email: mailSlurpAddress,
+  email: testEmailAddress,
   role: "student",
 };
 
@@ -41,6 +42,11 @@ const teacherTuple = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "john.doe@polito.it",
   role: "teacher",
+};
+
+const teacherCredentials = {
+  email: teacherTuple.email,
+  password: "password",
 };
 
 const courseTuple = {
@@ -54,8 +60,8 @@ const lectureTuple = {
   name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
-  start: moment().add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
-  end: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  start: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence"
 };
@@ -110,7 +116,7 @@ const expectedBookableLectures = [{
 
 describe("Lecture test", async function () {
   const authenticatedUser = request.agent(app);
-  this.timeout(10000);
+  this.timeout(15000);
   before(async () => {
     await knex("user").del();
     await knex("course").del();
@@ -125,15 +131,16 @@ describe("Lecture test", async function () {
   });
 
   describe("reservation test", async () => {
-    let inbox;
+    let newEmailPromise;
 
     before(async () => {
       const res = await authenticatedUser
         .post("/api/auth/login")
         .send(userCredentials)
         .expect(200);
-      inbox = (await mailslurp.getInboxes())[0];
-      mailslurp.emptyInbox(inbox.id);
+
+      await emailController.deleteEmails(imap);
+      newEmailPromise = emailController.waitForNewEmail(imap);
     });
 
     it("book a seat: should return a 200 response", async () => {
@@ -143,24 +150,24 @@ describe("Lecture test", async function () {
     });
 
     it("should receive an email", async () => {
-      const email = await mailslurp.waitForLatestEmail(inbox.id);
+      const email = await newEmailPromise;
       expect(email.body).to.match(/You have successfully booked a seat/);
     });
   });
 
   describe("teacher email test", async () => {
-    let inbox;
-
+    let newEmailPromise;
+    
     before(async () => {
-      // use the slurpemail address also for the teacher so that we can check the email is received
+      // use the gmail test address also for the teacher so that we can check the email is received
       await knex("user")
         .where("id", teacherTuple.id)
-        .update("email", mailSlurpAddress);
+        .update("email", testEmailAddress);
       await knex("lecture_booking").del();
       await knex("lecture_booking").insert(lectureBookingTuple);
 
-      inbox = (await mailslurp.getInboxes())[0];
-      mailslurp.emptyInbox(inbox.id);
+      await emailController.deleteEmails(imap);
+      newEmailPromise = emailController.waitForNewEmail(imap);
     });
 
     it("should receive an email with the number of the students booked", async () => {
@@ -169,7 +176,7 @@ describe("Lecture test", async function () {
         `${now.second()} ${now.minute()} * * * *`
       );
 
-      const email = await mailslurp.waitForLatestEmail(inbox.id);
+      const email = await newEmailPromise;
       expect(email.body).to.match(/1 students booked a seat/);
     });
   });
@@ -336,6 +343,27 @@ describe("list of lectures scheduled for a course", async () => {
     await knex("course").del();
   });
 });
+
+//Teacher cancel a lecture 1h before  
+describe("Teacher cancel a lecture 1 hour before  ", async () => {
+  await knex("lecture").del();
+  await knex("user").insert(teacherTuple);
+  await knex("lecture").insert(futureLectureTuple);    
+  const res = await authenticatedUser
+    .post("/api/auth/login")
+    .send(teacherCredentials);
+
+  expect(res.status).to.equal(200);
+});
+it("should return  with status 202", async () => {
+  const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+  expect(res.status).to.equal(202);
+});
+it("should return  with one of the message and not status 400 ", async () => {
+  const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+  expect(res.body.message).to.not.be.null
+});
+
 //Cancel a lecture booked by a student
 describe("Cancel a booked lecture ", async () => {
   //now let's login the user before we run any tests
@@ -373,6 +401,7 @@ describe("Cancel a booked lecture ", async () => {
   });
 });
 
+// Turn a presence lecture into distance one 
 // Turn a presence lecture into distance one 
 describe("Presence Lecture into distance one ", async () => {
   //now let's login the user before we run any tests
@@ -416,5 +445,47 @@ describe("Presence Lecture into distance one ", async () => {
     await knex("lecture").del();
     await knex("lecture_booking").del();
     await knex("course").del();
+  });
+});
+
+
+describe("Lecture cancellation test", async function () {
+  const authenticatedUser = request.agent(app);
+  this.timeout(15000);
+  
+  let newEmailPromise;
+
+  before(async () => {
+    await knex("user").del();
+    await knex("course").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course_available_student").del();
+    await knex("user").insert(userTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(lectureTuple);
+    await knex("course_available_student").insert(courseStudentTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple);
+
+    await authenticatedUser
+      .post("/api/auth/login")
+      .send(teacherCredentials)
+      .expect(200);
+    
+    await emailController.deleteEmails(imap);
+    newEmailPromise = emailController.waitForNewEmail(imap);
+  });
+
+  it("should return with status 202", async () => {
+    const res = await authenticatedUser
+      .delete(`/api/lectures/${lectureTuple.id}`)
+      .expect(202);
+  });
+
+  it("student booked should receive an email", async () => {
+    const email = await newEmailPromise;
+    expect(email.subject).to.match(/Lecture cancel information/);
+    expect(email.body).to.match(/is canceled by the teacher/);
   });
 });

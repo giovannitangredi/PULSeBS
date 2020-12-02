@@ -43,6 +43,9 @@ const LectureItem = ({
                   )}
               </label>
             </div>
+            <div  className="col-lg-3">
+            <Button variant="primary" onClick={(event) => handleBooking(lecture)} >Cancel</Button>
+            </div>
           </div>
         </div>
       </div>

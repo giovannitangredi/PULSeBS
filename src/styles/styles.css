@@ -28,3 +28,9 @@ body {
 .largefontsize {
   font-size: 2rem;
 }
+
+/*fix fullcalendar low contrast lines*/
+.fc-theme-standard td, .fc-theme-standard th
+{
+  border: 1px solid #858585;
+}
