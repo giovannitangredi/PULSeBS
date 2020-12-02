@@ -18,16 +18,31 @@ export const NavBar = (props) => {
 
   return (
     <Navbar>
-        <Navbar.Brand >Welcome, {props.user.name + " " + props.user.surname}</Navbar.Brand>
-        <Nav >
-        {props.user.role === "teacher"? <NavLink to="/teacher" className="nav-link" >Home</NavLink>: <NavLink to="/student">Home</NavLink>}
-
-        </Nav>
-        <Nav>
-        {props.user.role === "teacher" && <NavLink to="/courseId/detail" className="nav-link">Statistics</NavLink>}</Nav>
-        <Navbar.Collapse className="justify-content-end">
-             <Button variant="primary" onClick={(ev)=> handleLogout(ev)}> Logout</Button>
-        </Navbar.Collapse>
+      <Navbar.Brand>
+        Welcome, {props.user.name + " " + props.user.surname}
+      </Navbar.Brand>
+      <Nav>
+        {props.user.role === "teacher" ? (
+          <NavLink to="/teacher" className="nav-link">
+            Home
+          </NavLink>
+        ) : (
+          <NavLink to="/student">Home</NavLink>
+        )}
+      </Nav>
+      <Nav>
+        {props.user.role === "teacher" && (
+          <NavLink to="/courseId/detail" className="nav-link">
+            Statistics
+          </NavLink>
+        )}
+      </Nav>
+      <Navbar.Collapse className="justify-content-end">
+        <Button variant="primary" onClick={(ev) => handleLogout(ev)}>
+          {" "}
+          Logout
+        </Button>
+      </Navbar.Collapse>
     </Navbar>
   );
 };

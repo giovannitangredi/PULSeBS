@@ -42,7 +42,7 @@ export const App = (props) => {
     setAuthUser({});
     setLoading(false);
   };
-  
+
   useEffect(() => {
     setLoading(true);
     getUser();

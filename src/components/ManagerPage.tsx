@@ -18,7 +18,7 @@ interface LectureStats {
   course: string;
   date: Date;
   lecture: string;
-};
+}
 
 /*
 interface LectureStats {
@@ -45,7 +45,7 @@ export const ManagerPage = (props: any) => {
       .get(`/stats/systemStats`)
       .then((res) => {
         let systemStats: SystemStats = res.data;
-        console.log(systemStats); 
+        console.log(systemStats);
         setSystemStats(systemStats);
         setLoading(false);
       })
@@ -159,7 +159,17 @@ export const ManagerPage = (props: any) => {
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th>Course ({new Set<string>(lectureStats.map((lecture: LectureStats) => lecture.course)).size})</th>
+                <th>
+                  Course (
+                  {
+                    new Set<string>(
+                      lectureStats.map(
+                        (lecture: LectureStats) => lecture.course
+                      )
+                    ).size
+                  }
+                  )
+                </th>
                 <th>Lecture ({lectureStats.length})</th>
                 <th>Date</th>
                 <th>Bookings ({systemStats?.bookings})</th>
@@ -168,14 +178,16 @@ export const ManagerPage = (props: any) => {
               </tr>
             </thead>
             <tbody>
-              {lectureStats.map((lecture: LectureStats, index: number) => (<tr key={index}>
-                <td>{lecture.course}</td>
-                <td>{lecture.lecture}</td>
-                <td>{lecture.date}</td>
-                <td>{lecture.bookings}</td>
-                <td>{lecture.cancellations}</td>
-                <td>{lecture.attendances}</td>
-              </tr>))}
+              {lectureStats.map((lecture: LectureStats, index: number) => (
+                <tr key={index}>
+                  <td>{lecture.course}</td>
+                  <td>{lecture.lecture}</td>
+                  <td>{lecture.date}</td>
+                  <td>{lecture.bookings}</td>
+                  <td>{lecture.cancellations}</td>
+                  <td>{lecture.attendances}</td>
+                </tr>
+              ))}
             </tbody>
           </Table>
         </Tab>

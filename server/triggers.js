@@ -1,5 +1,4 @@
-exports.booking_trigger = 
-    `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON lecture_booking
+exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON lecture_booking
     BEGIN
         DELETE FROM _Variables;
         INSERT INTO _Variables(name, int_value, date_value, string_value) 
@@ -54,8 +53,7 @@ exports.booking_trigger =
     
     END;`;
 
-exports.cancellation_trigger = 
-    `CREATE TRIGGER IF NOT EXISTS cancellation AFTER DELETE ON lecture_booking
+exports.cancellation_trigger = `CREATE TRIGGER IF NOT EXISTS cancellation AFTER DELETE ON lecture_booking
     BEGIN
         DELETE FROM _Variables;
         INSERT INTO _Variables(name, int_value, date_value, string_value) 

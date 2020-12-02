@@ -34,16 +34,17 @@ const initTable = (name, attribute_declaration_cb, ...triggers) => {
             console.error(`There was an error creating table: ${error}`);
           });
       }
-    })  
+    })
     .then(() => {
-      for(let t of triggers) {
-        knex.raw(t)
-        .then(() => {
-          console.log(`New trigger added`);
-        })
-        .catch((error) => {
-          console.log(`There was an error creating trigger: ${error}`);
-        });
+      for (let t of triggers) {
+        knex
+          .raw(t)
+          .then(() => {
+            console.log(`New trigger added`);
+          })
+          .catch((error) => {
+            console.log(`There was an error creating trigger: ${error}`);
+          });
       }
     })
     .then(() => {
@@ -95,17 +96,19 @@ initTable("lecture", (table) => {
   table.integer("capacity").unsigned().notNullable();
 });
 
-initTable("lecture_booking", (table) => {
-  table.integer("lecture_id").notNullable();
-  table.foreign("lecture_id").references("lecture.id");
+initTable(
+  "lecture_booking",
+  (table) => {
+    table.integer("lecture_id").notNullable();
+    table.foreign("lecture_id").references("lecture.id");
 
-  table.integer("student_id").notNullable();
-  table.foreign("student_id").references("user.id");
+    table.integer("student_id").notNullable();
+    table.foreign("student_id").references("user.id");
 
-  table.datetime("booked_at").notNullable();
-}, 
-  triggers.booking_trigger, 
-  triggers.cancellation_trigger 
+    table.datetime("booked_at").notNullable();
+  },
+  triggers.booking_trigger,
+  triggers.cancellation_trigger
 );
 
 initTable("course_available_student", (table) => {
@@ -141,7 +144,7 @@ initTable("stats_usage", (table) => {
 
   table.integer("lid").notNullable();
   table.foreign("lid").references("stats_lecture.lid");
-  
+
   table.integer("booking").notNullable();
   table.integer("cancellations").notNullable();
   table.integer("attendance").notNullable();

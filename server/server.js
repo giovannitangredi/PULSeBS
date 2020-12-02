@@ -47,7 +47,7 @@ app.use(
 app.use("/api/user", userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/lectures", lectureRouter);
-app.use("/api/stats",statsRouter);
+app.use("/api/stats", statsRouter);
 
 // To return a better object in case of errors
 app.use(function (err, req, res, next) {
