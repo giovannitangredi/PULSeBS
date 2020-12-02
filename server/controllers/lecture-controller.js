@@ -235,6 +235,7 @@ exports.deleteLecture = async (req, res) => {
         lecture.lecturer == req.user.id &&
         lecture.start.localeCompare(deadlineToCancel) > 0
       ) {
+        sendEmailsForCancelledLecture(lectureId);
         await knex("lecture").where("id", lectureId).del();
         res.status(202).send();
       } else {
@@ -252,3 +253,34 @@ exports.deleteLecture = async (req, res) => {
   let string =
     "select lecture from lectures where lesson starts in more than 1 hour, which this teacher owns and teaches.";
 };
+
+sendEmailsForCancelledLecture = async (lectureId) => {
+
+  const result = await knex
+    .select(
+      { id: "user.id" },
+      { name: "user.name" },
+      { surname: "user.surname" },
+      { email: "user.email" },
+      { lectureName: "lecture.name" },
+      { lectureCourseName: "course.name" },
+      { lectureStart: "lecture.start" }
+    )
+    .from("lecture_booking")
+    .join("user", "lecture_booking.student_id", "=", "user.id")
+    .join("lecture", "lecture.id", "=", "lecture_booking.lecture_id")
+    .join("course", "lecture.course", "=", "course.id")
+    .where("lecture_booking.lecture_id", lectureId);
+
+  const emailSubject = "Lecture cancel information";
+  const emailBody = (name, surname, lectureName, lectureCourseName, lectureStart) => `Dear ${name} ${surname},<br/> \
+    Your booked lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} is canceled by the teacher,\
+    <br/>The PULSeBS Team`;
+
+  const queue = result.map(item => emailController.sendMail(item.email, emailSubject, emailBody(item.name, item.surname, item.lectureName, item.lectureCourseName, item.lectureStart)))
+  try {
+    await Promise.all(queue)
+  } catch (err) {
+    console.log(`There was an error cancelling the lecture: ${err}`);
+  }
+}
