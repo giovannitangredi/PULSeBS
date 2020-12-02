@@ -25,10 +25,7 @@ const userCredentials = {
   email: testEmailAddress,
   password: "password",
 };
-const teacherCredentials = {
-  email: "john.doe@polito.it",
-  password: "password",
-}
+
 const userTuple = {
   id: 1,
   name: "Enrico",
@@ -339,26 +336,50 @@ describe("list of lectures scheduled for a course", async () => {
 
 //Teacher cancel a lecture 1h before  
 describe("Teacher cancel a lecture 1 hour before  ", async () => {
+  await knex("lecture").del();
+  await knex("user").insert(teacherTuple);
+  await knex("lecture").insert(futureLectureTuple);    
+  const res = await authenticatedUser
+    .post("/api/auth/login")
+    .send(teacherCredentials);
+
+  expect(res.status).to.equal(200);
+});
+it("should return  with status 202", async () => {
+  const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+  expect(res.status).to.equal(202);
+});
+it("should return  with one of the message and not status 400 ", async () => {
+  const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
+  expect(res.body.message).to.not.be.null
+});
+
+//Cancel a lecture booked by a student
+describe("Cancel a booked lecture ", async () => {
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
   before(async () => {
     await knex("user").del();
-    await knex("lecture").del();
-    await knex("user").insert(teacherTuple);
-    await knex("lecture").insert(futureLectureTuple);    
+    await knex("lecture_booking").del();
+    await knex("user").insert(userTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple);    
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(teacherCredentials);
+      .send(userCredentials);
 
     expect(res.status).to.equal(200);
   });
-  it("should return  with status 202", async () => {
-    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
-    expect(res.status).to.equal(202);
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
+    expect(res).to.be.json;
+    expect(res.status).to.equal(200);
+
   });
-  it("should return  with one of the message and not status 400 ", async () => {
-    const res = await authenticatedUser.delete(`/api/lectures/${lectureTuple.id}`);
-    expect(res.body.message).to.not.be.null
+  it("should return message ", async () => {
+    const res = await authenticatedUser.delete(`/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`);
+    expect(res).to.have.property('body');
+    expect(res.body.message ).to.equal( `Booking canceled.`);
+   
   });
 
   after(async () => {
@@ -368,8 +389,6 @@ describe("Teacher cancel a lecture 1 hour before  ", async () => {
     await knex("course").del();
   });
 });
-
-
 
 describe("Lecture cancellation test", async function () {
   const authenticatedUser = request.agent(app);

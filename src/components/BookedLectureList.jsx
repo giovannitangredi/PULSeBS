@@ -11,12 +11,13 @@ export const BookedLectureList = (props) => {
           <th>Professor</th>
           <th>Start</th>
           <th>End</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         {props.lectures.length > 0 &&
           props.lectures.map((lecture) => (
-            <BookedLecture key={lecture.id} lecture={lecture}></BookedLecture>
+            <BookedLecture key={lecture.id} lecture={lecture} cancelBooking={props.cancelBooking}></BookedLecture>
           ))}
       </tbody>
     </Table>
