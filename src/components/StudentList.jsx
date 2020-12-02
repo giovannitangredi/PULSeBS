@@ -7,6 +7,7 @@ import StudentItem from "./StudentItem";
 import axios from "axios";
 import WeeklyCalendar from "./WeeklyCalendar";
 import Card from "react-bootstrap/Card";
+import Alert from "react-bootstrap/Alert";
 
 class StudentList extends React.Component {
   constructor(props) {
@@ -17,9 +18,14 @@ class StudentList extends React.Component {
       students: [],
       courses: [],
       selectedLecture: 0,
-      selectedCourse: 0,
+      selectedCourse: 0, 
+      selectedColors: [],
+      lectureColor:"",
       lecturetitle: "",
       studenttitle: "",
+      alertText:"",
+      alertType:"success",
+      alertShow:false
     };
   }
 
@@ -33,6 +39,14 @@ class StudentList extends React.Component {
   getCourseList = () => {
     axios.get(`/courses/`, {}).then((response) => {
       let result = response.data;
+      //color: this.props.colors[Math.floor(Math.random() * this.props.colors.length)]
+      result.forEach(element => {
+        this.state.selectedColors.push(this.props.colors[Math.floor(Math.random() * this.props.colors.length)]);
+      });
+   
+     let index=0;
+      
+      result=   (result)?  result.map(obj=> ({ ...obj, color:`${this.state.selectedColors[index++] }` }))  :result;
       this.setState({ courses: result });
     });
   };
@@ -40,6 +54,8 @@ class StudentList extends React.Component {
   getLecturesList = (courseID) => {
     axios.get(`/courses/${courseID.id}/lectures`, {}).then((response) => {
       let result = response.data;
+     let courseColor= this.state.courses.find(id=>id==courseID).color;
+     this.setState({lectureColor:courseColor});
       this.setState({ lecturetitle: courseID.name });
       this.setState({ lectures: result });
     });
@@ -68,7 +84,7 @@ class StudentList extends React.Component {
   renderEventContent(eventInfo) {
     if (eventInfo)
       return (
-        <div>
+        <div style={{ color : `${eventInfo.event.extendedProps.color}`}} >
           <p>
             {eventInfo.event.start.getHours()}:
             {eventInfo.event.start.getMinutes()}-
@@ -100,159 +116,47 @@ class StudentList extends React.Component {
     });
   };
 
+  handleBooking = ()=> {
+    this.setState({alertShow:true});
+
+    setTimeout(() => {  this.setState({alertShow:false})}, 3000);
+    this.scrolltoview("CoursesElement");
+  }
+  cancelBookingHandle = (lecture)=> {
+    this.handleBooking();
+
+    console.log(lecture.extendedProps.id);
+     axios.delete(`/lectures/${lecture.extendedProps.id}`, {}).then((response) => {
+      this.setState({alertType:"success"});
+      this.setState({alertText:"Lecture has canceled sucssesfully"});
+
+     }).catch(error => {
+      this.setState({alertType:"danger"});
+      this.setState({alertText:"There is a problem in removing Leture"});
+     });
+    
+     
+   }
+
   componentDidMount() {
     this.setState({ selectedLecture: 1 });
-
     this.getCourseList();
-
-    /* this.setState({
-      Courses: [{ id: 1, name: "Soft eng II", main_prof: 3 }],
-    });
-
-    this.setState({
-      lectures: [
-        {
-          id: 2323,
-          lecturer_name: "Software 2",
-          start: Date.parse("11/9/2020 13:00:00 GMT"),
-          end: Date.parse("11/9/2020 14:00:00 GMT"),
-          capacity: 84,
-          booked_students: "20",
-          course: "84",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2423,
-          lecturer_name: "Data Science and Database Technology",
-          start: Date.parse("13/9/2020 12:00:00 GMT"),
-          end: Date.parse("13/9/2020 14:00:00 GMT"),
-          capacity: 170,
-          booked_students: "20",
-          course: "170",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2623,
-          lecturer_name: "Compiler",
-          start: Date.parse("14/9/2020 09:00:00 GMT"),
-          end: Date.parse("14/9/2020 11:00:00 GMT"),
-          capacity: 60,
-          booked_students: "20",
-          course: "60",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2253,
-          lecturer_name: "Computer Architectures",
-          start: Date.parse("15/9/2020 12:00:00 GMT"),
-          end: Date.parse("15/9/2020 13:00:00 GMT"),
-          capacity: 210,
-          booked_students: "20",
-          course: "210",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2293,
-          lecturer_name: "System and Device Programming",
-          start: Date.parse("16/9/2020 13:00:00 GMT"),
-          end: Date.parse("16/9/2020 14:00:00 GMT"),
-          capacity: 130,
-          booked_students: "20",
-          course: "130",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2393,
-          lecturer_name: "Computer Networks",
-          start: Date.parse("17/9/2020 13:00:00 GMT"),
-          end: Date.parse("17/9/2020 14:00:00 GMT"),
-          capacity: 129,
-          booked_students: "20",
-          course: "129",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-
-        {
-          id: 2723,
-          lecturer_name: "Mobile application development",
-          start: Date.parse("18/9/2020 13:00:00 GMT"),
-          end: Date.parse("18/9/2020 14:00:00 GMT"),
-          capacity: 83,
-          booked_students: "20",
-          course: "32",
-          lecturer_name: "John",
-          lecturer_surname: "Doe",
-          lecturer_id: 3,
-        },
-      ],
-    });
-    this.setState({
-      students: [
-        {
-          id: 2223,
-          name: "Mithridates",
-          surename: "Theophylaktos",
-          email: "Mithridates@gmail.com",
-        },
-        { id: 2213, name: "Ajay", surename: "Phoibe", email: "Ajay@gmail.com" },
-        {
-          id: 4253,
-          name: "Valeri",
-          surename: "Sabina",
-          email: "Sabina@gmail.com",
-        },
-        {
-          id: 2263,
-          name: "Mithridates",
-          surename: "Theophylaktos",
-          email: "Theophylaktos@gmail.com",
-        },
-        {
-          id: 2273,
-          name: "Ajay",
-          surename: "Phoibe",
-          email: "Phoibe@gmail.com",
-        },
-        {
-          id: 4283,
-          name: "Valeri",
-          surename: "Sabina",
-          email: "Valeri@gmail.com",
-        },
-        {
-          id: 2593,
-          name: "Loane",
-          surename: "Aeson",
-          email: "Loane@gmail.com",
-        },
-      ],
-    });*/
   }
+
 
   render() {
     return (
       <>
-        <div className="container">
+      { this.state.alertShow && (
+                     <Alert  variant={this.state.alertType} >
+                       {this.state.alertText}
+                     </Alert>        
+       )}
+          
+        <div  id="CoursesElement" className="container">
           <Card
             border={"secondary"}
-            style={{ width: "100%", height: "75vh", margin: "1rem 0rem" }}
+            style={{ width: "100%", maxHeight: "75vh", margin: "1rem 0rem" }}
           >
             <Card.Header>
               <h4>Courses</h4>
@@ -260,7 +164,7 @@ class StudentList extends React.Component {
             {this.state.courses && (
               <div
                 className=" bg-light "
-                style={{ height: "75vh", overflow: "scroll" }}
+                style={{ maxHeight: "75vh",  overflow: "scroll" }}
               >
                 <div
                   className="d-flex align-content-center  flex-wrap bg-light "
@@ -283,17 +187,17 @@ class StudentList extends React.Component {
               style={{
                 width: "100%",
                 margin: "1rem 0rem",
-                background: "#e1e1e152",
+                background: "rgb(254 254 254)",
               }}
             >
-              <Card.Header>
+              <Card.Header style={{ background:`${this.state.lectureColor}`}}>
                 {" "}
                 <h4>
                   <b>{this.state.lecturetitle}</b> Lectures
                 </h4>{" "}
               </Card.Header>
               <div className="row" style={{ margin: "1rem 0rem" }}>
-                <div className="col-12 col-md-8">
+                <div className="col-12">
                   <div className="col">
                     <WeeklyCalendar
                       handleEventClick={this.handleEventClick}
@@ -303,33 +207,36 @@ class StudentList extends React.Component {
                     />
                   </div>
                 </div>
-                <div className="col-6 col-md-4">
+                <div className="col-12">
                   <div id="lecturelistview" className="col">
                     {this.formatEvents().length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"
-                        style={{ height: "28rem", margin: "1rem 0rem" }}
+                        style={{  margin: "1rem 0rem" }}
                       >
                         <ListGroup.Item>
                           <div className="d-flex w-100 justify-content-between">
                             <div className="container">
                               <div className="row">
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>Lecture Name</label>
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>Start</label>
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-3">
                                   <label>End</label>
+                                </div>
+                                 <div className="col-lg-3">
+                                 
                                 </div>
                               </div>
                             </div>
                           </div>
                         </ListGroup.Item>
                         {this.formatEvents().map((lecture) => (
-                          <LectureItem lecture={lecture} />
+                          <LectureItem lecture={lecture} handleBooking={this.cancelBookingHandle} />
                         ))}
                       </ListGroup>
                     ) : (
