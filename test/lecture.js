@@ -101,7 +101,7 @@ const expectedBookableLectures = [{
 
 describe("Lecture test", async function () {
   const authenticatedUser = request.agent(app);
-  this.timeout(10000);
+  this.timeout(15000);
   before(async () => {
     await knex("user").del();
     await knex("course").del();
