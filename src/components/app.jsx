@@ -51,7 +51,7 @@ export const App = (props) => {
 
   const redirectToIfLoggedIn = () => {
     const redirect = authUser.id ? `/${authUser.role}` : "/login";
-    if (!location.pathname.startsWith(redirect))
+    //if (!location.pathname.startsWith(redirect)) there was some problem with the redirect because of this if
       return <Redirect to={redirect}></Redirect>;
     return null;
   };

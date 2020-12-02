@@ -84,7 +84,7 @@ export const CourseDetail = (props) => {
     let lectures = [];
     let reservations = [];
 
-    weeksBetween.forEach((weekStartDate) => {
+    weekdays.forEach((weekStartDate) => {
       courseFilter.forEach((id) => {
         promiseArray.push(
           GetFromServer(`/courses/${id}/bookings?week=${weekStartDate}`)
@@ -92,7 +92,7 @@ export const CourseDetail = (props) => {
       });
     });
 
-    monthsBetween.forEach((monthStartDate) => {
+    months.forEach((monthStartDate) => {
       courseFilter.forEach((id) => {
         promiseArray.push(
           GetFromServer(`/courses/${id}/bookings?month=${monthStartDate}`)
@@ -299,6 +299,7 @@ export const CourseDetail = (props) => {
               <thead>
                 <tr>
                   <th>Course Name</th>
+                  <th>Lecture Date</th>
                   <th>Lecture Name</th>
                   <th>NumberOfBooking</th>
                 </tr>
@@ -310,6 +311,7 @@ export const CourseDetail = (props) => {
                       <React.Fragment key={index}>
                         <tr>
                           <td>{item.course_name}</td>
+                          <td>{item.date}</td>
                           <td>{item.lecture_name}</td>
                           <td>{item.booking}</td>
                         </tr>
