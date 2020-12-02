@@ -51,6 +51,11 @@ const managerTuple={
   email: "mario.castello@polito.it",
   role: "manager",
 };
+const teacherCredentials = {
+  email: teacherTuple.email,
+  password: "password"
+};
+
 const courseTuple = {
   id: 1,
   name: "Software Engineering II",
@@ -135,6 +140,7 @@ describe("Usage test", async function () {
       await knex("stats_time").del();
       await knex("stats_usage").del();
       await knex("user").insert(userTuple);
+      await knex("user").insert(teacherTuple);
       await knex("course").insert(courseTuple);
       await knex("lecture").insert(lectureTuple);
       await knex("lecture").insert(lecture2Tuple);
@@ -146,7 +152,7 @@ describe("Usage test", async function () {
       before(async () => {
         const res = await authenticatedUser
           .post("/api/auth/login")
-          .send(userCredentials)
+          .send(teacherCredentials)
           .expect(200);       
         await knex("lecture_booking").insert(lectureBookingTuple);    //+1 Lecture 1 (user 1)
         await knex("lecture_booking").insert(lecture2BookingTuple);   //+1 Lecture 2 (user 1)
@@ -187,11 +193,11 @@ describe("Usage test", async function () {
     
     describe("Get the number of bookings for all lectures of the course scheduled for the week", async () => {
         const year = moment(lectureTuple.start).year();
-        const week =  moment(lectureTuple.start).week();
+        const week =  moment(lectureTuple.start).isoWeek();
         before(async () => {
             const res = await authenticatedUser
               .post("/api/auth/login")
-              .send(userCredentials)
+              .send(teacherCredentials)
               .expect(200);    
         await knex("lecture_booking").insert(lectureBookingTuple);    //+1 Lecture 1 (user 1)
         await knex("lecture_booking").insert(lecture2BookingTuple);   //+1 Lecture 2 (user 1)
@@ -201,8 +207,8 @@ describe("Usage test", async function () {
           it("Should return the total number of booking scheduled for the week (2 in Lecture 1, 1 in Lecture 2 -> 1.5) after three insert in lecture_booking", async () => {
             const res = await authenticatedUser
                 .get(`/api/courses/${courseTuple.id}/bookings?week=${year}-${week}`).expect(200);
-            expect(res.body.length).to.equal(1);
-            expect(res.body[0].booking).to.equal(1.5); //in sql table week 47, here week 48
+                expect(res.body.length).to.equal(1);
+            expect(res.body[0].booking).to.equal(1.5); 
           });
 
           it("Should return the total number of booking scheduled for the week (1) after delete in lecture_booking", async () => {
@@ -218,7 +224,7 @@ describe("Usage test", async function () {
               
              const res = await authenticatedUser
                  .get(`/api/courses/${courseTuple.id}/bookings?week=${year}-${week}`).expect(200);
-             expect(res.body.length).to.equal(1);
+                 expect(res.body.length).to.equal(1);
              expect(res.body[0].booking).to.equal(1);   
     
         }); 
@@ -237,7 +243,7 @@ describe("Usage test", async function () {
     before(async () => {
         const res = await authenticatedUser
           .post("/api/auth/login")
-          .send(userCredentials)
+          .send(teacherCredentials)
           .expect(200);         
           await knex("lecture_booking").insert(lectureBookingTuple);    //+1 Lecture 1 (user 1)
           await knex("lecture_booking").insert(lecture2BookingTuple);   //+1 Lecture 2 (user 1)
