@@ -99,6 +99,7 @@ exports.convert_trigger =
 
     exports.deleteLecture_trigger = 
     `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFORE DELETE ON lecture
+    
     BEGIN
     DELETE FROM _Variables;
 

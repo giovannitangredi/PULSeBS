@@ -225,9 +225,10 @@ describe("GET /api/lectures/previousbooking", async () => {
     await knex("course").del();
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
-    await knex("course").insert(courseTuple);
+    
     const res = await authenticatedUser
       .post("/api/auth/login")
       .send(userCredentials);
@@ -263,6 +264,7 @@ describe("List of students booked for a lecture", async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
+    await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);    
     await knex("lecture_booking").insert(lectureBookingTuple);    
     const res = await authenticatedUser
@@ -298,6 +300,7 @@ describe("list of lectures scheduled for a course", async () => {
     await knex("lecture").del();
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
@@ -341,6 +344,7 @@ describe("Cancel a booked lecture ", async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
+    await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple); 
     await knex("lecture_booking").insert(lectureBookingTuple);    
     const res = await authenticatedUser
@@ -379,6 +383,7 @@ describe("Presence Lecture into distance one ", async () => {
     await knex("lecture").del();
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);  
     await knex("lecture_booking").insert(lectureBookingTuple);  
     const res = await authenticatedUser
