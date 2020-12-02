@@ -20,6 +20,11 @@ const userCredentials = {
   password: "password",
 };
 
+const managerCredentials = {
+  email: "mario.castello@polito.it",
+  password: "password",
+};
+
 const userTuple = {
   id: 1,
   name: "Enrico",
@@ -38,6 +43,14 @@ const teacherTuple = {
   role: "teacher",
 };
 
+const managerTuple={
+  id: 3,
+  name: "Mario",
+  surname: "Castello",
+  password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
+  email: "mario.castello@polito.it",
+  role: "manager",
+};
 const courseTuple = {
   id: 1,
   name: "Software Engineering II",
@@ -86,9 +99,32 @@ const lecture2Tuple = {
     booked_at: moment().subtract(2, "days").format("YYYY-MM-DD HH:mm:ss"),
   };
 
+  const StatsUsageTuple ={
+    tid: teacherTuple.id,
+    lid: lectureTuple.id,
+    booking:1,
+    cancellations:0,
+    attendance:1,
+  };
+
+  const StatsTimeTuple ={
+    tid:teacherTuple.id,
+    date:"2020-12-01",
+    week:"2020-48",
+    month:"2020-11",
+    year:"2020"
+   };
+
+  const StatsLectureTuple ={
+    lid: "10",
+    lecture_id:lectureTuple.id,
+    lecture_name:lectureTuple.name,
+    course_id:courseTuple.id,
+    course_name:courseTuple.name
+  }
 describe("Usage test", async function () {
     const authenticatedUser = request.agent(app);
-    this.timeout(10000);
+    this.timeout(100000);
     before(async () => {
       await knex("user").del();
       await knex("course").del();
@@ -245,5 +281,174 @@ describe("Usage test", async function () {
     await knex("stats_time").del();
     await knex("stats_usage").del();
   });
-
 });
+
+describe("Return the system stats ", async () => {
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del()
+    await knex("stats_usage").del();
+    await knex("user").insert(managerTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("lecture").insert(lectureTuple);
+    await knex("course").insert(courseTuple);
+    await knex("stats_usage").insert(StatsUsageTuple) ;   
+
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(managerCredentials);
+
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/stats/system`);
+    expect(res).to.be.json;
+    expect(res.status).to.equal(200);    
+  });
+  it("should return the response details ", async () => {
+    const res = await authenticatedUser.get(`/api/stats/system`);
+    expect(res).to.have.property('body');
+    expect(res.body.length).to.equal(1);
+    expect(res.body[0].cancellations).to.equal(0);
+    expect(res.body[0].bookings).to.equal(1);
+    expect(res.body[0].attendances).to.equal(1);
+  });
+  after(async () => {
+    await knex("stats_usage").del();
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+ //Get all the lecture stats 
+describe("Return all the lecture stats ", async () => {
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del()
+    await knex("user").insert( managerTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple); 
+    await knex("lecture").insert(lectureTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple)
+    await knex("stats_usage").insert(StatsUsageTuple);  
+    await knex("stats_lecture").insert(StatsLectureTuple);
+    await knex("stats_time").insert(StatsTimeTuple);
+
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(managerCredentials);
+
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/stats/lectures`);
+    expect(res).to.be.json;
+    expect(res.status).to.equal(200);    
+  });
+  it("should return the response details  ", async () => {
+    const res = await authenticatedUser.get(`/api/stats/lectures`);
+    expect(res).to.have.property('body');
+     expect(res.body.length).to.equal(1);
+    expect(res.body).to.have.deep.members([{ lecture:StatsLectureTuple.lecture_name, course:StatsLectureTuple.course_name ,cancellations:StatsUsageTuple.cancellations, attendance: StatsUsageTuple.attendance ,booking: StatsUsageTuple.booking,date:StatsTimeTuple.date,}])
+  });
+  after(async () => {
+    await knex("stats_usage").del();
+    await knex("stats_lecture").del();
+    await knex("stats_time").del();
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Get course total Stats for a single course with courseid 
+describe("Return all the Course stats ", async () => {
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("user").insert( managerTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple); 
+    await knex("lecture").insert(lectureTuple);
+    await knex("stats_usage").insert(StatsUsageTuple);  
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(managerCredentials);
+
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/courses/${courseTuple.id}/stats`);
+    expect(res).to.be.json;
+    expect(res.status).to.equal(200);    
+  });
+  it("should return the body length  ", async () => {
+    const res = await authenticatedUser.get(`/api/courses/${courseTuple.id}/stats`);
+    expect(res).to.have.property('body');
+    expect(res.body.length).to.equal(1);
+  });
+  after(async () => {
+    await knex("stats_usage").del();
+    await knex("stats_lecture").del();
+    await knex("stats_time").del();
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Get  the course lecture stats 
+describe("Return course  lecture stats ", async () => {
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("course").del();
+    await knex("user").insert( managerTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple); 
+    await knex("lecture").insert(lectureTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple)
+    await knex("stats_usage").insert(StatsUsageTuple);  
+    await knex("stats_lecture").insert(StatsLectureTuple);
+    await knex("stats_time").insert(StatsTimeTuple);
+
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(managerCredentials);
+
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/courses/${courseTuple.id}/lecturesStats`);
+    expect(res).to.be.json;
+    expect(res.status).to.equal(200);    
+  });
+  it("should return the details of course lecture stats  ", async () => {
+    const res = await authenticatedUser.get(`/api/courses/${courseTuple.id}/lecturesStats`);
+    expect(res).to.have.property('body');
+     expect(res.body.length).to.equal(1);
+    expect(res.body).to.have.deep.members([{lecture:StatsLectureTuple.lecture_name, course:StatsLectureTuple.course_name ,cancellations:StatsUsageTuple.cancellations, attendance: StatsUsageTuple.attendance ,booking: StatsUsageTuple.booking,date:StatsTimeTuple.date}])
+  });
+  after(async () => {
+    await knex("stats_usage").del();
+    await knex("stats_lecture").del();
+    await knex("stats_time").del();
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+
+
+
+
