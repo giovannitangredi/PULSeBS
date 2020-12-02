@@ -416,9 +416,6 @@ describe("Return course  lecture stats ", async () => {
     await knex("course").insert(courseTuple); 
     await knex("lecture").insert(lectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple)
-    await knex("stats_usage").insert(StatsUsageTuple);  
-    await knex("stats_lecture").insert(StatsLectureTuple);
-    await knex("stats_time").insert(StatsTimeTuple);
 
     const res = await authenticatedUser
       .post("/api/auth/login")

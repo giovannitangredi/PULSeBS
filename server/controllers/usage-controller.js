@@ -207,7 +207,7 @@ exports.getBookingStats = async (req, res) => {
     .from("user")
     .where("id",user)
     .then((result)=>{
-      if(result.role[0] != "manager")
+      if(result[0].role != "manager")
        res.status(401).json({
         message : "Unauthorize acces only managers can acces this query"
       });
