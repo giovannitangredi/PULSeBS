@@ -1,5 +1,6 @@
 const { where } = require("../db");
 const knex = require("../db");
+const moment = require("moment");
 
 /**
  * Get historical data about bookings
@@ -12,11 +13,17 @@ const knex = require("../db");
  *
  *  /courses/:courseid/bookings?month={year}-{month}
  *    -> Return the avarage of bookings for the lectures of the course { :courseid } scheduled for the month { ?month }
+ *
+ * /courses/:courseid/bookings?fromWeek={year}-{week}&toWeek={year}-{week}
+ *    -> For each week return the avarage bookings for the lectures of the course { :courseid } scheduled between fromWeek and toWeek. { ?fromWeek, ?toWeek }
+ *
+ *  /courses/:courseid/bookings?fromMonth={year}-{week}&toMonth={year}-{week}
+ *    -> For each month return the avarage bookings for the lectures of the course { :courseid } scheduled between fromMonth and toMonth. { ?fromMonth, ?toMonth }
  * */
 exports.getBookingStats = async (req, res) => {
   const courseId = req.params.courseid;
-  const week = req.query.week;
-  const month = req.query.month;
+  const { week, month, fromWeek, toWeek, fromMonth, toMonth } = req.query;
+
   const userId = req.user.id;
 
   try {
@@ -28,11 +35,65 @@ exports.getBookingStats = async (req, res) => {
         throw { msg: `There was an error retrieving user info`, status: 501 };
       });
 
-    if (user.length == 1 && user[0].role != "teacher") {
-      throw { msg: `Only teachers can get the bookings`, status: 401 };
+    if (user.length == 1 && !["teacher", "manager"].includes(user[0].role)) {
+      throw {
+        msg: `Only teachers and managers can get the bookings.`,
+        status: 401,
+      };
     }
-
-    if (week) {
+    if (fromWeek && toWeek) {
+      // Get the avarage of bookings for the lectures of the course {courseid} in a given week
+      knex
+        .select(
+          { course_id: "sl.course_id" },
+          { course_name: "sl.course_name" },
+          { week: "st.week" },
+          knex.raw("avg(su.booking - su.cancellations) as booking")
+        )
+        .from({ su: "stats_usage" })
+        .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
+        .join({ st: "stats_time" }, "su.tid", "=", "st.tid")
+        .where("sl.course_id", courseId)
+        .andWhere("st.week", ">=", fromWeek)
+        .andWhere("st.week", "<=", toWeek)
+        .andWhere(knex.raw("su.booking - su.cancellations"), ">", 0)
+        .groupBy("course_id", "course_name", "week")
+        .then((queryResults) => {
+          res.json(queryResults);
+        })
+        .catch(() => {
+          throw {
+            msg: `There was an error retrieving weekly bookings`,
+            status: 501,
+          };
+        });
+    } else if (fromMonth && toMonth) {
+      // Get the avarage of bookings for the lectures of the course {courseid} in a given month
+      knex
+        .select(
+          { course_id: "sl.course_id" },
+          { course_name: "sl.course_name" },
+          { month: "st.month" },
+          knex.raw("avg(su.booking - su.cancellations) as booking")
+        )
+        .from({ su: "stats_usage" })
+        .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
+        .join({ st: "stats_time" }, "su.tid", "=", "st.tid")
+        .where("sl.course_id", courseId)
+        .andWhere("st.month", ">=", fromMonth)
+        .andWhere("st.month", "<=", toMonth)
+        .andWhere(knex.raw("su.booking - su.cancellations"), ">", 0)
+        .groupBy("course_id", "course_name", "month")
+        .then((queryResults) => {
+          res.json(queryResults);
+        })
+        .catch(() => {
+          throw {
+            msg: `There was an error retrieving monthly bookings`,
+            status: 501,
+          };
+        });
+    } else if (week) {
       // Get the avarage of bookings for the lectures of the course {courseid} in a given week
       knex
         .select(
@@ -172,6 +233,7 @@ exports.getAllLecturesStats = async (req, res) => {
     .select(
       { lecture: "sl.lecture_name" },
       { course: "sl.course_name" },
+      { courseId: "sl.course_id" },
       { cancellations: "su.cancellations" },
       { attendances: "su.attendance" },
       { bookings: "su.booking" },
