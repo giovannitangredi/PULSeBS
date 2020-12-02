@@ -362,9 +362,10 @@ describe("list of lectures scheduled for a course", async () => {
 });
 
 //Teacher cancel a lecture 1h before
-describe("Teacher cancel a lecture 1 hour before  ", async () => {
+describe("Teacher cancel a lecture 1 hour before  ", async function () { 
   const authenticatedUser = request.agent(app);
-
+  this.timeout(15000);
+  let newEmailPromise;
   before(async () => {
     await knex("user").del();
     await knex("course").del();
@@ -382,20 +383,20 @@ describe("Teacher cancel a lecture 1 hour before  ", async () => {
       .post("/api/auth/login")
       .send(teacherCredentials)
       .expect(200);
-    let newEmailPromise;
+    
     await emailController.deleteEmails(imap);
     newEmailPromise = emailController.waitForNewEmail(imap);
   });
 
   it("should return  with status 202", async () => {
     const res = await authenticatedUser.delete(
-      `/api/lectures/${lectureTuple.id}`
+      `/api/lectures/${futureLectureTuple.id}`
     );
     expect(res.status).to.equal(202);
   });
   it("should return  with one of the message and not status 400 ", async () => {
     const res = await authenticatedUser.delete(
-      `/api/lectures/${lectureTuple.id}`
+      `/api/lectures/${futureLectureTuple.id}`
     );
     expect(res.body.message).to.not.be.null;
   });
@@ -403,6 +404,12 @@ describe("Teacher cancel a lecture 1 hour before  ", async () => {
     const email = await newEmailPromise;
     expect(email.subject).to.match(/Lecture cancel information/);
     expect(email.body).to.match(/is canceled by the teacher/);
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
   });
 });
 
@@ -413,6 +420,8 @@ describe("Cancel a booked lecture ", async () => {
   before(async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
+    await knex("course").del();
+    await knex("lecture").del();
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
@@ -440,13 +449,14 @@ describe("Cancel a booked lecture ", async () => {
   });
   after(async () => {
     await knex("user").del();
+    await knex("course").del();
     await knex("lecture").del();
     await knex("lecture_booking").del();
-    await knex("course").del();
+    await knex("course_available_student").del();
   });
 });
 
-// Turn a presence lecture into distance one
+
 // Turn a presence lecture into distance one
 describe("Presence Lecture into distance one ", async () => {
   //now let's login the user before we run any tests

@@ -12,6 +12,6 @@ router.get("/previousbooking", lectureRoutes.getExistentBooking);
 router.get("/:lectureid/students", lectureRoutes.getBookedStudents);
 router.put("/:lectureid/convert", lectureRoutes.convertDistanceLecture);
 router.delete("/:lectureid/cancelbook", lectureRoutes.cancelBooking);
-router.delete("/:lectureid", lectureRoutes.deleteLecture);
+router.delete("/:lectureId", lectureRoutes.deleteLecture);
 // Export router
 module.exports = router;
