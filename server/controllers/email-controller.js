@@ -3,7 +3,7 @@ const knex = require("./../db");
 let cron = require("node-cron");
 var imaps = require("imap-simple");
 let nodemailer = require("nodemailer");
-const simpleParser = require('mailparser').simpleParser;
+const simpleParser = require("mailparser").simpleParser;
 
 exports.sendMail = async (email, subject, body) => {
   // create reusable transporter object using the default SMTP transport
@@ -53,11 +53,10 @@ exports.fetchEmails = async (imap) => {
 };
 
 exports.waitForNewEmail = async (imap) => {
-
   return new Promise(async (resolve, reject) => {
-    connection = await imaps.connect({ 
-      imap, 
-      onmail: async function() {
+    connection = await imaps.connect({
+      imap,
+      onmail: async function () {
         var searchCriteria = ["UNSEEN"];
         var fetchOptions = {
           bodies: [""],
@@ -67,7 +66,8 @@ exports.waitForNewEmail = async (imap) => {
 
         resolve(
           messages.map(async function (message) {
-            const raw = message.parts.filter((part) => part.which === "")[0].body;
+            const raw = message.parts.filter((part) => part.which === "")[0]
+              .body;
             const mail = await simpleParser(raw);
             return { subject: mail.subject, body: mail.html };
           })[0]
@@ -75,15 +75,15 @@ exports.waitForNewEmail = async (imap) => {
 
         await connection.closeBox("INBOX");
         connection.end();
-      } 
+      },
     });
 
     await connection.openBox("INBOX");
-  }); 
+  });
 };
 
 exports.deleteEmails = async (imap) => {
-  const connection = await imaps.connect({imap});
+  const connection = await imaps.connect({ imap });
   await connection.openBox("INBOX");
   var searchCriteria = ["ALL"];
 
@@ -115,7 +115,6 @@ exports.deleteEmails = async (imap) => {
   second ( optional )
   */
 exports.startScheduler = async (schedulePattern) => {
-
   return new Promise((resolve, reject) => {
     // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
     cron.schedule(schedulePattern, () => {

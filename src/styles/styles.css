@@ -30,7 +30,7 @@ body {
 }
 
 /*fix fullcalendar low contrast lines*/
-.fc-theme-standard td, .fc-theme-standard th
-{
+.fc-theme-standard td,
+.fc-theme-standard th {
   border: 1px solid #858585;
 }

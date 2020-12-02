@@ -10,11 +10,16 @@ export const ReservationPage = (props: any) => {
       .get("/lectures/previousbooking")
       .then((res) => {
         let lectures = [...res.data];
-        let now =new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        let now = new Date()
+          .toISOString()
+          .replace(/T/, " ")
+          .replace(/\..+/, "");
         let date = new Date();
-        date.setDate(date.getDate() +14);
-        let deadline = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        let l2w = lectures.filter( (el : any)=> el.start>= now && el.start<=deadline);
+        date.setDate(date.getDate() + 14);
+        let deadline = date.toISOString().replace(/T/, " ").replace(/\..+/, "");
+        let l2w = lectures.filter(
+          (el: any) => el.start >= now && el.start <= deadline
+        );
         setBookedLectures(lectures);
         setBookedLectures2weeks(l2w);
         setLoading(false);
@@ -29,11 +34,16 @@ export const ReservationPage = (props: any) => {
       .get(`/lectures/bookable`)
       .then((res) => {
         let lectures = res.data;
-        let now =new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        let now = new Date()
+          .toISOString()
+          .replace(/T/, " ")
+          .replace(/\..+/, "");
         let date = new Date();
-        date.setDate(date.getDate() +14);
-        let deadline = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        let l2w = lectures.filter( (el : any)=> el.start>= now && el.start<=deadline);
+        date.setDate(date.getDate() + 14);
+        let deadline = date.toISOString().replace(/T/, " ").replace(/\..+/, "");
+        let l2w = lectures.filter(
+          (el: any) => el.start >= now && el.start <= deadline
+        );
         setLectures(lectures);
         setLectures2weeks(l2w);
         getBookedLectures();
@@ -55,17 +65,18 @@ export const ReservationPage = (props: any) => {
         setLoading(false);
       });
   };
-  const cancelBooking = (lectureID : any)=>{
+  const cancelBooking = (lectureID: any) => {
     setLoading(true);
     axios
-    .delete(`/lectures/${lectureID}/cancelbook`)
-    .then((res)=>{
-      getReservations();
-    }).catch((err) => {
-      console.log(err);
-      setLoading(false);
-    });
-  }
+      .delete(`/lectures/${lectureID}/cancelbook`)
+      .then((res) => {
+        getReservations();
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
   /* let FacReservations = [{course : "Softwere Engeneering 2", booked_students :20,capacity: 45, id:1 ,start:  "2020-11-11:08:30:00", end : "2020-11-11:11:00:00", lecturer : "Mario Rossi", name : "Lecture 1" },
       {course : "Softwere Engeneering 2",booked_students :3, capacity: 45,id:2 ,start: "2020-11-14:08:30:00",end: "2020-11-14:11:00:00",lecturer:"Mario Rossi",name:"Lecture 2"},
       {course : "Web Application 1",booked_students :43,capacity: 61 ,id:3 ,start: "2020-11-12:08:30:00",end: "2020-11-12:11:00:00",lecturer:"Valeria Verdi",name:"Lecture 1"}];*/
@@ -85,11 +96,14 @@ export const ReservationPage = (props: any) => {
       <h1>Book a Lecture</h1>
       <BookingLectureList
         lectures={lectures2weeks}
-        bookLecture={bookLecture}    
+        bookLecture={bookLecture}
       ></BookingLectureList>
       <hr></hr>
       <h1>Booked Lectures</h1>
-      <BookedLectureList lectures={bookedLectures2weeks} cancelBooking = {cancelBooking}></BookedLectureList>
+      <BookedLectureList
+        lectures={bookedLectures2weeks}
+        cancelBooking={cancelBooking}
+      ></BookedLectureList>
       <ReservationCalendar
         bookedLectures={bookedLectures}
         lectures={lectures}

@@ -25,12 +25,12 @@ const course1Tuple = {
   id: 1,
   name: "Software Engineering I",
   main_prof: 1,
-}
+};
 const course2Tuple = {
   id: 2,
   name: "Software Engineering II",
   main_prof: 2,
-}
+};
 
 const userResponseData = { ...userTuple };
 delete userResponseData.password_hash;
@@ -57,7 +57,7 @@ describe("GET /api/courses/", () => {
   it("it should return 1 course associated to main_prof 1", async () => {
     const res = await authenticatedUser.get("/api/courses/");
     expect(res.body.length).to.equal(1);
-    expect(res.body).to.have.deep.members([course1Tuple])
+    expect(res.body).to.have.deep.members([course1Tuple]);
   });
   afterEach(async () => {
     await knex("course").del();

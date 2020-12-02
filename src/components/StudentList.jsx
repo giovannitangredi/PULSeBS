@@ -18,14 +18,14 @@ class StudentList extends React.Component {
       students: [],
       courses: [],
       selectedLecture: 0,
-      selectedCourse: 0, 
+      selectedCourse: 0,
       selectedColors: [],
-      lectureColor:"",
+      lectureColor: "",
       lecturetitle: "",
       studenttitle: "",
-      alertText:"",
-      alertType:"success",
-      alertShow:false
+      alertText: "",
+      alertType: "success",
+      alertShow: false,
     };
   }
 
@@ -40,13 +40,22 @@ class StudentList extends React.Component {
     axios.get(`/courses/`, {}).then((response) => {
       let result = response.data;
       //color: this.props.colors[Math.floor(Math.random() * this.props.colors.length)]
-      result.forEach(element => {
-        this.state.selectedColors.push(this.props.colors[Math.floor(Math.random() * this.props.colors.length)]);
+      result.forEach((element) => {
+        this.state.selectedColors.push(
+          this.props.colors[
+            Math.floor(Math.random() * this.props.colors.length)
+          ]
+        );
       });
-   
-     let index=0;
-      
-      result=   (result)?  result.map(obj=> ({ ...obj, color:`${this.state.selectedColors[index++] }` }))  :result;
+
+      let index = 0;
+
+      result = result
+        ? result.map((obj) => ({
+            ...obj,
+            color: `${this.state.selectedColors[index++]}`,
+          }))
+        : result;
       this.setState({ courses: result });
     });
   };
@@ -102,7 +111,9 @@ class StudentList extends React.Component {
 
     if (eventInfo)
       return (
-        <div style={{ color : `${eventInfo.event.extendedProps.color}`}} >
+        <div
+          style={{ color: `${eventInfo.event.extendedProps.backgroundColor}` }}
+        >
           <p>
             {format(eventInfo.event.start.getHours())}:
             {format(eventInfo.event.start.getMinutes())}-
@@ -148,44 +159,43 @@ class StudentList extends React.Component {
     });
   };
 
-  handleBooking = ()=> {
-    this.setState({alertShow:true});
+  handleBooking = () => {
+    this.setState({ alertShow: true });
 
-    setTimeout(() => {  this.setState({alertShow:false})}, 3000);
+    setTimeout(() => {
+      this.setState({ alertShow: false });
+    }, 3000);
     this.scrolltoview("CoursesElement");
-  }
-  cancelBookingHandle = (lecture)=> {
+  };
+  cancelBookingHandle = (lecture) => {
     this.handleBooking();
 
     console.log(lecture.extendedProps.id);
-     axios.delete(`/lectures/${lecture.extendedProps.id}`, {}).then((response) => {
-      this.setState({alertType:"success"});
-      this.setState({alertText:"Lecture has canceled sucssesfully"});
-
-     }).catch(error => {
-      this.setState({alertType:"danger"});
-      this.setState({alertText:"There is a problem in removing Leture"});
-     });
-    
-     
-   }
+    axios
+      .delete(`/lectures/${lecture.extendedProps.id}`, {})
+      .then((response) => {
+        this.setState({ alertType: "success" });
+        this.setState({ alertText: "Lecture has canceled sucssesfully" });
+      })
+      .catch((error) => {
+        this.setState({ alertType: "danger" });
+        this.setState({ alertText: "There is a problem in removing Leture" });
+      });
+  };
 
   componentDidMount() {
     this.setState({ selectedLecture: 1 });
     this.getCourseList();
   }
 
-
   render() {
     return (
       <>
-      { this.state.alertShow && (
-                     <Alert  variant={this.state.alertType} >
-                       {this.state.alertText}
-                     </Alert>        
-       )}
-          
-        <div  id="CoursesElement" className="container">
+        {this.state.alertShow && (
+          <Alert variant={this.state.alertType}>{this.state.alertText}</Alert>
+        )}
+
+        <div id="CoursesElement" className="container">
           <Card
             border={"secondary"}
             style={{ width: "100%", maxHeight: "75vh", margin: "1rem 0rem" }}
@@ -196,7 +206,7 @@ class StudentList extends React.Component {
             {this.state.courses && (
               <div
                 className=" bg-light "
-                style={{ maxHeight: "75vh",  overflow: "scroll" }}
+                style={{ maxHeight: "75vh", overflow: "scroll" }}
               >
                 <div
                   className="d-flex align-content-center  flex-wrap bg-light "
@@ -222,7 +232,7 @@ class StudentList extends React.Component {
                 background: "rgb(254 254 254)",
               }}
             >
-              <Card.Header style={{ background:`${this.state.lectureColor}`}}>
+              <Card.Header style={{ background: `${this.state.lectureColor}` }}>
                 {" "}
                 <h4>
                   <b>{this.state.lecturetitle}</b> Lectures
@@ -239,7 +249,7 @@ class StudentList extends React.Component {
                     />
                   </div>
                 </div>
-                <div className="col-6 col-md-5">
+                <div className="col-12">
                   <div
                     className="d-flex flex-row align-items-center justify-content-end"
                     id="legendView"
@@ -305,7 +315,7 @@ class StudentList extends React.Component {
                           <LectureItem
                             key={lecture.extendedProps.id}
                             lecture={lecture}
-                            handleConvert={this.handleConvertLecture} 
+                            handleConvert={this.handleConvertLecture}
                             handleBooking={this.cancelBookingHandle}
                           />
                         ))}
@@ -374,6 +384,8 @@ class StudentList extends React.Component {
                     >
                       {!this.state.selectedLecture
                         ? "No lecture is selected"
+                        : !this.state.selectedLecture.extendedProps
+                        ? "no students booked for this lecture"
                         : this.state.selectedLecture.extendedProps.status ===
                           "distance"
                         ? "Remote lecture selected: no students list available"

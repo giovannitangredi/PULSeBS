@@ -170,7 +170,5 @@ initTable("_Trigger", (table) => {
   table.string("trigger_status");
 });
 
-
-
 // Export the database
 module.exports = knex;

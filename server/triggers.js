@@ -1,5 +1,4 @@
-exports.booking_trigger = 
-    `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON lecture_booking
+exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON lecture_booking
     BEGIN
         DELETE FROM _Variables;
         INSERT INTO _Variables(name, int_value, date_value, string_value) 
@@ -51,8 +50,7 @@ exports.booking_trigger =
     
     END;`;
 
-exports.cancellation_trigger = 
-    `CREATE TRIGGER IF NOT EXISTS cancellation AFTER DELETE ON lecture_booking
+exports.cancellation_trigger = `CREATE TRIGGER IF NOT EXISTS cancellation AFTER DELETE ON lecture_booking
     WHEN 'on' = (SELECT trigger_status FROM _Trigger WHERE name = 'cancellation_trigger')
     BEGIN
         DELETE FROM _Variables;
@@ -68,8 +66,7 @@ exports.cancellation_trigger =
             AND tid = (SELECT int_value FROM _Variables WHERE name = 'tid');
     END;`;
 
-exports.convert_trigger = 
-    `CREATE TRIGGER IF NOT EXISTS convert AFTER UPDATE OF status ON lecture
+exports.convert_trigger = `CREATE TRIGGER IF NOT EXISTS convert AFTER UPDATE OF status ON lecture
     WHEN NEW.status = 'distance' 
     BEGIN
     DELETE FROM _Variables;
@@ -97,8 +94,7 @@ exports.convert_trigger =
         WHERE name = 'cancellation_trigger';
     END;`;
 
-    exports.deleteLecture_trigger = 
-    `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFORE DELETE ON lecture
+exports.deleteLecture_trigger = `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFORE DELETE ON lecture
     
     BEGIN
     DELETE FROM _Variables;

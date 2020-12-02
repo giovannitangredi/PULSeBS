@@ -167,19 +167,19 @@ exports.newBooking = async (req, res) => {
 exports.cancelBooking = async (req, res) => {
   const lectureId = req.params.lectureid;
   const studentId = req.user && req.user.id;
-  
+
   // Delete booking lecture in lecture_booking table
-	knex("lecture_booking")
-    .where("lecture_id",lectureId)
-    .andWhere("student_id",studentId)
-		.del()
+  knex("lecture_booking")
+    .where("lecture_id", lectureId)
+    .andWhere("student_id", studentId)
+    .del()
     .then(() => {
       res.json({ message: `Booking canceled.` });
-      })
-      .catch((err) => {
-        // Send a error message in response
-        res.json({ message: `There was an error canceling the booking` });
-      });
+    })
+    .catch((err) => {
+      // Send a error message in response
+      res.json({ message: `There was an error canceling the booking` });
+    });
 };
 
 // Get the list of lectures scheduled for a course
@@ -245,50 +245,54 @@ exports.convertDistanceLecture = async (req, res) => {
     .add(30, "minutes")
     .format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select({ name: "name" }, { start: "start" }, { status: "status" }, { lecturer: "lecturer"})
+    .select(
+      { name: "name" },
+      { start: "start" },
+      { status: "status" },
+      { lecturer: "lecturer" }
+    )
     .from("lecture")
     .where("id", lectureId)
     .then(([lectureQueryResults]) => {
       const lecture = lectureQueryResults;
       if (
         moment(deadline).isBefore(lecture.start) &&
-        lecture.status === "presence" && lecture.lecturer === req.user.id
+        lecture.status === "presence" &&
+        lecture.lecturer === req.user.id
       ) {
         knex("lecture")
           .where("id", lectureId)
           .update({
             status: "distance",
-            capacity: "0"
+            capacity: "0",
           })
           .then(() => {
             res.status(204).json({
-              message: `Presence lecture '${lecture.name}' turned into a distance one`
+              message: `Presence lecture '${lecture.name}' turned into a distance one`,
             });
           })
           .catch((err) => {
             res.status(304).json({
-              message: `There was an error converting the lecture into a distance one`
+              message: `There was an error converting the lecture into a distance one`,
             });
           });
-      } 
-      else if (lecture.lecturer != req.user.id) {
+      } else if (lecture.lecturer != req.user.id) {
         res.status(401).json({
-          message: `Professor can convert only his lecture`
+          message: `Professor can convert only his lecture`,
         });
-      }  
-          else if (lecture.status === "distance") {
+      } else if (lecture.status === "distance") {
         res.status(304).json({
-          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Already a distance one!`
+          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Already a distance one!`,
         });
       } else {
         res.status(304).json({
-          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Lecture starting in 30 minutes!`
+          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Lecture starting in 30 minutes!`,
         });
       }
     })
     .catch((err) => {
       res.status(404).json({
-        message: `There was an error searching the lecture`
+        message: `There was an error searching the lecture`,
       });
     });
 };
@@ -333,7 +337,6 @@ exports.deleteLecture = async (req, res) => {
 };
 
 sendEmailsForCancelledLecture = async (lectureId) => {
-
   const result = await knex
     .select(
       { id: "user.id" },
@@ -351,14 +354,32 @@ sendEmailsForCancelledLecture = async (lectureId) => {
     .where("lecture_booking.lecture_id", lectureId);
 
   const emailSubject = "Lecture cancel information";
-  const emailBody = (name, surname, lectureName, lectureCourseName, lectureStart) => `Dear ${name} ${surname},<br/> \
+  const emailBody = (
+    name,
+    surname,
+    lectureName,
+    lectureCourseName,
+    lectureStart
+  ) => `Dear ${name} ${surname},<br/> \
     Your booked lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} is canceled by the teacher,\
     <br/>The PULSeBS Team`;
 
-  const queue = result.map(item => emailController.sendMail(item.email, emailSubject, emailBody(item.name, item.surname, item.lectureName, item.lectureCourseName, item.lectureStart)))
+  const queue = result.map((item) =>
+    emailController.sendMail(
+      item.email,
+      emailSubject,
+      emailBody(
+        item.name,
+        item.surname,
+        item.lectureName,
+        item.lectureCourseName,
+        item.lectureStart
+      )
+    )
+  );
   try {
-    await Promise.all(queue)
+    await Promise.all(queue);
   } catch (err) {
     console.log(`There was an error cancelling the lecture: ${err}`);
   }
-}
+};
