@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "react-bootstrap";
-import Dialog from "react-bootstrap-dialog";
+import Dialog from "./bootstrap-dialog/index";
 
 export default class ConfirmDialog extends React.Component {
   onClickOkCancel = () => {
