@@ -80,7 +80,11 @@ export const App = () => {
             )}
           </Route>
           <Route path="/courseId/detail">
-            <CourseDetail></CourseDetail>
+          { !authUser.id && <Redirect to="/login"></Redirect>}
+            {authUser.id && authUser.role !== "teacher" && (
+              <Redirect to="/"></Redirect>
+            )}
+            <CourseDetail> user={authUser} userid={authUser.id} </CourseDetail>
           </Route>
         </Switch>
       </div>

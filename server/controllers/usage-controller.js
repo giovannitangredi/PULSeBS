@@ -13,9 +13,24 @@ const knex = require("../db");
  *    -> Return the avarage of bookings for the lectures of the course { :courseid } scheduled for the month { ?month }
  * */ 
 exports.getBookingStats = async (req, res) => {
-    const courseId = req.params.courseid;
-    const week = req.query.week;
-    const month = req.query.month;
+  const courseId = req.params.courseid;
+  const week = req.query.week;
+  const month = req.query.month;
+  const userId = req.user.id;
+
+  try {
+    
+    const user = await knex
+    .select({ role: "role" })
+    .from("user")
+    .where("id", userId)
+    .catch(() => {
+      throw { msg: `There was an error retrieving user info`, status: 501 };
+    });
+
+    if(user.length == 1 && user[0].role != "teacher") {
+      throw { msg:`Only teachers can get the bookings`, status: 401 };
+    }
 
     if(week) {
       // Get the avarage of bookings for the lectures of the course {courseid} in a given week
@@ -37,10 +52,8 @@ exports.getBookingStats = async (req, res) => {
         .then((queryResults) => {
           res.json(queryResults);
         })
-        .catch((err) => {
-          res.json({
-            message: `There was an error retrieving the bookings`,
-          });
+        .catch(() => {
+          throw { msg: `There was an error retrieving weekly bookings`, status: 501 };
         });
     }
     else if (month) {
@@ -63,12 +76,9 @@ exports.getBookingStats = async (req, res) => {
         .then((queryResults) => {
           res.json(queryResults);
         })
-        .catch((err) => {
-          res.json({
-            message: `There was an error retrieving the bookings ${err}`,
-          });
+        .catch(() => {
+          throw { msg: `There was an error retrieving monthly bookings`, status: 501 };
         });
-
     }
     else {
       // Get the number of bookings for all the lectures of the course {courseid}
@@ -78,6 +88,7 @@ exports.getBookingStats = async (req, res) => {
           {lecture_name: "sl.lecture_name"}, 
           {course_id: "sl.course_id"}, 
           {course_name: "sl.course_name"}, 
+          {date: "st.date" },
           knex.raw("(su.booking - su.cancellations) as booking")
         )
         .from({su: "stats_usage"})
@@ -89,11 +100,15 @@ exports.getBookingStats = async (req, res) => {
         .then((queryResults) => {
           res.json(queryResults);
         })
-        .catch((err) => {
-          res.json({
-            message: `There was an error retrieving the bookings ${err}`,
-          });
+        .catch(() => {
+          throw { msg: `There was an error retrieving bookings`, status: 501 };
         });
-    }
-  };
-  
+    }      
+  } catch(err) {
+    res
+      .status(err.status)
+      .json({
+        message: err.msg
+      });
+  }
+};

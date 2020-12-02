@@ -38,6 +38,11 @@ const teacherTuple = {
   role: "teacher",
 };
 
+const teacherCredentials = {
+  email: teacherTuple.email,
+  password: "password"
+};
+
 const courseTuple = {
   id: 1,
   name: "Software Engineering II",
@@ -99,6 +104,7 @@ describe("Usage test", async function () {
       await knex("stats_time").del();
       await knex("stats_usage").del();
       await knex("user").insert(userTuple);
+      await knex("user").insert(teacherTuple);
       await knex("course").insert(courseTuple);
       await knex("lecture").insert(lectureTuple);
       await knex("lecture").insert(lecture2Tuple);
@@ -110,7 +116,7 @@ describe("Usage test", async function () {
       before(async () => {
         const res = await authenticatedUser
           .post("/api/auth/login")
-          .send(userCredentials)
+          .send(teacherCredentials)
           .expect(200);       
         await knex("lecture_booking").insert(lectureBookingTuple);    //+1 Lecture 1 (user 1)
         await knex("lecture_booking").insert(lecture2BookingTuple);   //+1 Lecture 2 (user 1)
@@ -155,7 +161,7 @@ describe("Usage test", async function () {
         before(async () => {
             const res = await authenticatedUser
               .post("/api/auth/login")
-              .send(userCredentials)
+              .send(teacherCredentials)
               .expect(200);    
         await knex("lecture_booking").insert(lectureBookingTuple);    //+1 Lecture 1 (user 1)
         await knex("lecture_booking").insert(lecture2BookingTuple);   //+1 Lecture 2 (user 1)
@@ -201,7 +207,7 @@ describe("Usage test", async function () {
     before(async () => {
         const res = await authenticatedUser
           .post("/api/auth/login")
-          .send(userCredentials)
+          .send(teacherCredentials)
           .expect(200);         
           await knex("lecture_booking").insert(lectureBookingTuple);    //+1 Lecture 1 (user 1)
           await knex("lecture_booking").insert(lecture2BookingTuple);   //+1 Lecture 2 (user 1)

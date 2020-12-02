@@ -4,8 +4,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export const DatePickerComponent = (props) => {
-  const [startDate, setStartDate] = useState(new Date("2014/02/08"));
-  const [endDate, setEndDate] = useState(new Date("2014/02/10"));
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const startDateHandler = (sdate, edate) => {
     if (props.startDateHandle) props.startDateHandle(sdate, edate);
     setStartDate(sdate);
