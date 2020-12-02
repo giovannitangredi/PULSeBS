@@ -12,7 +12,7 @@ exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON 
             WHERE lecture.course = course.id AND lecture.id = NEW.lecture_id;
 
         INSERT INTO stats_time(date, week, month, year) 
-            SELECT date_value, strftime('%Y-', date_value) || (strftime('%W', date_value)+1), strftime('%Y-%m', date_value), strftime('%Y', date_value) 
+            SELECT date_value, strftime('%Y-', date_value) || (strftime('%W', date_value)), strftime('%Y-%m', date_value), strftime('%Y', date_value) 
             FROM _Variables 
             WHERE name = 'lecture' 
             AND NOT EXISTS (
