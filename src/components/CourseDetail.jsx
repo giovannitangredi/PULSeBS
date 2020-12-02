@@ -17,8 +17,8 @@ export const CourseDetail = (props) => {
   const [courseFilter, setcourseFilter] = useState([]);
   const [bookedLectures, setBookedLectures] = useState([]);
   const [reserved, setReserved] = useState([]);
-  const [startDate, setStartDate] = useState(new Date("2020/10/08"));
-  const [endDate, setEndDate] = useState(new Date("2014/12/10"));
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [weeksBetween, setWeeksBetween] = useState([]);
   const [monthsBetween, setMonthsBetween] = useState([]);
 
@@ -78,7 +78,7 @@ export const CourseDetail = (props) => {
       months.push(month);
     });
     setMonthsBetween(months);
-
+    
     let promiseArray = [];
     let promiseArray2 = [];
     let lectures = [];
@@ -125,6 +125,8 @@ export const CourseDetail = (props) => {
         });
 
         setReserved(reservations);
+        console.log(weeksBetween)
+        console.log(monthsBetween)
       })
       .catch((reason) => {
         console.log(reason);
@@ -155,13 +157,11 @@ export const CourseDetail = (props) => {
     var dateStart = moment(startDate);
     var dateEnd = moment(endDate);
     var timeValues = [];
-
     while (
-      dateEnd > dateStart ||
-      dateStart.format("M") === dateEnd.format("M")
+      dateStart.format("YYYY-MM") <= dateEnd.format("YYYY-MM")
     ) {
       timeValues.push(dateStart.format("YYYY-MM"));
-      dateStart.add(1, "month");
+      dateStart.add(1, "months");
     }
 
     return timeValues;
@@ -199,8 +199,10 @@ export const CourseDetail = (props) => {
     return weeknum;
   };
   /* this is called when end start of datepicker is changed */
-  const datePickerHandle = (sdate, edate) => {
+  const datePickerHandle = (sdate) => {
     setStartDate(sdate);
+  };
+  const datePickerHandle2 = (edate) => {
     setEndDate(edate);
   };
 
@@ -209,8 +211,8 @@ export const CourseDetail = (props) => {
     let sDate;
     let eDate;
     let dateArr = [];
-    let tempstart = startd;
-    let tempend = endd;
+    let tempstart = new Date(startd);
+    let tempend = new Date(endd);
 
     while (tempstart <= tempend) {
       if (tempstart.getDay() == 1 || (dateArr.length == 0 && !sDate)) {
@@ -242,7 +244,7 @@ export const CourseDetail = (props) => {
           <DatePickerComponent
             className="mx-3"
             startDateHandle={datePickerHandle}
-            endDateHandle={datePickerHandle}
+            endDateHandle={datePickerHandle2}
           />
           <Button variant="primary mx-3" onClick={getrelateddatafromserver}>
             Apply
@@ -264,7 +266,6 @@ export const CourseDetail = (props) => {
                 <tr>
                   <th></th>
                   <th>Course Name</th>
-                  <th>Lecture Name</th>
                   <th>Week</th>
                   <th>Month</th>
                   <th>NumberOfBooking</th>
@@ -273,6 +274,7 @@ export const CourseDetail = (props) => {
               <tbody>
                 {bookedLectures &&
                   bookedLectures.map((item, index) => {
+                    console.log(item);
                     return (
                       <React.Fragment key={index}>
                         <tr>
