@@ -21,6 +21,7 @@ export const CourseDetail = (props) => {
   const [endDate, setEndDate] = useState(new Date());
   const [weeksBetween, setWeeksBetween] = useState([]);
   const [monthsBetween, setMonthsBetween] = useState([]);
+  const [monthLectures,setMonthLectures] = useState([]);
 
   /* get http call */
   function GetFromServer(URL) {
@@ -81,8 +82,10 @@ export const CourseDetail = (props) => {
 
     let promiseArray = [];
     let promiseArray2 = [];
+    let promiseArray3 = [];
     let lectures = [];
     let reservations = [];
+    let lecturesMonth = [];
 
     weekdays.forEach((weekStartDate) => {
       courseFilter.forEach((id) => {
@@ -94,7 +97,7 @@ export const CourseDetail = (props) => {
 
     months.forEach((monthStartDate) => {
       courseFilter.forEach((id) => {
-        promiseArray.push(
+        promiseArray3.push(
           GetFromServer(`/courses/${id}/bookings?month=${monthStartDate}`)
         );
       });
@@ -125,6 +128,18 @@ export const CourseDetail = (props) => {
         });
 
         setReserved(reservations);
+      })
+      .catch((reason) => {
+        console.log(reason);
+      });
+      Promise.all(promiseArray3)
+      .then((values) => {
+        values.forEach((lecture) => {
+          lecture.forEach((lecture2) => {
+            lecturesMonth.push(lecture2);
+          });
+        });
+        setMonthLectures(lecturesMonth);
       })
       .catch((reason) => {
         console.log(reason);
@@ -263,7 +278,6 @@ export const CourseDetail = (props) => {
                 <tr>
                   <th>Course Name</th>
                   <th>Week</th>
-                  <th>Month</th>
                   <th>NumberOfBooking</th>
                 </tr>
               </thead>
@@ -275,6 +289,39 @@ export const CourseDetail = (props) => {
                         <tr>
                           <td>{item.course_name}</td>
                           <td>{item.week ? item.week : "-"}</td>
+                          <td>{item.booking}</td>
+                        </tr>
+                      </React.Fragment>
+                    );
+                  })}
+                {!reserved || reserved.length > 0 ? (
+                  ""
+                ) : (
+                  <tr>
+                    <td colspan="4">
+                      <div className="w-100 d-flex justify-content-center">
+                        <h4>No Record to show</h4>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+            <Table size="sm" className="pb-4 mb-4 shadow-sm">
+              <thead>
+                <tr>
+                  <th>Course Name</th>
+                  <th>Month</th>
+                  <th>NumberOfBooking</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookedLectures &&
+                  monthLectures.map((item, index) => {
+                    return (
+                      <React.Fragment key={index}>
+                        <tr>
+                          <td>{item.course_name}</td>
                           <td>{item.month ? item.month : "-"}</td>
                           <td>{item.booking}</td>
                         </tr>

@@ -173,8 +173,8 @@ exports.getAllLecturesStats = async (req, res) => {
       { lecture: "sl.lecture_name" },
       { course: "sl.course_name" },
       { cancellations: "su.cancellations" },
-      { attendance: "su.attendance" },
-      { booking: "su.booking" },
+      { attendances: "su.attendance" },
+      { bookings: "su.booking" },
       { date: "st.date" }
     )
     .from({ su: "stats_usage" })
@@ -250,8 +250,8 @@ exports.getCourseLecturesStats = async (req, res) => {
       { lecture: "sl.lecture_name" },
       { course: "sl.course_name" },
       { cancellations: "su.cancellations" },
-      { attendance: "su.attendance" },
-      { booking: "su.booking" },
+      { attendances: "su.attendance" },
+      { bookings: "su.booking" },
       { date: "st.date" }
     )
     .from({ su: "stats_usage" })
