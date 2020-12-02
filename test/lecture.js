@@ -20,6 +20,11 @@ const userCredentials = {
   password: "password",
 };
 
+const teacherCredentials = {
+  email: "john.doe@polito.it",
+  password: "password",
+};
+
 const userTuple = {
   id: 1,
   name: "Enrico",
@@ -52,6 +57,7 @@ const lectureTuple = {
   start: moment().add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
   end: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
+  status: "presence"
 };
 
 const futureLectureTuple = {
@@ -62,6 +68,7 @@ const futureLectureTuple = {
   start: moment().add(2, "days").format("YYYY-MM-DD HH:mm:ss"),
   end: moment().add(2, "days").add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
+  status: "presence"
 };
 
 const courseStudentTuple = {
@@ -84,7 +91,8 @@ const expectedPreviousBooking = [{
   start: lectureTuple.start,
   end: lectureTuple.end,
   capacity: lectureTuple.capacity,
-  booked_at: lectureBookingTuple.booked_at
+  booked_at: lectureBookingTuple.booked_at,
+  status: lectureTuple.status
 }]
 
 const expectedBookableLectures = [{
@@ -96,7 +104,8 @@ const expectedBookableLectures = [{
   start: futureLectureTuple.start,
   end: futureLectureTuple.end,
   capacity: futureLectureTuple.capacity,
-  booked_students: 0
+  booked_students: 0,
+  status: futureLectureTuple.status
 }]
 
 describe("Lecture test", async function () {
@@ -254,6 +263,7 @@ describe("List of students booked for a lecture", async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
+    await knex("lecture").insert(lectureTuple);    
     await knex("lecture_booking").insert(lectureBookingTuple);    
     const res = await authenticatedUser
       .post("/api/auth/login")
@@ -312,7 +322,9 @@ describe("list of lectures scheduled for a course", async () => {
       lecturer_surname: teacherTuple.surname,
       start: lectureTuple.start,
       end: lectureTuple.end,
-      capacity: lectureTuple.capacity,}]) 
+      capacity: lectureTuple.capacity,
+      status: lectureTuple.status
+    }]) 
   });
   after(async () => {
     await knex("user").del();
@@ -329,6 +341,7 @@ describe("Cancel a booked lecture ", async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("user").insert(userTuple);
+    await knex("lecture").insert(lectureTuple); 
     await knex("lecture_booking").insert(lectureBookingTuple);    
     const res = await authenticatedUser
       .post("/api/auth/login")
