@@ -51,19 +51,30 @@ class StudentList extends React.Component {
     });
   };
 
-  getLecturesList = (courseID) => {
-    axios.get(`/courses/${courseID.id}/lectures`, {}).then((response) => {
+  getLecturesList = (course) => {
+    axios.get(`/courses/${course.id}/lectures`, {}).then((response) => {
       let result = response.data;
-     let courseColor= this.state.courses.find(id=>id==courseID).color;
-     this.setState({lectureColor:courseColor});
-      this.setState({ lecturetitle: courseID.name });
-      this.setState({ lectures: result });
+      this.setState({
+        lecturetitle: course.name,
+        selectedCourse: course,
+        selectedLecture: undefined,
+        students: [],
+        lectures: result,
+      });
     });
   };
 
   formatEvents() {
     return this.state.lectures.map((lecture) => {
-      const { name, end, start, capacity, booked_students, id } = lecture;
+      const {
+        name,
+        end,
+        start,
+        capacity,
+        booked_students,
+        id,
+        status,
+      } = lecture;
 
       let startTime = new Date(start);
       let endTime = new Date(end);
@@ -72,37 +83,58 @@ class StudentList extends React.Component {
         title: name,
         start: startTime,
         end: endTime,
+        backgroundColor: status === "distance" ? "red" : "dodgerblue",
         extendedProps: {
           capacity: capacity,
           booked_students: booked_students,
+          status: status,
           id,
           name,
         },
       };
     });
   }
+
   renderEventContent(eventInfo) {
+    function format(n) {
+      return n > 9 ? "" + n : "0" + n;
+    }
+
     if (eventInfo)
       return (
         <div style={{ color : `${eventInfo.event.extendedProps.color}`}} >
           <p>
-            {eventInfo.event.start.getHours()}:
-            {eventInfo.event.start.getMinutes()}-
-            {eventInfo.event.end.getHours()}:
-            {eventInfo.event.start.getMinutes()}
+            {format(eventInfo.event.start.getHours())}:
+            {format(eventInfo.event.start.getMinutes())}-
+            {format(eventInfo.event.end.getHours())}:
+            {format(eventInfo.event.start.getMinutes())}
             <br></br>
             {eventInfo.event.title} <br></br>
-            Capacity:{eventInfo.event.extendedProps.capacity}{" "}
+            {eventInfo.event.extendedProps.status === "presence" &&
+              `Capacity: ${eventInfo.event.extendedProps.capacity}`}
           </p>
         </div>
       );
     else return null;
   }
+
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
     let lectureid = event._def.extendedProps.id;
-    this.setState({ studenttitle: event._def.extendedProps.name });
+    this.setState({
+      studenttitle: event._def.extendedProps.name,
+      selectedLecture: event._def,
+    });
     this.getStudentList(lectureid);
+  };
+
+  handleConvertLecture = (lectureId) => {
+    const course = this.state.selectedCourse;
+    course &&
+      course.id &&
+      axios
+        .put(`/lectures/${lectureId}/convert`, {})
+        .then((res) => res.status === 204 && this.getLecturesList(course));
   };
 
   loadLectureAndScroll = (elementId) => {
@@ -207,15 +239,49 @@ class StudentList extends React.Component {
                     />
                   </div>
                 </div>
-                <div className="col-12">
-                  <div id="lecturelistview" className="col">
+                <div className="col-6 col-md-5">
+                  <div
+                    className="d-flex flex-row align-items-center justify-content-end"
+                    id="legendView"
+                  >
+                    <ListGroup>
+                      <ListGroup.Item className="d-flex flex-row align-items-center">
+                        <span
+                          className="mx-2"
+                          style={{
+                            height: "10px",
+                            width: "10px",
+                            display: "block",
+                            float: "left",
+                            background: "red",
+                          }}
+                        ></span>
+                        Remote lecture
+                      </ListGroup.Item>
+                      <ListGroup.Item className="d-flex flex-row align-items-center">
+                        <span
+                          className="mx-2"
+                          style={{
+                            height: "10px",
+                            width: "10px",
+                            display: "block",
+                            float: "left",
+                            background: "dodgerblue",
+                          }}
+                        ></span>
+                        Presence lecture
+                      </ListGroup.Item>
+                    </ListGroup>
+                  </div>
+
+                  <div id="lecturelistview">
                     {this.formatEvents().length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"
-                        style={{  margin: "1rem 0rem" }}
+                        style={{ margin: "1rem 0rem" }}
                       >
-                        <ListGroup.Item>
+                        <ListGroup.Item key="head">
                           <div className="d-flex w-100 justify-content-between">
                             <div className="container">
                               <div className="row">
@@ -228,15 +294,20 @@ class StudentList extends React.Component {
                                 <div className="col-lg-3">
                                   <label>End</label>
                                 </div>
-                                 <div className="col-lg-3">
-                                 
+                                <div className="col-lg-3">
+                                  <label>Status</label>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </ListGroup.Item>
                         {this.formatEvents().map((lecture) => (
-                          <LectureItem lecture={lecture} handleBooking={this.cancelBookingHandle} />
+                          <LectureItem
+                            key={lecture.extendedProps.id}
+                            lecture={lecture}
+                            handleConvert={this.handleConvertLecture} 
+                            handleBooking={this.cancelBookingHandle}
+                          />
                         ))}
                       </ListGroup>
                     ) : (
@@ -301,7 +372,12 @@ class StudentList extends React.Component {
                         margin: "2rem",
                       }}
                     >
-                      No lecture is selected or there is no students available
+                      {!this.state.selectedLecture
+                        ? "No lecture is selected"
+                        : this.state.selectedLecture.extendedProps.status ===
+                          "distance"
+                        ? "Remote lecture selected: no students list available"
+                        : "no students booked for this lecture"}
                     </h4>
                   )}
                 </div>

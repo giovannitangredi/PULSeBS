@@ -2,17 +2,24 @@ import React from "react";
 import Table from "react-bootstrap/Table";
 import { BookingLecture } from "./BookingLecture";
 export const BookingLectureList = (props) => {
+  const styles = {
+    head: {
+      border : "ridge",
+      borderWidth : "0 0.1em 0.1em 0.1em"
+    },
+  };
   return (
-    <Table>
+    <Table striped bordered hover>
       <thead>
         <tr>
-          <th>Course</th>
-          <th>Lecture</th>
-          <th>Professor</th>
-          <th>Start</th>
-          <th>End</th>
-          <th>Capacity</th>
-          <th></th>
+          <th style = {styles.head}>Course</th>
+          <th style = {styles.head}>Lecture</th>
+          <th style = {styles.head}>Professor</th>
+          <th style = {styles.head}>Status</th>
+          <th style = {styles.head}>Start</th>
+          <th style = {styles.head}>End</th>
+          <th style = {styles.head}>Capacity</th>
+          <th style = {styles.head}></th>
         </tr>
       </thead>
       <tbody>
