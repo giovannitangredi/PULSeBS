@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import moment from "moment";
 import {
   Table,
   Form,
@@ -16,14 +17,14 @@ export const CourseDetail = (props) => {
   const [courseFilter, setcourseFilter] = useState([]);
   const [bookedLectures, setBookedLectures] = useState([]);
   const [reserved, setReserved] = useState([]);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(new Date("2014/02/08"));
+  const [endDate, setEndDate] = useState(new Date("2014/02/10"));
   const [weeksBetween, setWeeksBetween] = useState([]);
   const [monthsBetween, setMonthsBetween] = useState([]);
 
   /* get http call */
-  let GetFromServer = async (url) => {
-    await axios
+  let GetFromServer = (url) => {
+    axios
       .get(url)
       .then((res) => {
         return res.data;
@@ -62,15 +63,34 @@ export const CourseDetail = (props) => {
   };
 
   const getrelateddatafromserver = () => {
+    let weekdays = [];
+    let listofweeks = evaluatelistofDates(startDate, endDate);
+    console.log("list of weeks");
+    console.log(listofweeks);
+    listofweeks.forEach((week) => {
+      weekdays.push(
+        week.startDate.getFullYear().toString() +
+          "-" +
+          week.startDate.getWeek().toString()
+      );
+    });
+    setWeeksBetween(weekdays);
+    let months = [];
+    getMonthList(startDate, endDate).forEach((month) => {
+      months.push(month);
+    });
+    console.log(listofweeks);
+    setMonthsBetween(months);
+
     let promiseArray = [];
     let lectures = [];
     let reservations = [];
 
     weeksBetween.forEach((weekStartDate) => {
+      console.log(weekStartDate);
       courseFilter.forEach((id) => {
         promiseArray.push(
           new Promise((resolve, reject) => {
-            console.log(weekStartDate);
             lectures.push(
               GetFromServer(`/courses/${id}/bookings?week=${weekStartDate}`)
             );
@@ -80,8 +100,8 @@ export const CourseDetail = (props) => {
     });
 
     monthsBetween.forEach((monthStartDate) => {
+      console.log(monthStartDate);
       courseFilter.forEach((id) => {
-        console.log(monthStartDate);
         promiseArray.push(
           new Promise((resolve, reject) => {
             lectures.push(
@@ -130,39 +150,36 @@ export const CourseDetail = (props) => {
   };
   /*get list of weeks between two dates */
   const getMonthList = (startDate, endDate) => {
-    let start = startDate.split("-");
-    let end = endDate.split("-");
-    let startYear = parseInt(start[0]);
-    let endYear = parseInt(end[0]);
-    let dates = [];
+    var dateStart = moment(startDate);
+    var dateEnd = moment(endDate);
+    var timeValues = [];
 
-    for (let i = startYear; i <= endYear; i++) {
-      let endMonth = i != endYear ? 11 : parseInt(end[1]) - 1;
-      let startMon = i === startYear ? parseInt(start[1]) - 1 : 0;
-      for (let j = startMon; j <= endMonth; j = j > 12 ? j % 12 || 11 : j + 1) {
-        let month = j + 1;
-        let displayMonth = month < 10 ? "0" + month : month;
-        dates.push(new Date([i, displayMonth, "01"].join("-")));
-      }
+    while (
+      dateEnd > dateStart ||
+      dateStart.format("M") === dateEnd.format("M")
+    ) {
+      timeValues.push(dateStart.format("YYYY-MM"));
+      dateStart.add(1, "month");
     }
-    return dates;
+
+    return timeValues;
   };
   /*gets the week number of a date */
-  Date.prototype.getWeekList = function (dowOffset) {
-    /*getWeekList() http://www.meanfreepath.com */
+  Date.prototype.getWeek = function (dowOffset) {
+    /*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.meanfreepath.com */
 
     dowOffset = typeof dowOffset == "int" ? dowOffset : 0; //default dowOffset to zero
-    let newYear = new Date(this.getFullYear(), 0, 1);
-    let day = newYear.getDay() - dowOffset; //the day of week the year begins on
+    var newYear = new Date(this.getFullYear(), 0, 1);
+    var day = newYear.getDay() - dowOffset; //the day of week the year begins on
     day = day >= 0 ? day : day + 7;
-    let daynum =
+    var daynum =
       Math.floor(
         (this.getTime() -
           newYear.getTime() -
           (this.getTimezoneOffset() - newYear.getTimezoneOffset()) * 60000) /
           86400000
       ) + 1;
-    let weeknum;
+    var weeknum;
     //if the year starts before the middle of a week
     if (day < 4) {
       weeknum = Math.floor((daynum + day - 1) / 7) + 1;
@@ -171,7 +188,7 @@ export const CourseDetail = (props) => {
         let nday = nYear.getDay() - dowOffset;
         nday = nday >= 0 ? nday : nday + 7;
         /*if the next year starts before the middle of
-                    the week, it is week #1 of that year*/
+                  the week, it is week #1 of that year*/
         weeknum = nday < 4 ? 1 : 53;
       }
     } else {
@@ -180,41 +197,9 @@ export const CourseDetail = (props) => {
     return weeknum;
   };
   /* this is called when end start of datepicker is changed */
-  const startDateHandle = (date) => {
-    setStartDate(date);
-    let weekdays = [];
-    evaluatelistofDates(startDate, endDate).forEach((week) => {
-      weekdays.push(
-        week.getFullYear().toString() + "-" + week.getWeekList().toString()
-      );
-    });
-    setWeeksBetween(weekdays);
-    let months = [];
-    getMonthList(startDate, endDate).forEach((month) => {
-      months.push(
-        month.getFullYear().toString() + "-" + month.getMonth().toString()
-      );
-    });
-    setMonthsBetween(months);
-  };
-  /* this is called when end date of datepicker is changed */
-  const endDateHandle = (date) => {
-    setEndDate(date);
-    let weekdays = [];
-    evaluatelistofDates(startDate, endDate).forEach((week) => {
-      weekdays.push(
-        date.getFullYear().toString() + "-" + date.getWeekList().toString()
-      );
-    });
-    setWeeksBetween(weekdays);
-
-    let months = [];
-    getMonthList(startDate, endDate).forEach((month) => {
-      months.push(
-        month.getFullYear().toString() + "-" + month.getMonth().toString()
-      );
-    });
-    setMonthsBetween(months);
+  const datePickerHandle = (sdate, edate) => {
+    setStartDate(sdate);
+    setEndDate(edate);
   };
 
   /*gets the weeks in between 2 dates */
@@ -222,17 +207,19 @@ export const CourseDetail = (props) => {
     let sDate;
     let eDate;
     let dateArr = [];
+    let tempstart = startd;
+    let tempend = endd;
 
-    while (startd <= endd) {
-      if (startd.getDay() == 1 || (dateArr.length == 0 && !sDate)) {
-        sDate = new Date(startd.getTime());
+    while (tempstart <= tempend) {
+      if (tempstart.getDay() == 1 || (dateArr.length == 0 && !sDate)) {
+        sDate = new Date(tempstart.getTime());
       }
 
       if (
-        (sDate && startd.getDay() == 0) ||
-        startd.getTime() == endd.getTime()
+        (sDate && tempstart.getDay() == 0) ||
+        tempstart.getTime() == tempend.getTime()
       ) {
-        eDate = new Date(startd.getTime());
+        eDate = new Date(tempstart.getTime());
       }
 
       if (sDate && eDate) {
@@ -241,7 +228,7 @@ export const CourseDetail = (props) => {
         eDate = undefined;
       }
 
-      startd.setDate(startd.getDate() + 1);
+      tempstart.setDate(tempstart.getDate() + 1);
     }
     return dateArr;
   };
@@ -252,8 +239,8 @@ export const CourseDetail = (props) => {
           <label className="px-3 font-weight-bold">Choose a date range: </label>
           <DatePickerComponent
             className="mx-3"
-            startDateHandle={startDateHandle}
-            endDateHandle={endDateHandle}
+            startDateHandle={datePickerHandle}
+            endDateHandle={datePickerHandle}
           />
           <Button variant="primary mx-3" onClick={getrelateddatafromserver}>
             Apply

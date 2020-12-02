@@ -6,19 +6,19 @@ import "react-datepicker/dist/react-datepicker.css";
 export const DatePickerComponent = (props) => {
   const [startDate, setStartDate] = useState(new Date("2014/02/08"));
   const [endDate, setEndDate] = useState(new Date("2014/02/10"));
-  const startDateHandler = (date) => {
-    if (props.startDateHandle) props.startDateHandle(date);
-    setStartDate(date);
+  const startDateHandler = (sdate, edate) => {
+    if (props.startDateHandle) props.startDateHandle(sdate, edate);
+    setStartDate(sdate);
   };
-  const endDateHandler = (date) => {
-    if (props.endDateHandle) props.endDateHandle(date);
-    setEndDate(date);
+  const endDateHandler = (sdate, edate) => {
+    if (props.endDateHandle) props.endDateHandle(sdate, edate);
+    setEndDate(edate);
   };
   return (
     <>
       <DatePicker
         selected={startDate}
-        onChange={(date) => startDateHandler(date)}
+        onChange={(date) => startDateHandler(date, endDate)}
         selectsStart
         maxDate={new Date()}
         startDate={startDate}
@@ -26,7 +26,7 @@ export const DatePickerComponent = (props) => {
       />
       <DatePicker
         selected={endDate}
-        onChange={(date) => endDateHandler(date)}
+        onChange={(date) => endDateHandler(startDate, date)}
         selectsEnd
         maxDate={new Date()}
         startDate={startDate}
