@@ -414,8 +414,9 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
 });
 
 //Cancel a lecture booked by a student
-describe("Cancel a booked lecture ", async () => {
+describe("Cancel a booked lecture ", async function ()  {
   //now let's login the user before we run any tests
+  this.timeout(5000)
   const authenticatedUser = request.agent(app);
   before(async () => {
     await knex("user").del();
@@ -425,6 +426,7 @@ describe("Cancel a booked lecture ", async () => {
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
+    await knex("course_available_student").insert(courseStudentTuple);
     await knex("lecture").insert(lectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
     const res = await authenticatedUser
