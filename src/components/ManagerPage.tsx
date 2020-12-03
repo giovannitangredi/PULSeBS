@@ -238,9 +238,9 @@ export const ManagerPage = (props: any) => {
     axios
       .get(`/courses/${courseId}/stats`)
       .then((res) => {
-        let courseSumStats = res.data;
+        if (res.data.length !== 1) throw Error("Response is not well formed.");
+        let courseSumStats = res.data[0];
         setCourseSumStats(courseSumStats);
-        console.log(courseSumStats);
         setLoading(false);
       })
       .catch((err) => {
@@ -437,9 +437,9 @@ export const ManagerPage = (props: any) => {
                     <tr>
                       <th>Lecture ({courseLectureStats.length})</th>
                       <th>Date</th>
-                      <th>Bookings {/*({courseSumStats?.bookings})*/}</th>
-                      <th>Cancellations {/*({courseSumStats?.cancellations})*/}</th>
-                      <th>Attendances {/*({courseSumStats?.attendances})*/}</th>
+                      <th>Bookings ({courseSumStats?.bookings})</th>
+                      <th>Cancellations ({courseSumStats?.cancellations})</th>
+                      <th>Attendances ({courseSumStats?.attendances})</th>
                     </tr>
                   </thead>
                   <tbody>
