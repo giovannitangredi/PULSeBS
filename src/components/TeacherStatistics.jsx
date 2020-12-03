@@ -106,11 +106,11 @@ export const CourseDetail = (props) => {
         GetFromServer(
           `/courses/${id}/bookings?fromMonth=${startDate
             .getFullYear()
-            .toString()}-${startDate
-            .getMonth()
-            .toString()}&toMonth=${endDate
-            .getFullYear()
-            .toString()}-${endDate.getMonth().toString()}`
+            .toString()}-${
+            startDate.getMonth() + (1).toString()
+          }&toMonth=${endDate.getFullYear().toString()}-${
+            endDate.getMonth() + 1
+          }`
         )
       );
     });
