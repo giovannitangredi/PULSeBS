@@ -36,6 +36,7 @@ class ReservationCalendar extends React.Component {
           lecturer_name,
           lecturer_surname,
           color,
+          status
         } = lecture;
         let startTime = new Date(start);
         let endTime = new Date(end);
@@ -55,6 +56,7 @@ class ReservationCalendar extends React.Component {
             lecturer_surname,
             color,
             name,
+            status
           },
         };
       });
@@ -84,9 +86,10 @@ class ReservationCalendar extends React.Component {
             {eventInfo.event.extendedProps.course}
             <br></br>
             {eventInfo.event.extendedProps.lecturer_name}{" "}
-            {eventInfo.event.extendedProps.lecturer_surname}<br></br>
-             Capacity:
-            {eventInfo.event.extendedProps.capacity}{" "}
+            {eventInfo.event.extendedProps.lecturer_surname}
+            {
+              eventInfo.event.extendedProps.status == "presence" && <><br/>Capacity: {eventInfo.event.extendedProps.capacity}{" "}</>
+            }
           </p>
         </div>
       );

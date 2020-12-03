@@ -139,8 +139,12 @@ export const CourseDetail = (props) => {
             reservations.push(reservation2);
           });
         });
-
-        setReserved(reservations);
+        setReserved(
+          reservations.filter((l) => 
+            l.date >= moment(startDate).format("YYYY-MM-DD") &&
+            l.date <= moment(endDate).format("YYYY-MM-DD")
+          ) 
+        );
       })
       .catch((reason) => {
         console.log(reason);
@@ -291,7 +295,7 @@ export const CourseDetail = (props) => {
                 <tr>
                   <th>Course Name</th>
                   <th>Week</th>
-                  <th>NumberOfBooking</th>
+                  <th>Bookings avarage</th>
                 </tr>
               </thead>
               <tbody>
@@ -325,7 +329,7 @@ export const CourseDetail = (props) => {
                 <tr>
                   <th>Course Name</th>
                   <th>Month</th>
-                  <th>NumberOfBooking</th>
+                  <th>Bookings avarage</th>
                 </tr>
               </thead>
               <tbody>
@@ -361,7 +365,7 @@ export const CourseDetail = (props) => {
                   <th>Course Name</th>
                   <th>Lecture Date</th>
                   <th>Lecture Name</th>
-                  <th>NumberOfBooking</th>
+                  <th>Bookings</th>
                 </tr>
               </thead>
               <tbody>

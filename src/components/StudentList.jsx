@@ -127,7 +127,7 @@ class StudentList extends React.Component {
             {eventInfo.event.title} <br></br>
             {eventInfo.event.extendedProps.status === "presence" && (
               <>
-                `Capacity: ${eventInfo.event.extendedProps.capacity}`<br></br>
+                Capacity: {eventInfo.event.extendedProps.capacity}<br></br>
               </>
             )}
             {eventInfo.event.extendedProps.status === "presence"
