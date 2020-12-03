@@ -240,6 +240,7 @@ export const ManagerPage = (props: any) => {
       .then((res) => {
         let courseSumStats = res.data;
         setCourseSumStats(courseSumStats);
+        console.log(courseSumStats);
         setLoading(false);
       })
       .catch((err) => {
@@ -436,9 +437,9 @@ export const ManagerPage = (props: any) => {
                     <tr>
                       <th>Lecture ({courseLectureStats.length})</th>
                       <th>Date</th>
-                      <th>Bookings ({courseSumStats?.bookings})</th>
-                      <th>Cancellations ({courseSumStats?.cancellations})</th>
-                      <th>Attendances ({courseSumStats?.attendances})</th>
+                      <th>Bookings {/*({courseSumStats?.bookings})*/}</th>
+                      <th>Cancellations {/*({courseSumStats?.cancellations})*/}</th>
+                      <th>Attendances {/*({courseSumStats?.attendances})*/}</th>
                     </tr>
                   </thead>
                   <tbody>
