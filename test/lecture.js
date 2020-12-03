@@ -187,8 +187,9 @@ describe("Lecture test", async function () {
 });
 
 // Get all avaliable booking
-describe("GET /api/lectures/bookable", async () => {
+describe("GET /api/lectures/bookable", async function () {
   //now let's login the user before we run any tests
+  this.timeout(5000);
   const authenticatedUser = request.agent(app);
   beforeEach(async () => {
     await knex("user").del();
@@ -460,7 +461,8 @@ describe("Cancel a booked lecture ", async function ()  {
 
 
 // Turn a presence lecture into distance one
-describe("Presence Lecture into distance one ", async () => {
+describe("Presence Lecture into distance one ", async function () {
+  this.timeout(5000);
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
   const authenticatedStudent = request.agent(app);

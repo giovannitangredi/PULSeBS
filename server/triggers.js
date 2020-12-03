@@ -51,7 +51,7 @@ exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON 
     END;`;
 
 exports.cancellation_trigger = `CREATE TRIGGER IF NOT EXISTS cancellation AFTER DELETE ON lecture_booking
-    WHEN 'on' = (SELECT trigger_status FROM _Trigger WHERE name = 'cancellation_trigger')
+    WHEN NOT EXISTS (SELECT name FROM _Trigger WHERE name = 'cancellation_trigger')
     BEGIN
         DELETE FROM _Variables;
         INSERT INTO _Variables(name, int_value, date_value, string_value) 
@@ -71,9 +71,8 @@ exports.convert_trigger = `CREATE TRIGGER IF NOT EXISTS convert AFTER UPDATE OF 
     BEGIN
     DELETE FROM _Variables;
 
-    UPDATE _Trigger
-        SET trigger_status = 'off'
-        WHERE name = 'cancellation_trigger';
+    INSERT INTO _Trigger(name) VALUES ('cancellation_trigger');
+
 
     INSERT INTO _Variables(name, int_value) 
         SELECT 'lecture', count(*)
@@ -89,8 +88,7 @@ exports.convert_trigger = `CREATE TRIGGER IF NOT EXISTS convert AFTER UPDATE OF 
         SET booking = 0, cancellations = cancellations + (SELECT int_value FROM _Variables WHERE name = 'lecture'), attendance = 0 
         WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid');
     
-    UPDATE _Trigger
-        SET trigger_status = 'on'
+    DELETE FROM _Trigger
         WHERE name = 'cancellation_trigger';
     END;`;
 
@@ -99,9 +97,7 @@ exports.deleteLecture_trigger = `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFO
     BEGIN
     DELETE FROM _Variables;
 
-    UPDATE _Trigger
-        SET trigger_status = 'off'
-        WHERE name = 'cancellation_trigger';
+    INSERT INTO _Trigger(name) VALUES ('cancellation_trigger');
 
     DELETE FROM lecture_booking
         WHERE lecture_id = OLD.id;
@@ -114,7 +110,6 @@ exports.deleteLecture_trigger = `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFO
     DELETE FROM stats_lecture
         WHERE lecture_id = OLD.id;
     
-    UPDATE _Trigger
-        SET trigger_status = 'on'
+        DELETE FROM _Trigger
         WHERE name = 'cancellation_trigger';
     END;`;

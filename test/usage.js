@@ -6,19 +6,8 @@ const chaiHttp = require("chai-http");
 const expect = chai.expect;
 chai.use(chaiHttp);
 const moment = require("moment");
-const emailController = require("../server/controllers/email-controller");
-const MailSlurp = require("mailslurp-client").default;
-
-const apiKey =
-  "ff4ecbf86022042fe17030bc0ff37f0f4a5ff3470d9727218d1945b1862a580c";
-const mailSlurpAddress = "8d0dbfbc-f2b7-4e53-a6dc-7dd32ee45e83@mailslurp.com";
-const mailslurp = new MailSlurp({ apiKey });
 
 //the data we need to pass to the login method
-const userCredentials = {
-  email: mailSlurpAddress,
-  password: "password",
-};
 
 const managerCredentials = {
   email: "mario.castello@polito.it",
@@ -30,7 +19,7 @@ const userTuple = {
   name: "Enrico",
   surname: "Carraro",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
-  email: mailSlurpAddress,
+  email: "e_carra@qwerty.it",
   role: "student",
 };
 
@@ -112,29 +101,6 @@ const lecture2BookingTuple = {
   booked_at: moment().subtract(2, "days").format("YYYY-MM-DD HH:mm:ss"),
 };
 
-const StatsUsageTuple = {
-  tid: teacherTuple.id,
-  lid: lectureTuple.id,
-  booking: 1,
-  cancellations: 0,
-  attendance: 1,
-};
-
-const StatsTimeTuple = {
-  tid: teacherTuple.id,
-  date: "2020-12-01",
-  week: "2020-48",
-  month: "2020-11",
-  year: "2020",
-};
-
-const StatsLectureTuple = {
-  lid: "10",
-  lecture_id: lectureTuple.id,
-  lecture_name: lectureTuple.name,
-  course_id: courseTuple.id,
-  course_name: courseTuple.name,
-};
 describe("Usage test", async function () {
   const authenticatedUser = request.agent(app);
   this.timeout(100000);
@@ -144,9 +110,6 @@ describe("Usage test", async function () {
     await knex("lecture").del();
     await knex("lecture_booking").del();
     await knex("course_available_student").del();
-    await knex("stats_lecture").del();
-    await knex("stats_time").del();
-    await knex("stats_usage").del();
     await knex("user").insert(userTuple);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
@@ -161,6 +124,9 @@ describe("Usage test", async function () {
         .post("/api/auth/login")
         .send(teacherCredentials)
         .expect(200);
+        await knex("stats_lecture").del();
+        await knex("stats_time").del();
+        await knex("stats_usage").del();
       await knex("lecture_booking").insert(lectureBookingTuple); //+1 Lecture 1 (user 1)
       await knex("lecture_booking").insert(lecture2BookingTuple); //+1 Lecture 2 (user 1)
       await knex("lecture_booking").insert(lectureBookingTuple2); //+1 Lecture 1 (user 2)
@@ -170,9 +136,9 @@ describe("Usage test", async function () {
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings`)
         .expect(200);
-      /*expect(res.body.length).to.equal(2);
+      expect(res.body.length).to.equal(2);
       expect(res.body[0].booking).to.equal(2);
-      expect(res.body[1].booking).to.equal(1);*/
+      expect(res.body[1].booking).to.equal(1);
     });
 
     it("Should return the total number of booking (1 for lecture 1) after delete in lecture_booking", async () => {
@@ -189,8 +155,8 @@ describe("Usage test", async function () {
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings`)
         .expect(200);
-     /* expect(res.body.length).to.equal(1);
-      expect(res.body[0].booking).to.equal(1);*/
+      expect(res.body.length).to.equal(1);
+      expect(res.body[0].booking).to.equal(1);
     });
     after(async () => {
       await knex("lecture_booking").del();
@@ -208,6 +174,9 @@ describe("Usage test", async function () {
         .post("/api/auth/login")
         .send(teacherCredentials)
         .expect(200);
+        await knex("stats_lecture").del();
+        await knex("stats_time").del();
+        await knex("stats_usage").del();
       await knex("lecture_booking").insert(lectureBookingTuple); //+1 Lecture 1 (user 1)
       await knex("lecture_booking").insert(lecture2BookingTuple); //+1 Lecture 2 (user 1)
       await knex("lecture_booking").insert(lectureBookingTuple2); //+1 Lecture 1 (user 2)
@@ -217,8 +186,8 @@ describe("Usage test", async function () {
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings?week=${year}-${week}`)
         .expect(200);
-      /*expect(res.body.length).to.equal(1);
-      expect(res.body[0].booking).to.equal(1.5);*/
+      expect(res.body.length).to.equal(1);
+      expect(res.body[0].booking).to.equal(1.5);
     });
 
     it("Should return the total number of booking scheduled for the week (1) after delete in lecture_booking", async () => {
@@ -235,8 +204,8 @@ describe("Usage test", async function () {
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings?week=${year}-${week}`)
         .expect(200);
-     /* expect(res.body.length).to.equal(1);
-      expect(res.body[0].booking).to.equal(1);*/
+      expect(res.body.length).to.equal(1);
+      expect(res.body[0].booking).to.equal(1);
     });
     after(async () => {
       await knex("lecture_booking").del();
@@ -254,6 +223,9 @@ describe("Usage test", async function () {
         .post("/api/auth/login")
         .send(teacherCredentials)
         .expect(200);
+        await knex("stats_lecture").del();
+        await knex("stats_time").del();
+        await knex("stats_usage").del();
       await knex("lecture_booking").insert(lectureBookingTuple); //+1 Lecture 1 (user 1)
       await knex("lecture_booking").insert(lecture2BookingTuple); //+1 Lecture 2 (user 1)
       await knex("lecture_booking").insert(lectureBookingTuple2); //+1 Lecture 1 (user 2)
@@ -263,8 +235,8 @@ describe("Usage test", async function () {
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings?month=${year}-${month}`)
         .expect(200);
-      /*expect(res.body.length).to.equal(1);
-      expect(res.body[0].booking).to.equal(1.5);*/
+      expect(res.body.length).to.equal(1);
+      expect(res.body[0].booking).to.equal(1.5);
     });
 
     it("Should return the total number of booking scheduled for the month (1) after delete in lecture_booking", async () => {
@@ -280,8 +252,8 @@ describe("Usage test", async function () {
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings?month=${year}-${month}`)
         .expect(200);
-      /*expect(res.body.length).to.equal(1);
-      expect(res.body[0].booking).to.equal(1);*/
+      expect(res.body.length).to.equal(1);
+      expect(res.body[0].booking).to.equal(1);
     });
     after(async () => {
       await knex("lecture_booking").del();
@@ -310,7 +282,6 @@ describe("Return the system stats ", async () => {
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
-    //await knex("stats_usage").insert(StatsUsageTuple);
 
     const res = await authenticatedUser
       .post("/api/auth/login")
@@ -351,10 +322,6 @@ describe("Return all the lecture stats ", async () => {
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
-    /*await knex("stats_usage").insert(StatsUsageTuple);
-    await knex("stats_lecture").insert(StatsLectureTuple);
-    await knex("stats_time").insert(StatsTimeTuple);*/
-
     const res = await authenticatedUser
       .post("/api/auth/login")
       .send(managerCredentials);
