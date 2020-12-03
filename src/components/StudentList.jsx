@@ -92,7 +92,8 @@ class StudentList extends React.Component {
         title: name,
         start: startTime,
         end: endTime,
-        backgroundColor: status === "distance" ? "red" : "dodgerblue",
+        backgroundColor: status === "distance" ? "#F73D3D" : "dodgerblue",
+        display: "block",
         extendedProps: {
           capacity: capacity,
           booked_students: booked_students,
@@ -112,17 +113,22 @@ class StudentList extends React.Component {
     if (eventInfo)
       return (
         <div
-          style={{ color: `${eventInfo.event.extendedProps.backgroundColor}` }}
+        className="rounded row align-items-center justify-content-center"
+          style={{ color: `${eventInfo.event.extendedProps.backgroundColor}`,
+          color: "#000000",
+          height: "100%",  
+          fontWeight: "600",
+          fontSize: "0.85rem"}}
+          
         >
-          <p>
-            {format(eventInfo.event.start.getHours())}:
-            {format(eventInfo.event.start.getMinutes())}-
-            {format(eventInfo.event.end.getHours())}:
-            {format(eventInfo.event.start.getMinutes())}
-            <br></br>
+          <p style={{ textAlign: "center" } } className="my-auto">
+          
+            
             {eventInfo.event.title} <br></br>
             {eventInfo.event.extendedProps.status === "presence" &&
-              `Capacity: ${eventInfo.event.extendedProps.capacity}`}
+              <>`Capacity: ${eventInfo.event.extendedProps.capacity}`<br></br></> }
+               
+               {eventInfo.event.extendedProps.status === "presence" ? "Lecture in presence" : "Remote lecture"} 
           </p>
         </div>
       );
@@ -149,6 +155,7 @@ class StudentList extends React.Component {
   };
 
   loadLectureAndScroll = (elementId) => {
+    this.setState({lectureColor: elementId.color})
     this.getLecturesList(elementId);
     this.scrolltoview("WeeklyCalendarContainer");
   };
@@ -234,9 +241,48 @@ class StudentList extends React.Component {
             >
               <Card.Header style={{ background: `${this.state.lectureColor}` }}>
                 {" "}
+                <div className="d-flex justify-content-between">
                 <h4>
                   <b>{this.state.lecturetitle}</b> Lectures
                 </h4>{" "}
+
+                <div>
+                  <svg width="340" height="40">
+                    <text font-size="14" font-family="Verdana" x="7" y="22">
+                      Remote Lectures
+                    </text>
+                    <rect
+                      x="129"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: "#F73D3D",
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    <text font-size="14" font-family="Verdana" x="169" y="22">
+                      Presence Lectures
+                    </text>
+                    <rect
+                      x="309"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: "dodgerblue",
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    
+                    
+                  </svg>
+                </div>
+                </div>
+
+
               </Card.Header>
               <div className="row" style={{ margin: "1rem 0rem" }}>
                 <div className="col-12">
@@ -250,39 +296,6 @@ class StudentList extends React.Component {
                   </div>
                 </div>
                 <div className="col-12">
-                  <div
-                    className="d-flex flex-row align-items-center justify-content-end"
-                    id="legendView"
-                  >
-                    <ListGroup>
-                      <ListGroup.Item className="d-flex flex-row align-items-center">
-                        <span
-                          className="mx-2"
-                          style={{
-                            height: "10px",
-                            width: "10px",
-                            display: "block",
-                            float: "left",
-                            background: "red",
-                          }}
-                        ></span>
-                        Remote lecture
-                      </ListGroup.Item>
-                      <ListGroup.Item className="d-flex flex-row align-items-center">
-                        <span
-                          className="mx-2"
-                          style={{
-                            height: "10px",
-                            width: "10px",
-                            display: "block",
-                            float: "left",
-                            background: "dodgerblue",
-                          }}
-                        ></span>
-                        Presence lecture
-                      </ListGroup.Item>
-                    </ListGroup>
-                  </div>
 
                   <div id="lecturelistview">
                     {this.formatEvents().length > 0 ? (

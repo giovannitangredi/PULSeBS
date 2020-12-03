@@ -14,9 +14,11 @@ class WeeklyCalendar extends React.Component {
           defaultView="dayGridMonth"
           slotMinTime="08:00:00"
           slotMaxTime="20:00:00"
+          height="auto"
+          slotDuration = "00:20:00"
           eventClick={this.props.handleEventClick}
           headerToolbar={{
-            left: "prev,next, today",
+            left: "prev,next today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}

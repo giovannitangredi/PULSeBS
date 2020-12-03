@@ -7,15 +7,17 @@ class ReservationCalendar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      greenColor: "#37ecd8", // 3788d8 is blue and 37ecd8 is green
-      blueColor: "#3788d8",
+      greenColor: "#36D745", // 3788d8 is blue and 37ecd8 is green
+      blueColor: "dodgerblue",
+      redColor: "#F73D3D"
     };
   }
 
   /* returns prepared information for calendar */
   formatEvents = () => {
+    console.log(this.props)
     return this.props.lectures
-      .map((obj) => ({ ...obj, color: `${this.state.blueColor}` }))
+      .map((obj) => ({ ...obj, color: obj.status === "distance" ? this.state.redColor : this.state.blueColor }))
       .concat(
         this.props.bookedLectures.map((obj) => ({
           ...obj,
@@ -35,7 +37,6 @@ class ReservationCalendar extends React.Component {
           lecturer_surname,
           color,
         } = lecture;
-
         let startTime = new Date(start);
         let endTime = new Date(end);
 
@@ -43,6 +44,8 @@ class ReservationCalendar extends React.Component {
           title: name,
           start: startTime,
           end: endTime,
+          backgroundColor: color,
+          display: "block",
           extendedProps: {
             capacity: capacity,
             booked_students: booked_students,
@@ -69,19 +72,20 @@ class ReservationCalendar extends React.Component {
             marginLeft: "-2%",
             marginTop: "-2%",
             color: "#000000",
-            fontWeight: "bold",
+            fontWeight: "500",
             fontSize: "0.85rem",
-            background: `${eventInfo.event.extendedProps.color}`,
+            
             border: "4px solid #000000;",
           }}
         >
           <p>
             {eventInfo.event.title}
-            {" - "}
+            <br></br>
             {eventInfo.event.extendedProps.course}
-            {" by "}
+            <br></br>
             {eventInfo.event.extendedProps.lecturer_name}{" "}
-            {eventInfo.event.extendedProps.lecturer_surname} Capacity:
+            {eventInfo.event.extendedProps.lecturer_surname}<br></br>
+             Capacity:
             {eventInfo.event.extendedProps.capacity}{" "}
           </p>
         </div>
@@ -112,7 +116,7 @@ class ReservationCalendar extends React.Component {
               <div className="d-flex justify-content-between">
                 <h4>Lectures</h4>{" "}
                 <div>
-                  <svg width="340" height="40">
+                  <svg width="510" height="40">
                     <text font-size="14" font-family="Verdana" x="7" y="22">
                       Booked Lectures
                     </text>
@@ -137,6 +141,20 @@ class ReservationCalendar extends React.Component {
                       height="30"
                       style={{
                         fill: `${this.state.blueColor}`,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    <text font-size="14" font-family="Verdana" x="350" y="22">
+                      Remote Lectures
+                    </text>
+                    <rect
+                      x="475"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: `${this.state.redColor}`,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
