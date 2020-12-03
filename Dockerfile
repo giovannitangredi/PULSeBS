@@ -13,6 +13,8 @@ COPY . .
 RUN yarn install
 RUN yarn add fullcalendar
 RUN yarn add node-cron
+RUN yarn add react-datepicker
+RUN yarn add moment
 EXPOSE 3000
 EXPOSE 4001
 CMD yarn start
