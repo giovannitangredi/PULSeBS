@@ -8,6 +8,7 @@ import axios from "axios";
 import WeeklyCalendar from "./WeeklyCalendar";
 import Card from "react-bootstrap/Card";
 import Alert from "react-bootstrap/Alert";
+import moment from "moment";
 
 class StudentList extends React.Component {
   constructor(props) {
@@ -113,22 +114,25 @@ class StudentList extends React.Component {
     if (eventInfo)
       return (
         <div
-        className="rounded row align-items-center justify-content-center"
-          style={{ color: `${eventInfo.event.extendedProps.backgroundColor}`,
-          color: "#000000",
-          height: "100%",  
-          fontWeight: "600",
-          fontSize: "0.85rem"}}
-          
+          className="rounded row align-items-center justify-content-center"
+          style={{
+            color: `${eventInfo.event.extendedProps.backgroundColor}`,
+            color: "#000000",
+            height: "100%",
+            fontWeight: "600",
+            fontSize: "0.85rem",
+          }}
         >
-          <p style={{ textAlign: "center" } } className="my-auto">
-          
-            
+          <p style={{ textAlign: "center" }} className="my-auto">
             {eventInfo.event.title} <br></br>
-            {eventInfo.event.extendedProps.status === "presence" &&
-              <>`Capacity: ${eventInfo.event.extendedProps.capacity}`<br></br></> }
-               
-               {eventInfo.event.extendedProps.status === "presence" ? "Lecture in presence" : "Remote lecture"} 
+            {eventInfo.event.extendedProps.status === "presence" && (
+              <>
+                `Capacity: ${eventInfo.event.extendedProps.capacity}`<br></br>
+              </>
+            )}
+            {eventInfo.event.extendedProps.status === "presence"
+              ? "Lecture in presence"
+              : "Remote lecture"}
           </p>
         </div>
       );
@@ -155,7 +159,7 @@ class StudentList extends React.Component {
   };
 
   loadLectureAndScroll = (elementId) => {
-    this.setState({lectureColor: elementId.color})
+    this.setState({ lectureColor: elementId.color });
     this.getLecturesList(elementId);
     this.scrolltoview("WeeklyCalendarContainer");
   };
@@ -174,7 +178,7 @@ class StudentList extends React.Component {
     }, 3000);
     this.scrolltoview("CoursesElement");
   };
-  cancelBookingHandle = (lecture) => {
+  cancelLectureHandle = (lecture) => {
     this.handleBooking();
 
     console.log(lecture.extendedProps.id);
@@ -242,47 +246,42 @@ class StudentList extends React.Component {
               <Card.Header style={{ background: `${this.state.lectureColor}` }}>
                 {" "}
                 <div className="d-flex justify-content-between">
-                <h4>
-                  <b>{this.state.lecturetitle}</b> Lectures
-                </h4>{" "}
-
-                <div>
-                  <svg width="340" height="40">
-                    <text font-size="14" font-family="Verdana" x="7" y="22">
-                      Remote Lectures
-                    </text>
-                    <rect
-                      x="129"
-                      y="3"
-                      width="30"
-                      height="30"
-                      style={{
-                        fill: "#F73D3D",
-                        strokeWidth: 1,
-                        stroke: "rgb(0,0,0)",
-                      }}
-                    />
-                    <text font-size="14" font-family="Verdana" x="169" y="22">
-                      Presence Lectures
-                    </text>
-                    <rect
-                      x="309"
-                      y="3"
-                      width="30"
-                      height="30"
-                      style={{
-                        fill: "dodgerblue",
-                        strokeWidth: 1,
-                        stroke: "rgb(0,0,0)",
-                      }}
-                    />
-                    
-                    
-                  </svg>
+                  <h4>
+                    <b>{this.state.lecturetitle}</b> Lectures
+                  </h4>{" "}
+                  <div>
+                    <svg width="340" height="40">
+                      <text font-size="14" font-family="Verdana" x="7" y="22">
+                        Remote Lectures
+                      </text>
+                      <rect
+                        x="129"
+                        y="3"
+                        width="30"
+                        height="30"
+                        style={{
+                          fill: "#F73D3D",
+                          strokeWidth: 1,
+                          stroke: "rgb(0,0,0)",
+                        }}
+                      />
+                      <text font-size="14" font-family="Verdana" x="169" y="22">
+                        Presence Lectures
+                      </text>
+                      <rect
+                        x="309"
+                        y="3"
+                        width="30"
+                        height="30"
+                        style={{
+                          fill: "dodgerblue",
+                          strokeWidth: 1,
+                          stroke: "rgb(0,0,0)",
+                        }}
+                      />
+                    </svg>
+                  </div>
                 </div>
-                </div>
-
-
               </Card.Header>
               <div className="row" style={{ margin: "1rem 0rem" }}>
                 <div className="col-12">
@@ -296,9 +295,10 @@ class StudentList extends React.Component {
                   </div>
                 </div>
                 <div className="col-12">
-
                   <div id="lecturelistview">
-                    {this.formatEvents().length > 0 ? (
+                    {this.formatEvents().filter((lecture) =>
+                            moment(lecture.start).isSameOrAfter(
+                              moment().startOf("day"))).length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"
@@ -324,14 +324,19 @@ class StudentList extends React.Component {
                             </div>
                           </div>
                         </ListGroup.Item>
-                        {this.formatEvents().map((lecture) => (
-                          <LectureItem
-                            key={lecture.extendedProps.id}
-                            lecture={lecture}
-                            handleConvert={this.handleConvertLecture}
-                            handleBooking={this.cancelBookingHandle}
-                          />
-                        ))}
+                        {this.formatEvents().map(
+                          (lecture) =>
+                            moment(lecture.start).isSameOrAfter(
+                              moment().startOf("day")
+                            ) && (
+                              <LectureItem
+                                key={lecture.extendedProps.id}
+                                lecture={lecture}
+                                handleConvert={this.handleConvertLecture}
+                                handleBooking={this.cancelLectureHandle}
+                              />
+                            )
+                        )}
                       </ListGroup>
                     ) : (
                       <h4
@@ -342,7 +347,7 @@ class StudentList extends React.Component {
                           margin: "2rem",
                         }}
                       >
-                        No Course is selected
+                        No lectures available
                       </h4>
                     )}
                   </div>
