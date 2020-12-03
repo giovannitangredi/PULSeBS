@@ -79,22 +79,29 @@ initTable("course", (table) => {
   table.foreign("main_prof").references("user.id");
 });
 
-initTable("lecture", (table) => {
-  table.increments("id").primary();
+initTable(
+  "lecture",
+  (table) => {
+    table.increments("id").primary();
 
-  table.string("name").notNullable();
+    table.string("name").notNullable();
 
-  table.integer("course").unsigned().notNullable();
-  table.foreign("course").references("course.id");
+    table.integer("course").unsigned().notNullable();
+    table.foreign("course").references("course.id");
 
-  table.integer("lecturer").unsigned().notNullable();
-  table.foreign("lecturer").references("user.id");
+    table.integer("lecturer").unsigned().notNullable();
+    table.foreign("lecturer").references("user.id");
 
-  table.dateTime("start").notNullable();
-  table.dateTime("end").notNullable();
+    table.dateTime("start").notNullable();
+    table.dateTime("end").notNullable();
 
-  table.integer("capacity").unsigned().notNullable();
-});
+    table.integer("capacity").unsigned().notNullable();
+
+    table.string("status").notNullable();
+  },
+  triggers.convert_trigger,
+  triggers.deleteLecture_trigger
+);
 
 initTable(
   "lecture_booking",
@@ -157,5 +164,11 @@ initTable("_Variables", (table) => {
   table.date("date_value");
   table.string("string_value");
 });
+
+initTable("_Trigger", (table) => {
+  table.string("name").primary();
+  table.string("trigger_status");
+});
+
 // Export the database
 module.exports = knex;

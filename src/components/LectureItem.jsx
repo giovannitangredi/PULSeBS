@@ -1,22 +1,51 @@
 import React from "react";
 import ListGroup from "react-bootstrap/ListGroup";
+import ConfirmDialog from "./ConfirmDialog";
+import moment from "moment";
+import Button from "react-bootstrap/Button";
 
-const lectureItem = (props) => {
-  let { lecture } = props;
-
+// ({lecture: {title, start, end, extendedProps: {status, id}}, handleConvert})
+const LectureItem = ({ lecture, handleConvert, handleBooking }) => {
   return (
-    <ListGroup.Item id={lecture.id}>
+    <ListGroup.Item>
       <div className="d-flex w-100 justify-content-between">
         <div className="container">
           <div className="row">
-            <div className="col-lg-4">
+            <div className="col-lg-3">
               <label>{lecture.title}</label>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-2">
               <label>{lecture.start.toDateString()}</label>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-3">
               <label>{lecture.end.toDateString()}</label>
+            </div>
+            <div className="col-lg-2">
+              <label style={{ textTransform: "capitalize" }}>
+                {lecture.extendedProps.status === "distance"
+                  ? "Remote"
+                  : lecture.extendedProps.status}{" "}
+                {moment()
+                  .add(30, "minutes")
+                  .isBefore(moment(lecture.start, "YYYY-MM-DD HH:mm:ss")) &&
+                  lecture.extendedProps.status === "presence" && (
+                    <ConfirmDialog
+                      body="Are you sure you want to hold this lecture remotely?"
+                      action={() => {
+                        handleConvert(lecture.extendedProps.id);
+                      }}
+                      buttonText="Change"
+                    />
+                  )}
+              </label>
+            </div>
+            <div className="col-lg-2">
+              <Button
+                variant="primary"
+                onClick={(event) => handleBooking(lecture)}
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         </div>
@@ -24,4 +53,4 @@ const lectureItem = (props) => {
     </ListGroup.Item>
   );
 };
-export default lectureItem;
+export default LectureItem;

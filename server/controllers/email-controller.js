@@ -3,6 +3,7 @@ const knex = require("./../db");
 let cron = require("node-cron");
 var imaps = require("imap-simple");
 let nodemailer = require("nodemailer");
+const simpleParser = require("mailparser").simpleParser;
 
 exports.sendMail = async (email, subject, body) => {
   // create reusable transporter object using the default SMTP transport
@@ -25,57 +26,82 @@ exports.sendMail = async (email, subject, body) => {
   });
 
   console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-  // Preview only available when sending through an Ethereal account
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-  // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
 };
 
-/* output
-[
-   {
-     which: 'HEADER',
-     size: 595,
-     body: {
-       'return-path': [Array],
-       received: [Array],
-       'content-type': [Array],
-       from: [Array],
-       to: [Array],
-       subject: [Array],
-       'message-id': [Array],
-       'content-transfer-encoding': [Array],
-       date: [Array],
-       'mime-version': [Array]
-     }
-   }
-]
-*/
-exports.fetchemails = async (Imapconfig) => {
-  let emailbody;
-  imaps.connect(Imapconfig).then(function (connection) {
-    return connection.openBox("INBOX").then(function () {
-      var searchCriteria = ["UNSEEN"];
+exports.fetchEmails = async (imap) => {
+  const connection = await imaps.connect({ imap });
+  await connection.openBox("INBOX");
 
-      var fetchOptions = {
-        bodies: ["HEADER", "TEXT"],
-        markSeen: false,
-      };
+  var searchCriteria = ["ALL"];
+  var fetchOptions = {
+    bodies: [""],
+    markSeen: true,
+  };
 
-      return connection
-        .search(searchCriteria, fetchOptions)
-        .then(function (results) {
-          emailbody = results.map(function (res) {
-            return res.parts.filter(function (part) {
-              return part.which === "HEADER";
-            })[0].body;
-          });
-        });
+  const messages = await connection.search(searchCriteria, fetchOptions);
+
+  await connection.closeBox("INBOX");
+  connection.end();
+
+  return await Promise.all(
+    messages.map(async function (message) {
+      const raw = message.parts.filter((part) => part.which === "")[0].body;
+      const mail = await simpleParser(raw);
+      return { subject: mail.subject, body: mail.html };
+    })
+  );
+};
+
+exports.waitForNewEmail = async (imap) => {
+  return new Promise(async (resolve, reject) => {
+    connection = await imaps.connect({
+      imap,
+      onmail: async function () {
+        var searchCriteria = ["UNSEEN"];
+        var fetchOptions = {
+          bodies: [""],
+          markSeen: true,
+        };
+        const messages = await connection.search(searchCriteria, fetchOptions);
+
+        resolve(
+          messages.map(async function (message) {
+            const raw = message.parts.filter((part) => part.which === "")[0]
+              .body;
+            const mail = await simpleParser(raw);
+            return { subject: mail.subject, body: mail.html };
+          })[0]
+        );
+
+        await connection.closeBox("INBOX");
+        connection.end();
+      },
     });
+
+    await connection.openBox("INBOX");
   });
-  return emailbody;
 };
+
+exports.deleteEmails = async (imap) => {
+  const connection = await imaps.connect({ imap });
+  await connection.openBox("INBOX");
+  var searchCriteria = ["ALL"];
+
+  var fetchOptions = {
+    bodies: ["HEADER", "TEXT"],
+    markSeen: true,
+  };
+
+  const messages = await connection.search(searchCriteria, fetchOptions);
+
+  messages.forEach(async (message) => {
+    await connection.moveMessage(message.attributes.uid, "[Gmail]/Trash");
+  });
+
+  await connection.closeBox("INBOX");
+  connection.end();
+};
+
 // returns a promise when it first calls
 // 12 at nights scheduler runs this code with this pattern "0 0 0 * * *"
 // every second with this pattern "* * * * * *"
@@ -89,21 +115,6 @@ exports.fetchemails = async (Imapconfig) => {
   second ( optional )
   */
 exports.startScheduler = async (schedulePattern) => {
-  /*
-  const Imapconfig = {
-    imap: {
-      user: "pulsebs.softeng@gmail.com",
-      password: "xssyjwawrmvrkgag",
-      host: "imap.gmail.com",
-      port: 993,
-      tls: true,
-      tlsOptions: { rejectUnauthorized: false },
-      authTimeout: 3000,
-    },
-  };
-  //checks for unread message
-  this.fetchemails(Imapconfig);
-  */
   return new Promise((resolve, reject) => {
     // (second minute hour dayofmonth(1-31) month(1-12) dayofweek(0-7))
     cron.schedule(schedulePattern, () => {

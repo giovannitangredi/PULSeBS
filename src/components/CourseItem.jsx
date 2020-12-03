@@ -13,7 +13,10 @@ const courseItem = (props) => {
         border={"secondary"}
         style={{ width: "20rem" }}
       >
-        <Card.Header> Course ID: {course.id} </Card.Header>
+        <Card.Header style={{ background: `${course.color}` }}>
+          {" "}
+          Course ID: {course.id}{" "}
+        </Card.Header>
         <Card.Body>
           <Card.Title>{course.name}</Card.Title>
           <Card.Text>Course Description.</Card.Text>
