@@ -9,15 +9,21 @@ class ReservationCalendar extends React.Component {
     this.state = {
       greenColor: "#36D745", // 3788d8 is blue and 37ecd8 is green
       blueColor: "dodgerblue",
-      redColor: "#F73D3D"
+      redColor: "#F73D3D",
     };
   }
 
   /* returns prepared information for calendar */
   formatEvents = () => {
-    console.log(this.props)
+    console.log(this.props);
     return this.props.lectures
-      .map((obj) => ({ ...obj, color: obj.status === "distance" ? this.state.redColor : this.state.blueColor }))
+      .map((obj) => ({
+        ...obj,
+        color:
+          obj.status === "distance"
+            ? this.state.redColor
+            : this.state.blueColor,
+      }))
       .concat(
         this.props.bookedLectures.map((obj) => ({
           ...obj,
@@ -36,7 +42,7 @@ class ReservationCalendar extends React.Component {
           lecturer_name,
           lecturer_surname,
           color,
-          status
+          status,
         } = lecture;
         let startTime = new Date(start);
         let endTime = new Date(end);
@@ -56,7 +62,7 @@ class ReservationCalendar extends React.Component {
             lecturer_surname,
             color,
             name,
-            status
+            status,
           },
         };
       });
@@ -76,7 +82,7 @@ class ReservationCalendar extends React.Component {
             color: "#000000",
             fontWeight: "500",
             fontSize: "0.85rem",
-            
+
             border: "4px solid #000000;",
           }}
         >
@@ -87,9 +93,12 @@ class ReservationCalendar extends React.Component {
             <br></br>
             {eventInfo.event.extendedProps.lecturer_name}{" "}
             {eventInfo.event.extendedProps.lecturer_surname}
-            {
-              eventInfo.event.extendedProps.status == "presence" && <><br/>Capacity: {eventInfo.event.extendedProps.capacity}{" "}</>
-            }
+            {eventInfo.event.extendedProps.status == "presence" && (
+              <>
+                <br />
+                Capacity: {eventInfo.event.extendedProps.capacity}{" "}
+              </>
+            )}
           </p>
         </div>
       );

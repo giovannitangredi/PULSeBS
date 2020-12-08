@@ -127,7 +127,8 @@ class StudentList extends React.Component {
             {eventInfo.event.title} <br></br>
             {eventInfo.event.extendedProps.status === "presence" && (
               <>
-                Capacity: {eventInfo.event.extendedProps.capacity}<br></br>
+                Capacity: {eventInfo.event.extendedProps.capacity}
+                <br></br>
               </>
             )}
             {eventInfo.event.extendedProps.status === "presence"
@@ -297,8 +298,10 @@ class StudentList extends React.Component {
                 <div className="col-12">
                   <div id="lecturelistview">
                     {this.formatEvents().filter((lecture) =>
-                            moment(lecture.start).isSameOrAfter(
-                              moment().startOf("day"))).length > 0 ? (
+                      moment(lecture.start).isSameOrAfter(
+                        moment().startOf("day")
+                      )
+                    ).length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"

@@ -16,6 +16,7 @@ const lectureRouter = require("./routes/lecture-route");
 const courseRouter = require("./routes/course-route");
 const mail = require("./controllers/email-controller");
 const statsRouter = require("./routes/usage-route");
+const uploadRouter = require("./routes/upload-route");
 
 // Set default port for express app
 const PORT = process.env.PORT || 4001;
@@ -48,6 +49,7 @@ app.use("/api/user", userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/lectures", lectureRouter);
 app.use("/api/stats", statsRouter);
+app.use("/api/upload", uploadRouter);
 
 // To return a better object in case of errors
 app.use(function (err, req, res, next) {

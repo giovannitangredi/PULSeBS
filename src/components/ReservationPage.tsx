@@ -94,22 +94,26 @@ export const ReservationPage = (props: any) => {
   return (
     <Container>
       <h1>Book a Lecture</h1>
-      {lectures2weeks.length===0 && <h2>There are no bookable in 2 weeks to show</h2>}
-      { lectures2weeks.length!== 0 &&
-      <BookingLectureList
-        lectures={lectures2weeks}
-        bookLecture={bookLecture}
-      ></BookingLectureList>
-    }
+      {lectures2weeks.length === 0 && (
+        <h2>There are no bookable in 2 weeks to show</h2>
+      )}
+      {lectures2weeks.length !== 0 && (
+        <BookingLectureList
+          lectures={lectures2weeks}
+          bookLecture={bookLecture}
+        ></BookingLectureList>
+      )}
       <hr></hr>
       <h1>Booked Lectures</h1>
-      {bookedLectures2weeks.length===0 && <h2>There are no booked in 2 weeks to show</h2>}
-      { bookedLectures2weeks.length!== 0 &&
-      <BookedLectureList
-        lectures={bookedLectures2weeks}
-        cancelBooking={cancelBooking}
-      ></BookedLectureList>
-      }
+      {bookedLectures2weeks.length === 0 && (
+        <h2>There are no booked in 2 weeks to show</h2>
+      )}
+      {bookedLectures2weeks.length !== 0 && (
+        <BookedLectureList
+          lectures={bookedLectures2weeks}
+          cancelBooking={cancelBooking}
+        ></BookedLectureList>
+      )}
       <ReservationCalendar
         bookedLectures={bookedLectures}
         lectures={lectures}

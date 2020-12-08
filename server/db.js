@@ -57,7 +57,7 @@ const initTable = (name, attribute_declaration_cb, ...triggers) => {
 };
 
 initTable("user", (table) => {
-  table.increments("id").primary();
+  table.string("id").primary();
 
   table.string("name").notNullable();
 
@@ -68,15 +68,25 @@ initTable("user", (table) => {
   table.string("email").notNullable();
 
   table.string("role").notNullable();
+
+  table.string("city");
+
+  table.datetime("birthday");
+
+  table.string("ssn").notNullable();
 });
 
 initTable("course", (table) => {
-  table.increments("id").primary();
+  table.string("id").primary();
 
   table.string("name").notNullable();
 
-  table.integer("main_prof").unsigned().notNullable();
+  table.string("main_prof").unsigned().notNullable();
   table.foreign("main_prof").references("user.id");
+
+  table.integer("year").notNullable();
+
+  table.integer("semester").notNullable();
 });
 
 initTable(
@@ -84,12 +94,12 @@ initTable(
   (table) => {
     table.increments("id").primary();
 
-    table.string("name").notNullable();
+    table.string("name");
 
-    table.integer("course").unsigned().notNullable();
+    table.string("course").notNullable();
     table.foreign("course").references("course.id");
 
-    table.integer("lecturer").unsigned().notNullable();
+    table.string("lecturer").notNullable();
     table.foreign("lecturer").references("user.id");
 
     table.dateTime("start").notNullable();
@@ -98,6 +108,8 @@ initTable(
     table.integer("capacity").unsigned().notNullable();
 
     table.string("status").notNullable();
+
+    table.integer("room").unsigned().notNullable();
   },
   triggers.convert_trigger,
   triggers.deleteLecture_trigger
@@ -109,7 +121,7 @@ initTable(
     table.integer("lecture_id").notNullable();
     table.foreign("lecture_id").references("lecture.id");
 
-    table.integer("student_id").notNullable();
+    table.string("student_id").notNullable();
     table.foreign("student_id").references("user.id");
 
     table.datetime("booked_at").notNullable();
@@ -119,10 +131,10 @@ initTable(
 );
 
 initTable("course_available_student", (table) => {
-  table.integer("course_id").notNullable();
+  table.string("course_id").notNullable();
   table.foreign("course_id").references("course.id");
 
-  table.integer("student_id").notNullable();
+  table.string("student_id").notNullable();
   table.foreign("student_id").references("user.id");
 });
 
@@ -167,6 +179,18 @@ initTable("_Variables", (table) => {
 
 initTable("_Trigger", (table) => {
   table.string("name").primary();
+});
+
+initTable("semester", (table) => {
+  table.increments("sid").primary();
+
+  table.string("name").notNullable();
+
+  table.datetime("start").notNullable();
+
+  table.datetime("end").notNullable();
+
+  table.integer("inserted_lectures").notNullable(); //0-no insert 1-insert
 });
 
 // Export the database

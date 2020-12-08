@@ -140,10 +140,11 @@ export const CourseDetail = (props) => {
           });
         });
         setReserved(
-          reservations.filter((l) => 
-            l.date >= moment(startDate).format("YYYY-MM-DD") &&
-            l.date <= moment(endDate).format("YYYY-MM-DD")
-          ) 
+          reservations.filter(
+            (l) =>
+              l.date >= moment(startDate).format("YYYY-MM-DD") &&
+              l.date <= moment(endDate).format("YYYY-MM-DD")
+          )
         );
       })
       .catch((reason) => {
