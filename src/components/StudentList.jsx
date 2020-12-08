@@ -107,9 +107,9 @@ class StudentList extends React.Component {
   }
 
   renderEventContent(eventInfo) {
-    function format(n) {
+    /*function format(n) {
       return n > 9 ? "" + n : "0" + n;
-    }
+    }*/
 
     if (eventInfo)
       return (
@@ -117,7 +117,6 @@ class StudentList extends React.Component {
           className="rounded row align-items-center justify-content-center"
           style={{
             color: `${eventInfo.event.extendedProps.backgroundColor}`,
-            color: "#000000",
             height: "100%",
             fontWeight: "600",
             fontSize: "0.85rem",
