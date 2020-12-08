@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ReservationPage } from "./ReservationPage";
 import StudentList from "./StudentList";
 import { ManagerPage } from "./ManagerPage";
+import { SupportOfficerPage } from "./SupportOfficerPage";
 import { NavBar } from "./NavBar";
 import {
   BrowserRouter as Router,
@@ -365,6 +366,10 @@ export const App = () => {
           <Route path="/manager">
             {redirectToIfLoggedIn()}
             <ManagerPage />
+          </Route>
+          <Route path="/supportOfficer">
+            {redirectToIfLoggedIn()}
+            <SupportOfficerPage />
           </Route>
           <Route path="/">{redirectToIfLoggedIn()}</Route>
         </Switch>
