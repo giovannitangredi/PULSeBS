@@ -9,7 +9,7 @@ import {
   Switch,
   Route,
   Redirect,
-  useLocation,
+ // useLocation,
 } from "react-router-dom";
 import axios from "axios";
 import { CourseDetail } from "./TeacherStatistics";

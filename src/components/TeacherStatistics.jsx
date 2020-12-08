@@ -49,11 +49,11 @@ export const CourseDetail = (props) => {
       if (filter != undefined) {
         if (enabled) {
           newFilter.push(filter);
-          await setcourseFilter(newFilter);
+           setcourseFilter(newFilter);
         } else {
           newFilter = newFilter.filter((x) => x != filter);
           setcourseFilter(newFilter);
-          await setcourseFilter(newFilter);
+          setcourseFilter(newFilter);
         }
       }
     }
