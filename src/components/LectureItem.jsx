@@ -39,16 +39,16 @@ const LectureItem = ({ lecture, handleConvert, handleBooking }) => {
                   )}
               </label>
             </div>
-            {moment(lecture.start).isAfter(moment().add(1, "hour")) && (
-              <div className="col-lg-2">
+            <div className="col-lg-2">
+              {moment(lecture.start).isAfter(moment().add(1, "hour")) && (
                 <Button
                   variant="primary"
                   onClick={(event) => handleBooking(lecture)}
                 >
                   Cancel
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
