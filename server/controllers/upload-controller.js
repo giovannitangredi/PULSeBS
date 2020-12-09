@@ -91,7 +91,13 @@ const readFile = async (userId, path, type, semesterId) => {
           row.role = type;
         }
         if (type === "schedule") {
-          generateLectures(semesterId, row);
+          generateLectures(semesterId, row)
+            .catch((error) => {
+              reject ({
+                status: 500,
+                msg: `There was an error inserting the schedule`,
+              });
+          });
           //totInsert += countInsert; 
         }
         else {
