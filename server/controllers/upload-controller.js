@@ -17,6 +17,26 @@ const checkSupportOfficer = async (userId) => {
   }
   return true;
 };
+/*
+const checkDuplicate = async (values) => {  //check duplicate elements (same id)
+  //console.log(values)
+  let valueArr = values.map(function(item){ return item.id });
+  valueArr.some(function(item, idx){ 
+    console.log(valueArr.indexOf(item) != idx)
+    return valueArr.indexOf(item) != idx    //return true if ther is duplicate
+});
+}
+
+const checkRowValidity = async (row,type) => {
+  if (type === "schedule") { 
+    const regex = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
+    //console.log(row.time.match(regex))
+    if (row.time.match(regex) === null) {console.log("FALSE"); return false;}
+    else {
+      console.log("TRUE")
+      return true;}
+  }
+}*/
 
 const readFile = async (userId, path, type, semesterId) => {
   //type: student, teacher, course, enrollment, schedule
@@ -43,7 +63,7 @@ const readFile = async (userId, path, type, semesterId) => {
       return;
     }
     let rows = [];
-    let totInsert = 0;
+    //var totInsert = 0;
     fs.createReadStream(path)
       .pipe(
         csv.parse({
@@ -56,14 +76,23 @@ const readFile = async (userId, path, type, semesterId) => {
           msg: error,
         });
       })
-      .on("data", (row) => {
+      .on("data", async (row) => {
+        /*const res = checkRowValidity(row,type)
+        if (res) {
+          console.log("errore")
+          reject ({
+            status: 502,
+            msg: `The file has some errors`,
+          });
+          return;
+        }*/
         if (["student", "teacher"].includes(type)) {
           row.password_hash = bcrypt.hashSync("password", 1);
           row.role = type;
         }
         if (type === "schedule") {
-          const countInsert = generateLectures(semesterId, row);
-          totInsert += countInsert; 
+          generateLectures(semesterId, row);
+          //totInsert += countInsert; 
         }
         else {
           rows.push(row); 
@@ -71,6 +100,16 @@ const readFile = async (userId, path, type, semesterId) => {
       })
       .on("end", () => {
         if (type != "schedule") {
+          /*const res =  checkDuplicate(rows)
+          console.log(res)
+          if (type != "enrollments" && (res)){//unefficient
+            console.log("DENTRO")
+            reject ({
+              status: 501,
+              msg: `The file conteins duplicate id`,
+            });
+            return;
+          } */
           var chunkSize = 100;
           knex
             .batchInsert(tables[type], rows, chunkSize)
@@ -86,7 +125,7 @@ const readFile = async (userId, path, type, semesterId) => {
               });
             });
         } else {
-          resolve (totInsert);
+          resolve ();
         }  
       });
   })  
@@ -168,7 +207,7 @@ exports.uploadEnrollments = async (req, res) => {
 
 exports.uploadSchedule = async (req, res) => {
   const userId = req.user.id;
-  const semesterId = req.body.semesterid;
+  const semesterId = req.params.semesterid;
   let path = `${__dirname}/../../resources/static/uploads/` + req.file.filename;
   try {
     if (!semesterId) {
@@ -192,6 +231,7 @@ exports.uploadSchedule = async (req, res) => {
     }
     await readFile(userId, path, "schedule", semesterId);
     const tot = await knex("semester").update({ inserted_lectures: 1 }).where("sid", semesterId) //no more insert of lecture for the selected semester
+    console.log("TOT IN UPLOAD",tot)
     res.status(200).send({
       tot_insert: tot,
       message:
@@ -240,6 +280,7 @@ const generateLectures = async (semesterId, lecture) => {
       arr.push(createLecture(lecture, courseProf, tmp));
     }
     await knex("lecture").insert(arr);
+    console.log("TOT IN GENERATE",arr.length)
     return arr.length;
   } catch (error) {
     console.log(error);

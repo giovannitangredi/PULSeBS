@@ -13,7 +13,6 @@ export const BookedLectureList = (props) => {
       <thead>
         <tr>
           <th style={styles.head}>Course</th>
-          <th style={styles.head}>Lecture</th>
           <th style={styles.head}>Professor</th>
           <th style={styles.head}>Status</th>
           <th style={styles.head}>Start</th>
