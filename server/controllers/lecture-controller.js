@@ -7,7 +7,6 @@ exports.getBookingLectures = async (req, res) => {
   const studentId = req.user && req.user.id;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
-  //const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
       { id: "lecture.id" },
@@ -18,6 +17,9 @@ exports.getBookingLectures = async (req, res) => {
       { start: "start" },
       { end: "end" },
       { status: "lecture.status" },
+      { room: "lecture.room" },
+      { year: "course.year" },
+      { semester: "course.semester" },
       { capacity: "capacity" },
       knex.raw(`IFNULL(bookedStudent,0) as booked_students`)
     )
@@ -56,8 +58,6 @@ exports.getBookingLectures = async (req, res) => {
 //Get existent bookings by one student
 exports.getExistentBooking = async (req, res) => {
   const studentId = req.user && req.user.id;
-  //const today = moment().format("YYYY-MM-DD HH:mm:ss");
-  //const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
       { id: "lecture.id" },
@@ -67,6 +67,9 @@ exports.getExistentBooking = async (req, res) => {
       { lecturer_surname: "user.surname" },
       { start: "start" },
       { end: "end" },
+      { room: "lecture.room" },
+      { year: "course.year" },
+      { semester: "course.semester" },
       { capacity: "capacity" },
       { booked_at: "booked_at" },
       { status: "status" }
@@ -196,7 +199,8 @@ exports.getScheduledLectures = async (req, res) => {
       { lecturer_id: "u.id" },
       { lecturer_name: "u.name" },
       { lecturer_surname: "u.surname" },
-      { status: "l.status" }
+      { status: "l.status" },
+      { room: "l.room" }
     )
     .from({ l: "lecture" })
     .join({ u: "user" }, "l.lecturer", "=", "u.id")
@@ -237,7 +241,6 @@ exports.getBookedStudents = async (req, res) => {
 };
 
 // Turn a presence lecture into a distance one
-
 exports.convertDistanceLecture = async (req, res) => {
   const lectureId = req.params.lectureid;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -296,6 +299,7 @@ exports.convertDistanceLecture = async (req, res) => {
       });
     });
 };
+
 exports.deleteLecture = async (req, res) => {
   const lectureId = req.params.lectureId;
   try {
@@ -331,9 +335,6 @@ exports.deleteLecture = async (req, res) => {
       .status(400)
       .json({ message: `There was an error cancelling the lecture: ${err}` });
   }
-
-  /*let string =
-    "select lecture from lectures where lesson starts in more than 1 hour, which this teacher owns and teaches.";*/
 };
 
 const sendEmailsForCancelledLecture = async (lectureId) => {

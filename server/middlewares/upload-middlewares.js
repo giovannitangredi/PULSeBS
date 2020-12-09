@@ -3,7 +3,8 @@ const multer = require("multer");
 const csvFilter = (req, file, cb) => {
   if (
     file.mimetype.includes("text/csv") ||
-    file.mimetype.includes("application/vnd.ms-excel")
+    file.mimetype.includes("application/vnd.ms-excel") ||
+    file.mimetype.includes("application/octet-stream")
   ) {
     cb(null, true);
   } else {

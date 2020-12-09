@@ -9,7 +9,7 @@ import {
   Switch,
   Route,
   Redirect,
- // useLocation,
+  // useLocation,
 } from "react-router-dom";
 import axios from "axios";
 import { CourseDetail } from "./TeacherStatistics";
@@ -306,7 +306,7 @@ export const App = () => {
   ];
   const [authUser, setAuthUser] = useState({});
   const [loading, setLoading] = useState(false);
- // const location = useLocation();
+  // const location = useLocation();
   const getUser = () => {
     axios
       .get("/user/")

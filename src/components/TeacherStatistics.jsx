@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import {
-  Table,
-  Button,
-  ListGroup,
-} from "react-bootstrap";
+import { Table, Button, ListGroup } from "react-bootstrap";
 import axios from "axios";
 import { DatePickerComponent } from "./DatePickerComponent";
 
@@ -15,8 +11,8 @@ export const CourseDetail = (props) => {
   const [reserved, setReserved] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-//  const [weeksBetween, setWeeksBetween] = useState([]);
-//  const [monthsBetween, setMonthsBetween] = useState([]);
+  //  const [weeksBetween, setWeeksBetween] = useState([]);
+  //  const [monthsBetween, setMonthsBetween] = useState([]);
   const [monthLectures, setMonthLectures] = useState([]);
 
   /* get http call */
@@ -49,7 +45,7 @@ export const CourseDetail = (props) => {
       if (filter != undefined) {
         if (enabled) {
           newFilter.push(filter);
-           setcourseFilter(newFilter);
+          setcourseFilter(newFilter);
         } else {
           newFilter = newFilter.filter((x) => x != filter);
           setcourseFilter(newFilter);
@@ -69,12 +65,12 @@ export const CourseDetail = (props) => {
           week.startDate.getWeek().toString()
       );
     });
-   // setWeeksBetween(weekdays);
+    // setWeeksBetween(weekdays);
     let months = [];
     getMonthList(startDate, endDate).forEach((month) => {
       months.push(month);
     });
-   // setMonthsBetween(months);
+    // setMonthsBetween(months);
 
     let promiseArray = [];
     let promiseArray2 = [];

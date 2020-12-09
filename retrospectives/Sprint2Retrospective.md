@@ -38,7 +38,7 @@ Definition of Done :
 
 - Hours per task
 
-  - Average  : 2h 26m
+  - Average : 2h 26m
   - Standard Deviation : 3h 30m
 
 - Total task estimation error ratio: 0.91
@@ -47,7 +47,7 @@ Definition of Done :
 
 - Unit Testing
   - Total hours estimated : 5h 45m
-  - Total hours spent : 14h 
+  - Total hours spent : 14h
   - Nr of automated unit test cases : 21
   - Coverage : 80 %
 - E2E testing
@@ -70,7 +70,7 @@ Definition of Done :
 
 - What caused your errors in estimation (if any)?
 
-  - We underestimate some stories  because we didn't consider the dependencies between the stories.
+  - We underestimate some stories because we didn't consider the dependencies between the stories.
 
 - What lessons did you learn (both positive and negative) in this sprint?
 
@@ -80,6 +80,7 @@ Definition of Done :
 - Which improvement goals set in the previous retrospective were you able to achieve?
   - We didn't achieve the improvement goals from the previous retrospective .
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
+
   - Do not exceed the assigned 6 hours per week.
   - Put more effort in system testing to avoid bugs and produce some formal documentation for the tests.
 
