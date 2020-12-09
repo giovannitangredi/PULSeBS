@@ -20,7 +20,6 @@ const checkSupportOfficer = async (userId) => {
 
 const readFile = async (userId, path, type, semesterId) => {
   //type: student, teacher, course, enrollment, schedule
-  let err = {};
   const headers = {
     student: ["id", "name", "surname", "city", "email", "birthday", "ssn"],
     teacher: ["id", "name", "surname", "email", "ssn"],
@@ -35,63 +34,71 @@ const readFile = async (userId, path, type, semesterId) => {
     enrollment: "course_available_student",
     schedule: "lecture",
   };
-  if (!(await checkSupportOfficer(userId))) {
-    throw {
-      msg: "Only support officer can upload files.",
-      status: 401,
-    };
-  }
-  let rows = [];
-  fs.createReadStream(path)
-    .pipe(
-      csv.parse({
-        headers: headers[type],
-        renameHeaders: true,
+  return new Promise(async (resolve, reject) => {
+    if (!(await checkSupportOfficer(userId))) {
+      reject ({
+        msg: "Only support officer can upload files.",
+        status: 401,
+      });
+      return;
+    }
+    let rows = [];
+    let totInsert = 0;
+    fs.createReadStream(path)
+      .pipe(
+        csv.parse({
+          headers: headers[type],
+          renameHeaders: true,
+        })
+      )
+      .on("error", (error) => {
+        reject ({
+          msg: error,
+        });
       })
-    )
-    .on("error", (error) => {
-      throw {
-        msg: error,
-      };
-    })
-    .on("data", (row) => {
-      if (["student", "teacher"].includes(type)) {
-        row.password_hash = bcrypt.hashSync("password", 1);
-        row.role = type;
-      }
-      if (type === "schedule") {
-        generateLectures(semesterId, row);
-      }
-      rows.push(row); //keep for schedule?
-    })
-    .on("end", () => {
-      if (type != "schedule") {
-        var chunkSize = 100;
-        knex
-          .batchInsert(tables[type], rows, chunkSize)
-          .then(() => {
-            console.log("SUCCESS");
-            return rows.length;
-          })
-          .catch((err) => {
-            console.log("ERRORE ", err); //ritorna errore
-            throw {
-              status: 500,
-              msg: `There was an error inserting the ${type}s`,
-            };
-          });
-      }
-    });
+      .on("data", (row) => {
+        if (["student", "teacher"].includes(type)) {
+          row.password_hash = bcrypt.hashSync("password", 1);
+          row.role = type;
+        }
+        if (type === "schedule") {
+          const countInsert = generateLectures(semesterId, row);
+          totInsert += countInsert; 
+        }
+        else {
+          rows.push(row); 
+        }     
+      })
+      .on("end", () => {
+        if (type != "schedule") {
+          var chunkSize = 100;
+          knex
+            .batchInsert(tables[type], rows, chunkSize)
+            .then(() => {
+              console.log("SUCCESS");
+              resolve (rows.length);
+            })
+            .catch((err) => {
+              console.log("ERRORE ", err); //ritorna errore
+              reject ({
+                status: 500,
+                msg: `There was an error inserting the ${type}s`,
+              });
+            });
+        } else {
+          resolve (totInsert);
+        }  
+      });
+  })  
 };
 
 exports.uploadStudents = async (req, res) => {
   const userId = req.user.id;
   let path = `${__dirname}/../../resources/static/uploads/` + req.file.filename;
-
   try {
-    const rows = await readFile(userId, path, "student", null);
+    const tot = await readFile(userId, path, "student", null);
     res.status(200).send({
-      rows_lenght: rows,
+      tot_insert: tot,
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
@@ -107,9 +114,9 @@ exports.uploadProfessors = async (req, res) => {
   const userId = req.user.id;
   let path = `${__dirname}/../../resources/static/uploads/` + req.file.filename;
   try {
-    const rows = await readFile(userId, path, "teacher", null);
+    const tot = await readFile(userId, path, "teacher", null);
     res.status(200).send({
-      rows_lenght: rows,
+      tot_insert: tot,
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
@@ -125,9 +132,9 @@ exports.uploadCourses = async (req, res) => {
   const userId = req.user.id;
   let path = `${__dirname}/../../resources/static/uploads/` + req.file.filename;
   try {
-    const rows = await readFile(userId, path, "course", null);
+    const tot = await readFile(userId, path, "course", null);
     res.status(200).send({
-      rows_lenght: rows,
+      tot_insert: tot,
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
@@ -144,9 +151,9 @@ exports.uploadEnrollments = async (req, res) => {
   const userId = req.user.id;
   let path = `${__dirname}/../../resources/static/uploads/` + req.file.filename;
   try {
-    const rows = await readFile(userId, path, "enrollment", null);
+    const tot = await readFile(userId, path, "enrollment", null);
     res.status(200).send({
-      rows_lenght: rows,
+      tot_insert: tot,
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
@@ -184,24 +191,20 @@ exports.uploadSchedule = async (req, res) => {
       };
     }
     await readFile(userId, path, "schedule", semesterId);
+    const tot = await knex("semester").update({ inserted_lectures: 1 }).where("sid", semesterId) //no more insert of lecture for the selected semester
     res.status(200).send({
+      tot_insert: tot,
       message:
         "Uploaded the file successfully: " +
         req.file
-          .originalname /* +
-      "\nRows inserted: " +
-      rows.length,*/,
+          .originalname 
     });
   } catch (error) {
     console.log(error);
     res.status(error.status).send({
       message: error.msg,
     });
-  } /*
-  knex("semester")
-  .update({ inserted_lectures: 1 })
-  .where("sid", semesterId)*/
-
+  }
   fs.unlinkSync(path);
 };
 
@@ -229,7 +232,7 @@ const generateLectures = async (semesterId, lecture) => {
     if (tmp.isSameOrAfter(start, "d")) {
       //check if the day of the first week is after the start date, if true add a date
 
-      arr.push(createLecture(lecture, courseProf, tmp)); //nome della lezione incrementale?
+      arr.push(createLecture(lecture, courseProf, tmp)); 
     }
     while (tmp.add(7, "days").isBefore(end)) {
       //generate all days until the end date adding 7 days each time
@@ -237,6 +240,7 @@ const generateLectures = async (semesterId, lecture) => {
       arr.push(createLecture(lecture, courseProf, tmp));
     }
     await knex("lecture").insert(arr);
+    return arr.length;
   } catch (error) {
     console.log(error);
     throw { msg: `There was an error`, status: 503 };

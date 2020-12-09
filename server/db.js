@@ -94,8 +94,6 @@ initTable(
   (table) => {
     table.increments("id").primary();
 
-    table.string("name");
-
     table.string("course").notNullable();
     table.foreign("course").references("course.id");
 
