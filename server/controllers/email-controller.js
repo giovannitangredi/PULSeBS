@@ -127,7 +127,7 @@ exports.startScheduler = async (schedulePattern) => {
           const emailSubject = "Bookings for the lecture";
           for (let lecture of lectures) {
             const emailBody = `Dear ${lecture.lecturerName} ${lecture.lecturerSurname},<br/> \
-                  We inform You that ${lecture.bookingsNumber} students booked a seat for ${lecture.name} of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
+                  We inform You that ${lecture.bookingsNumber} students booked a seat for lecture of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
                   Thanks,<br/>The PULSeBS Team`;
             this.sendMail(lecture.lecturerEmail, emailSubject, emailBody);
           }
@@ -142,7 +142,7 @@ exports.getListOfLectures = async (from, to) => {
   //let querystring = `select distinct * from lecture join user where lecture.lecturer==user.id and lecture.start>='${date.format("YYYY-MM-DD HH:mm:ss")}' and  lecture.start<'${date.add(1, "days").format("YYYY-MM-DD HH:mm:ss")}' `;
   const queryResults = await knex
     .select(
-      { name: "lecture.name" },
+      //{ name: "lecture.name" },
       { courseName: "course.name" },
       { start: "lecture.start" },
       { lecturerName: "user.name" },
