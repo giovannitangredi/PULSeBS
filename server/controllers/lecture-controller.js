@@ -112,7 +112,7 @@ exports.newBooking = async (req, res) => {
           })
           .then(() => {
             // Send a success message in response
-            res.json({ message: `Booking created.` });
+            res.json({ message: `Booking created.` })
 
             // Get the user information
             const userQuery = knex

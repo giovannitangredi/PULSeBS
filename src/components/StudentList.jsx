@@ -77,7 +77,7 @@ class StudentList extends React.Component {
   formatEvents() {
     return this.state.lectures.map((lecture) => {
       const {
-        name,
+        //name,
         end,
         start,
         capacity,
@@ -90,7 +90,7 @@ class StudentList extends React.Component {
       let endTime = new Date(end);
 
       return {
-        title: name,
+        //title: name,
         start: startTime,
         end: endTime,
         backgroundColor: status === "distance" ? "#F73D3D" : "dodgerblue",
@@ -100,7 +100,7 @@ class StudentList extends React.Component {
           booked_students: booked_students,
           status: status,
           id,
-          name,
+          //name,
         },
       };
     });

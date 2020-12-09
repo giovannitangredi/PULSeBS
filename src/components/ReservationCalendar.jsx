@@ -48,7 +48,7 @@ class ReservationCalendar extends React.Component {
         let endTime = new Date(end);
 
         return {
-          title: name,
+          //title: name,
           start: startTime,
           end: endTime,
           backgroundColor: color,
@@ -61,7 +61,7 @@ class ReservationCalendar extends React.Component {
             lecturer_name,
             lecturer_surname,
             color,
-            name,
+            //name,
             status,
           },
         };

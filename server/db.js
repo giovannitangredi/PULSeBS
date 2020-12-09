@@ -149,7 +149,6 @@ initTable("stats_lecture", (table) => {
   table.increments("lid").primary();
 
   table.string("lecture_id").notNullable();
-  table.string("lecture_name").notNullable();
 
   table.integer("course_id").notNullable();
   table.string("course_name").notNullable();

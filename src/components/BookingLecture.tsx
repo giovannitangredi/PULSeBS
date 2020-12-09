@@ -14,7 +14,6 @@ export const BookingLecture = (props: any) => {
   return (
     <tr>
       <td style={styles.col}>{props.lecture.course}</td>
-      <td style={styles.col}>{props.lecture.name}</td>
       <td style={styles.col}>
         {props.lecture.lecturer_name + " " + props.lecture.lecturer_surname}
       </td>
