@@ -35,7 +35,7 @@ const DataSetupView = (props) => {
 	const handleOnSubmit = async (event) => {
 		event.stopPropagation();
 		event.preventDefault();
-		const form = event.target;
+		
 		let currentStatus = { ...uploadStatus };
 		let filesToUpload = { ...files };
 		const sendingOrder = ["students", "teachers", "courses", "enrollments"];
@@ -59,7 +59,6 @@ const DataSetupView = (props) => {
 			currentStatus[key] = "uploading";
 			setUploadStatus({ ...currentStatus });
 			try {
-				const res = 
 					await axios
 						.post(`/upload/${key}`,
 							formData
@@ -206,14 +205,12 @@ const ScheduleView = (props) => {
 	const handleOnSubmit = async (event) => {
 		event.stopPropagation();
 		event.preventDefault();
-		const form = event.target;
 
 		const formData = new FormData();
 		formData.append('file', scheduleFile);
 			
 		setUploadStatus("uploading");
 		try {
-			const res = 
 				await axios
 					.post(`/upload/schedule/${semester}`,
 						formData
@@ -252,9 +249,9 @@ const ScheduleView = (props) => {
 						<>
 						<option value={''}>Select a semester</option>
 						{ 
-							availableSemesters.map((semester) =>
-								<option value={semester.sid} key={semester.sid}>
-									{`${semester.name}: from ${semester.start} to ${semester.end}`}
+							availableSemesters.map((s) =>
+								<option value={s.sid} key={s.sid}>
+									{`${s.name}: from ${s.start} to ${s.end}`}
 								</option> 
 							)
 						}
