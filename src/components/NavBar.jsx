@@ -10,6 +10,7 @@ export const NavBar = (props) => {
     ],
     student: [{ title: "Home", path: "/student" }],
     manager: [{ title: "Home", path: "/manager" }],
+    supportOfficer: [{ title: "Home", path: "/supportOfficer" }],
   };
 
   const handleLogout = (ev) => {
