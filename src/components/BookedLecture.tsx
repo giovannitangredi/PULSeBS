@@ -1,5 +1,7 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
+import moment from "moment";
+
 export const BookedLecture = (props: any) => {
   const styles = {
     col: {
@@ -17,9 +19,17 @@ export const BookedLecture = (props: any) => {
       <td style={styles.col}>
         {props.lecture.lecturer_name + " " + props.lecture.lecturer_surname}
       </td>
-      <td style={styles.col}>{props.lecture.status}</td>
-      <td style={styles.col}>{props.lecture.start}</td>
-      <td style={styles.col}>{props.lecture.end}</td>
+      <td style={styles.col}>
+        {props.lecture.status === "presence" && "Room " + props.lecture.room}
+      </td>
+      <td style={styles.col}>
+        {moment(props.lecture.start).format("dddd, MMMM Do YYYY")}
+      </td>
+      <td style={styles.col}>
+        {moment(props.lecture.start)
+          .format("HH:mm")
+          .concat("-" + moment(props.lecture.end).format("HH:mm"))}
+      </td>
       <td style={styles.col}>
         <Button variant="warning" onClick={(evt) => handleCancel(evt)}>
           {" "}

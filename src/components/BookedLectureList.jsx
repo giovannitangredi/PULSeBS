@@ -14,9 +14,9 @@ export const BookedLectureList = (props) => {
         <tr>
           <th style={styles.head}>Course</th>
           <th style={styles.head}>Professor</th>
-          <th style={styles.head}>Status</th>
-          <th style={styles.head}>Start</th>
-          <th style={styles.head}>End</th>
+          <th style={styles.head}>Room</th>
+          <th style={styles.head}>Date</th>
+          <th style={styles.head}>Time</th>
           <th style={styles.head}></th>
         </tr>
       </thead>

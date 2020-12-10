@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
+import moment from "moment";
 export const BookingLecture = (props: any) => {
   const handleBooking = (evt: any) => {
     if (evt) evt.preventDefault();
@@ -17,11 +18,27 @@ export const BookingLecture = (props: any) => {
       <td style={styles.col}>
         {props.lecture.lecturer_name + " " + props.lecture.lecturer_surname}
       </td>
-      <td style={styles.col}>{props.lecture.status}</td>
-      <td style={styles.col}>{props.lecture.start}</td>
-      <td style={styles.col}>{props.lecture.end}</td>
       <td style={styles.col}>
-        {props.lecture.booked_students}/{props.lecture.capacity}
+        {props.lecture.status === "presence"
+          ? "Room " + props.lecture.room
+          : "Virtual Classroom"}
+      </td>
+      <td style={styles.col}>
+        {moment(props.lecture.start).format("dddd, MMMM Do YYYY")}
+      </td>
+      <td style={styles.col}>
+        {moment(props.lecture.start)
+          .format("HH:mm")
+          .concat("-" + moment(props.lecture.end).format("HH:mm"))}
+      </td>
+      <td style={styles.col}>
+        {props.lecture.status === "presence" ? (
+          <>
+            {props.lecture.booked_students}/{props.lecture.capacity}
+          </>
+        ) : (
+          "Online"
+        )}
       </td>
       <td style={styles.col}>
         {" "}

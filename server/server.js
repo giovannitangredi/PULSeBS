@@ -51,7 +51,7 @@ app.use("/api/courses", courseRouter);
 app.use("/api/lectures", lectureRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/upload", uploadRouter);
-app.use("/api/semesters", semesterRouter)
+app.use("/api/semesters", semesterRouter);
 
 // To return a better object in case of errors
 app.use(function (err, req, res, next) {
