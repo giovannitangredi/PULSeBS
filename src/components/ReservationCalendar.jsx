@@ -32,7 +32,7 @@ class ReservationCalendar extends React.Component {
       )
       .map((lecture) => {
         const {
-          name,
+          //name,
           end,
           start,
           capacity,
@@ -43,6 +43,7 @@ class ReservationCalendar extends React.Component {
           lecturer_surname,
           color,
           status,
+          room,
         } = lecture;
         let startTime = new Date(start);
         let endTime = new Date(end);
@@ -61,6 +62,7 @@ class ReservationCalendar extends React.Component {
             lecturer_name,
             lecturer_surname,
             color,
+            room,
             //name,
             status,
           },
@@ -96,7 +98,8 @@ class ReservationCalendar extends React.Component {
             {eventInfo.event.extendedProps.status == "presence" && (
               <>
                 <br />
-                Capacity: {eventInfo.event.extendedProps.capacity}{" "}
+                Room {eventInfo.event.extendedProps.room} Seats:{" "}
+                {eventInfo.event.extendedProps.capacity}
               </>
             )}
           </p>
