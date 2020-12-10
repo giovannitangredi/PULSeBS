@@ -12,6 +12,8 @@ const DataSetupView = (props) => {
 	const [message, setMessage] = useState({text: '', type: ''});
 	const [uploadStatus, setUploadStatus] = useState({});
 
+	const sendingOrder = ["students", "teachers", "courses", "enrollments"];
+
 	const resetForm = () => {
 		setFiles({});
 		setSubmitDisabled(true);
@@ -38,7 +40,6 @@ const DataSetupView = (props) => {
 		
 		let currentStatus = { ...uploadStatus };
 		let filesToUpload = { ...files };
-		const sendingOrder = ["students", "teachers", "courses", "enrollments"];
 		let failed = false;
 
 		// disable submit and reset buttons before start and clear old message
@@ -48,10 +49,8 @@ const DataSetupView = (props) => {
 
 		for(let key of sendingOrder) {
 			if(!files[key]) {
-				console.log("continua " +key);
 				continue;
 			}
-			console.log("ci sono " +key);
 
 			const formData = new FormData();
 			formData.append('file', files[key]);
@@ -93,69 +92,30 @@ const DataSetupView = (props) => {
 	
 	return (
 		<Form onChange={handleOnChange} onSubmit={handleOnSubmit}>
-			<Form.Row className="d-flex flex-row d-flex justify-content-center">
-				<Form.Group className="col-sm-8">
-					<Form.File id="students" 
-						label={ files["students"]?files["students"].name : "Upload students list file"} 
-						accept=".csv" 
-						custom/>
-				</Form.Group>
-				<Form.Group>
-					{ uploadStatus["students"] === "uploading" && <Spinner animation="border" /> }
-					{ uploadStatus["students"] === "completed" && <Check size={48} color="green"/> }
-					{ uploadStatus["students"] === "failed" && <X size={48} color="red"/> }
-				</Form.Group>
-			</Form.Row>	
-
-			<Form.Row className="d-flex flex-row d-flex justify-content-center">
-				<Form.Group className="col-sm-8">
-					<Form.File id="teachers" 
-						label={ files["teachers"]?files["teachers"].name : "Upload teachers list file"} 
-						accept=".csv" 
-						custom/>
-				</Form.Group>
-				<Form.Group>
-					{ uploadStatus["teachers"] === "uploading" && <Spinner animation="border" /> }
-					{ uploadStatus["teachers"] === "completed" && <Check size={48}  color="green" /> }
-					{ uploadStatus["teachers"] === "failed" && <X size={48} color="red" /> }
-				</Form.Group>
-			</Form.Row>	
-
-			<Form.Row className="d-flex flex-row d-flex justify-content-center">
-				<Form.Group className="col-sm-8">
-					<Form.File id="courses" 
-						label={ files["courses"]?files["courses"].name : "Upload courses list file"} 
-						accept=".csv" 
-						custom/>
-				</Form.Group>
-				<Form.Group>
-					{ uploadStatus["courses"] === "uploading" && <Spinner animation="border" /> }
-					{ uploadStatus["courses"] === "completed" && <Check size={48} color="green" /> }
-					{ uploadStatus["courses"] === "failed" && <X size={48} color="red" /> }
-				</Form.Group>
-			</Form.Row>	
-
-			<Form.Row className="d-flex flex-row d-flex justify-content-center">
-				<Form.Group className="col-sm-8">
-					<Form.File id="enrollments" 
-						label={ files["enrollments"]?files["enrollments"].name : "Upload enrollments list file"} 
-						accept=".csv" 
-						custom/>
-				</Form.Group>
-				<Form.Group>
-					{ uploadStatus["enrollments"] === "uploading" && <Spinner animation="border" /> }
-					{ uploadStatus["enrollments"] === "completed" && <Check size={48} color="green" /> }
-					{ uploadStatus["enrollments"] === "failed" && <X size={48} color="red" /> }
-				</Form.Group>
-			</Form.Row>	
+			{
+				sendingOrder.map((item) => 
+					<Form.Row className="d-flex flex-row d-flex justify-content-center">
+						<Form.Group className="col-sm-8">
+							<Form.File id={item} 
+								label={ files[item]? files[item].name : `Upload file for ${item}` } 
+								accept=".csv" 
+								custom/>
+						</Form.Group>
+						<Form.Group>
+							{ uploadStatus[item] === "uploading" && <Spinner animation="border" /> }
+							{ uploadStatus[item] === "completed" && <Check size={48} color="green"/> }
+							{ uploadStatus[item] === "failed" && <X size={48} color="red"/> }
+						</Form.Group>
+					</Form.Row>	
+				)
+			}
 			<Form.Row className="d-flex flex-row d-flex justify-content-center">
 				<Button type="submit" disabled={submitDisabled}>Upload files</Button>
 				<Button disabled={resetDisabled} onClick={resetForm} className="ml-3">Reset</Button>
 			</Form.Row>	
 			<Form.Row className="d-flex flex-row d-flex justify-content-center mt-3">
 				{message.text && <p className={message.type === "failure"? "text-danger": "text-success"}> {message.text} </p>}
-			</Form.Row>	
-			
+			</Form.Row>
 		</Form>
 	);
 };
