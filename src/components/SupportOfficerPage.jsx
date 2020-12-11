@@ -31,13 +31,17 @@ const DataSetupView = (props) => {
   const handleOnChange = (event) => {
     const fileBrowser = event.target;
     const fileSelected = fileBrowser.files[0];
-    const filesList = { ...files };
-    const newStatus = { ...uploadStatus };
-    filesList[fileBrowser.id] = fileSelected;
-    setFiles(filesList);
-    newStatus[fileBrowser.id] = "";
-    setUploadStatus(newStatus);
-    setSubmitDisabled(false);
+    if(fileSelected) {
+      const filesList = { ...files };
+      const newStatus = { ...uploadStatus };
+      filesList[fileBrowser.id] = fileSelected;
+      setFiles(filesList);
+      newStatus[fileBrowser.id] = "";
+      setUploadStatus(newStatus);
+      setSubmitDisabled(false);
+      // fix the problem with chrome that doesn't trigger onChange event when the same file is selected
+      fileBrowser.value = "";
+    }
   };
 
   const handleOnSubmit = async (event) => {
@@ -146,8 +150,7 @@ const DataSetupView = (props) => {
                 message.type === "failure" ? "text-danger" : "text-success"
               }
             >
-              {" "}
-              {message.text}{" "}
+              {message.text}
             </p>
           )}
         </Form.Row>
@@ -187,9 +190,11 @@ const ScheduleView = (props) => {
   const handleOnChange = (event) => {
     const fileBrowser = event.target;
     const fileSelected = fileBrowser.files[0];
-
-    setScheduleFile(fileSelected);
-    setUploadStatus("");
+    
+    if(fileSelected) {
+      setScheduleFile(fileSelected);
+      setUploadStatus("");
+    }
   };
 
   const handleSemesterOnChange = (event) => {
@@ -297,8 +302,7 @@ const ScheduleView = (props) => {
                 message.type === "failure" ? "text-danger" : "text-success"
               }
             >
-              {" "}
-              {message.text}{" "}
+              {message.text}
             </p>
           )}
         </Form.Row>
