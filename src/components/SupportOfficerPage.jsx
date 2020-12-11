@@ -197,6 +197,28 @@ const ScheduleView = (props) => {
 
     const formData = new FormData();
     formData.append("file", scheduleFile);
+    setUploadStatus("uploading");	
+		try {	
+				await axios	
+					.post(`/upload/schedule/${semester}`,	
+						formData	
+					);	
+				setUploadStatus("completed");	
+				setMessage({	
+					text: "Schedule uploaded", 	
+					type: 'success'	
+				});	
+				// refresh the available semesters list	
+				loadSemesters();	
+		} catch (error) {	
+			setUploadStatus("failed");	
+			setMessage(	
+				{	
+					text: error.response.data.message, 	
+					type: 'failure'	
+				}	
+			);		
+	  }
   };
   return (
     <Container className="d-flex flex-column pt-0 align-items-center rounded border border-primary col-10 bg-white">
