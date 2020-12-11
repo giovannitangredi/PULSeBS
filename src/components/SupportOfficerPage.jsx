@@ -33,7 +33,6 @@ const DataSetupView = (props) => {
     const fileSelected = fileBrowser.files[0];
     const filesList = { ...files };
     const newStatus = { ...uploadStatus };
-
     filesList[fileBrowser.id] = fileSelected;
     setFiles(filesList);
     newStatus[fileBrowser.id] = "";
@@ -70,7 +69,7 @@ const DataSetupView = (props) => {
         delete filesToUpload[key];
       } catch (error) {
         setMessage({
-          text: error.response.data.message,
+          text: error.response ? error.response.data.message : `Error uploading ${key}`,
           type: "failure",
         });
         currentStatus[key] = "failed";
@@ -103,16 +102,23 @@ const DataSetupView = (props) => {
         onSubmit={handleOnSubmit}
       >
         {sendingOrder.map((item) => (
-          <Form.Row className="d-flex flex-row justify-content-center">
+          <Form.Row key={item} className="d-flex flex-row justify-content-center">
             <Form.Group className="col-sm-10">
-              <Form.File
-                id={item}
-                label={
-                  files[item] ? files[item].name : `Upload file for ${item}`
-                }
-                accept=".csv"
-                custom
-              />
+              <Form.File custom>
+                <Form.File.Input 
+                  id={item}
+                  accept=".csv"
+                  onChange={handleOnChange} 
+                />
+                <Form.File.Label>
+                  {
+                    files[item] ? 
+                      <span className="font-weight-bold">{ files[item].name }</span> 
+                      : 
+                      `Upload file for ${item}`
+                  }
+                </Form.File.Label>
+              </Form.File>
             </Form.Group>
             <Form.Group>
               {uploadStatus[item] === "uploading" && (
@@ -172,7 +178,7 @@ const ScheduleView = (props) => {
       })
       .catch((error) => {
         setMessage({
-          text: error.response.data.message,
+          text: error.response ? error.response.data.message : "Error loading semesters",
           type: "failure",
         });
       });
@@ -209,12 +215,14 @@ const ScheduleView = (props) => {
 					type: 'success'	
 				});	
 				// refresh the available semesters list	
-				loadSemesters();	
+        setSemester("");
+        setScheduleFile(null);
+        loadSemesters();	
 		} catch (error) {	
 			setUploadStatus("failed");	
 			setMessage(	
 				{	
-					text: error.response.data.message, 	
+					text: error.response ? error.response.data.message : "Error uploading schedule", 	
 					type: 'failure'	
 				}	
 			);		
@@ -230,13 +238,21 @@ const ScheduleView = (props) => {
       <Form className="col-10" onSubmit={handleOnSubmit}>
         <Form.Row>
           <Form.Group className="col-sm-6">
-            <Form.File
-              id="schedule"
-              label={scheduleFile ? scheduleFile.name : "Upload schedule file"}
-              accept=".csv"
-              custom
-              onChange={handleOnChange}
-            />
+            <Form.File custom>
+              <Form.File.Input 
+                id="schedule"
+                accept=".csv"
+                onChange={handleOnChange} 
+              />
+              <Form.File.Label>
+                {
+                  scheduleFile ? 
+                    <span className="font-weight-bold">{ scheduleFile.name }</span> 
+                    : 
+                    "Upload schedule file"
+                }
+              </Form.File.Label>
+            </Form.File>
           </Form.Group>
 
           <Form.Group className="col-sm-5 ml-1">
@@ -244,12 +260,13 @@ const ScheduleView = (props) => {
               as="select"
               value={semester}
               onChange={handleSemesterOnChange}
+              className={ semester !== "" ? "font-weight-bold" : "" }
             >
               <>
                 <option value={""}>Select a semester</option>
                 {availableSemesters.map((s) => (
                   <option value={s.sid} key={s.sid}>
-                    {`${s.name}: from ${s.start} to ${s.end}`}
+                    {`${s.name} ( ${s.start} to ${s.end} )`}
                   </option>
                 ))}
               </>
