@@ -266,7 +266,7 @@ class StudentList extends React.Component {
                   </h4>{" "}
                   <div>
                     <svg width="340" height="40">
-                      <text font-size="14" font-family="Verdana" x="7" y="22">
+                      <text fontSize="14" fontFamily="Verdana" x="7" y="22">
                         Remote Lectures
                       </text>
                       <rect
@@ -280,7 +280,7 @@ class StudentList extends React.Component {
                           stroke: "rgb(0,0,0)",
                         }}
                       />
-                      <text font-size="14" font-family="Verdana" x="169" y="22">
+                      <text fontSize="14" fontFamily="Verdana" x="169" y="22">
                         Presence Lectures
                       </text>
                       <rect

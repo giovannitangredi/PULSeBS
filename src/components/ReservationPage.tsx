@@ -65,6 +65,19 @@ export const ReservationPage = (props: any) => {
         setLoading(false);
       });
   };
+  const candidateLecture = (lectureID:any)=>{
+    setLoading(true);
+    axios
+      .post(`/lectures/${lectureID}/candidate`, { lecture_id: lectureID })
+      .then((res) => {
+        getReservations();
+        console.log(res)
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  }
   const cancelBooking = (lectureID: any) => {
     setLoading(true);
     axios
@@ -99,6 +112,7 @@ export const ReservationPage = (props: any) => {
       <BookingLectureList
         lectures={lectures2weeks}
         bookLecture={bookLecture}
+        candidateLecture={candidateLecture}
       ></BookingLectureList>
     }
       <hr></hr>
@@ -112,6 +126,7 @@ export const ReservationPage = (props: any) => {
       }
       <ReservationCalendar
         bookedLectures={bookedLectures}
+        candidateLecture={candidateLecture}
         lectures={lectures}
         bookLecture={bookLecture}
       />
