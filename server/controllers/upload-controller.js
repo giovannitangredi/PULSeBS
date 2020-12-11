@@ -65,7 +65,7 @@ const readFile = async (userId, path, type, semesterId) => {
           msg: error,
         });
       })
-      .on("data", async (row) => {
+      .on("data", (row) => {
         if (["student", "teacher"].includes(type)) {
           row.password_hash = bcrypt.hashSync("password", 1);
           row.role = type;
@@ -76,25 +76,13 @@ const readFile = async (userId, path, type, semesterId) => {
               status: 500,
               msg: `There was an error inserting the schedule`,
             });
-            console.log("DOPO REJECT");
           });
-          //totInsert += countInsert;
         } else {
           rows.push(row);
         }
       })
       .on("end", () => {
         if (type != "schedule") {
-          /*const res =  checkDuplicate(rows)
-          console.log(res)
-          if (type != "enrollments" && (res)){//unefficient
-            console.log("DENTRO")
-            reject ({
-              status: 501,
-              msg: `The file conteins duplicate id`,
-            });
-            return;
-          } */
           var chunkSize = 100;
           knex
             .batchInsert(tables[type], rows, chunkSize)
@@ -214,11 +202,11 @@ exports.uploadSchedule = async (req, res) => {
       };
     }
     await readFile(userId, path, "schedule", semesterId);
-    const tot = await knex("semester")
+    await knex("semester")
       .update({ inserted_lectures: 1 })
       .where("sid", semesterId); //no more insert of lecture for the selected semester
     res.status(200).send({
-      tot_insert: tot,
+      //tot_insert: tot,
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
@@ -245,10 +233,11 @@ const generateLectures = async (semesterId, lecture) => {
       .from("course")
       .where("id", lecture.id);
     let courseProf = course[0];
+    const days = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat","Sun"];
     const regex =
       "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
-    if (lecture.time.match(regex) === null) {
-      return;
+    if (lecture.time.match(regex) === null || !days.includes(lecture.day) ) {
+      return 0;
     }
     let start = moment(semesterDate.start);
     let end = moment(semesterDate.end);
@@ -265,10 +254,8 @@ const generateLectures = async (semesterId, lecture) => {
       arr.push(createLecture(lecture, courseProf, tmp));
     }
     await knex("lecture").insert(arr);
-    //console.log("TOT IN GENERATE",arr.length)
     return arr.length;
   } catch (error) {
-    console.log("ERRORE", error);
     throw { msg: `There was an error`, status: 503 };
   }
 };
