@@ -234,16 +234,16 @@ exports.cancelBooking = async (req, res) => {
               .andWhere("student_id", student_id)
               .del();
           }
+          res.json({ message: "Booking canceled." });
         })
         .catch((err) => {
-          res.json({ message: `There was an error canceling the booking` });
+          res.json({ message: "There was an error canceling the booking." });
         });
     })
     .catch((err) => {
-      res.json({ message: `There was an error canceling the booking` });
+      res.json({ message: "There was an error canceling the booking." });
     });
 };
-
 // Get the list of lectures scheduled for a course
 exports.getScheduledLectures = async (req, res) => {
   const courseId = req.params.courseid;

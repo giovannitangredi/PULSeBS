@@ -140,7 +140,7 @@ class ReservationCalendar extends React.Component {
               <div className="d-flex justify-content-between">
                 <h4>Lectures</h4>{" "}
                 <div>
-                  <svg width="510" height="40">
+                  <svg width="850" height="40">
                     <text fontSize="14" fontFamily="Verdana" x="7" y="22">
                       Booked Lectures
                     </text>
@@ -179,6 +179,34 @@ class ReservationCalendar extends React.Component {
                       height="30"
                       style={{
                         fill: `${this.state.redColor}`,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    <text fontSize="14" fontFamily="Verdana" x="510" y="22">
+                      Full Lectures
+                    </text>
+                    <rect
+                      x="605"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: `#ffc107`,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    <text fontSize="14" fontFamily="Verdana" x="645" y="22">
+                      In Waiting List
+                    </text>
+                    <rect
+                      x="755"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: `#6c757d`,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
