@@ -7,6 +7,7 @@ exports.getBookingLectures = async (req, res) => {
   const studentId = req.user && req.user.id;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
+  console.log(deadline)
   const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
@@ -44,22 +45,7 @@ exports.getBookingLectures = async (req, res) => {
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
     .then((queryResults) => {
-      let index =0
-      queryResults.map(item => {
-        knex('waiting_list')
-          .where({
-            lecture_id: item.id,
-            student_id: studentId
-          }).then(result=>{
-            index++
-            if(result.length){
-              item.candidate = true
-            }
-            if(index === queryResults.length){
-              res.json(queryResults)
-            }
-          })
-      })
+      res.json(queryResults);
     })
     .catch((err) => {
       res.json({
@@ -238,7 +224,7 @@ exports.cancelBooking = async (req, res) => {
               })
               .then(() => {
                 knex("waiting_list")
-                  .where("lecture_id", lecture_id)
+                .where("lecture_id", lecture_id)
                   .andWhere("student_id", student_id)
                   .del()
                   .then(() => {

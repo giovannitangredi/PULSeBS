@@ -5,7 +5,7 @@ export const BookingLecture = (props: any) => {
     if (evt) evt.preventDefault();
     props.bookLecture(props.lecture.id);
   };
-  const handleCandidate = (evt: any) => {
+  const handleCandidate = (evt:any)=>{
     if (evt) evt.preventDefault();
     props.candidateLecture(props.lecture.id);
   }
@@ -37,13 +37,9 @@ export const BookingLecture = (props: any) => {
             </Button>
           )}
         {props.lecture.booked_students >= props.lecture.capacity &&
-          props.lecture.status != "distance" && <>
-            {
-              props.lecture.candidate ?
-                <Button variant="secondary" disabled>Candidate</Button> :
-                <Button variant="warning" onClick={(event) => handleCandidate(event)}>Candidate</Button>
-            }
-          </>}
+          props.lecture.status != "distance" && (
+            <Button variant="warning"  onClick={(event) => handleCandidate(event)}>Candidate</Button>
+          )}
       </td>
     </tr>
   );

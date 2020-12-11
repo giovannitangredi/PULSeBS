@@ -70,7 +70,6 @@ export const ReservationPage = (props: any) => {
     axios
       .post(`/lectures/${lectureID}/candidate`, { lecture_id: lectureID })
       .then((res) => {
-        getReservations();
         console.log(res)
       })
       .catch((err) => {
@@ -126,7 +125,6 @@ export const ReservationPage = (props: any) => {
       }
       <ReservationCalendar
         bookedLectures={bookedLectures}
-        candidateLecture={candidateLecture}
         lectures={lectures}
         bookLecture={bookLecture}
       />

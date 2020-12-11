@@ -17,20 +17,7 @@ class ReservationCalendar extends React.Component {
   formatEvents = () => {
     console.log(this.props)
     return this.props.lectures
-      .map(obj => {
-        let color = ''
-        if (obj.capacity === obj.booked_students) {
-          if (obj.candidate) {
-            color = '#6c757d'
-          }
-          else {
-            color = '#ffc107'
-          }
-        } else {
-          color = obj.status === "distance" ? this.state.redColor : this.state.blueColor
-        }
-        return { ...obj, color }
-      })
+      .map((obj) => ({ ...obj, color: obj.status === "distance" ? this.state.redColor : this.state.blueColor }))
       .concat(
         this.props.bookedLectures.map((obj) => ({
           ...obj,
@@ -100,7 +87,7 @@ class ReservationCalendar extends React.Component {
             {eventInfo.event.extendedProps.lecturer_name}{" "}
             {eventInfo.event.extendedProps.lecturer_surname}
             {
-              eventInfo.event.extendedProps.status == "presence" && <><br />Capacity: {eventInfo.event.extendedProps.capacity}{" "}</>
+              eventInfo.event.extendedProps.status == "presence" && <><br/>Capacity: {eventInfo.event.extendedProps.capacity}{" "}</>
             }
           </p>
         </div>
@@ -109,16 +96,9 @@ class ReservationCalendar extends React.Component {
   }
   /* if bookable try to book it */
   handleEventClick = ({ event }) => {
-    if (event._def.extendedProps.color == this.state.blueColor) {
-      if (window.confirm("Do you want to book this lecture?")) {
-        this.props.bookLecture(event._def.extendedProps.id)
-      }
-    }
-    else if(event._def.extendedProps.color == '#ffc107'){
-      if (window.confirm("Do you want to candidate this lecture?")) {
-        this.props.candidateLecture(event._def.extendedProps.id)
-      }
-    }
+    if (event._def.extendedProps.color == this.state.blueColor)
+      if (window.confirm("Do you want to book this lecture?"))
+        this.props.bookLecture(event._def.extendedProps.id);
   };
 
   render() {
@@ -129,6 +109,7 @@ class ReservationCalendar extends React.Component {
             border={"secondary"}
             style={{
               width: "100%",
+
               background: "rgb(254 254 254)",
             }}
           >
