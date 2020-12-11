@@ -54,6 +54,7 @@ class ReservationCalendar extends React.Component {
           end: endTime,
           backgroundColor: color,
           display: "block",
+          borderColor: "#000000",
           extendedProps: {
             capacity: capacity,
             booked_students: booked_students,
@@ -75,20 +76,18 @@ class ReservationCalendar extends React.Component {
     if (eventInfo)
       return (
         <div
-          className="rounded row align-items-center justify-content-center"
-          style={{
-            width: "104%",
-            height: "104%",
-            marginLeft: "-2%",
-            marginTop: "-2%",
-            color: "#000000",
-            fontWeight: "500",
-            fontSize: "0.85rem",
+        className="rounded row align-items-center m-0 justify-content-center"
+        style={{
+          width: "100%",
+          height: "100%",
 
-            border: "4px solid #000000;",
-          }}
-        >
-          <p>
+          color: "#000000",
+          fontWeight: "500",
+          fontSize: "0.85rem",
+          //border: "2px solid #000000",
+        }}
+      >
+        <p className="my-3">
             {eventInfo.event.title}
             <br></br>
             {eventInfo.event.extendedProps.course}
