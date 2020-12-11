@@ -70,7 +70,8 @@ export const ReservationPage = (props: any) => {
     axios
       .post(`/lectures/${lectureID}/candidate`, { lecture_id: lectureID })
       .then((res) => {
-        console.log(res)
+        console.log(res);
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
