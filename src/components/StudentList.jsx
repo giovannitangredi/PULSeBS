@@ -107,9 +107,9 @@ class StudentList extends React.Component {
   }
 
   renderEventContent(eventInfo) {
-    /*function format(n) {
+    function format(n) {
       return n > 9 ? "" + n : "0" + n;
-    }*/
+    }
 
     if (eventInfo)
       return (
@@ -117,6 +117,7 @@ class StudentList extends React.Component {
           className="rounded row align-items-center justify-content-center"
           style={{
             color: `${eventInfo.event.extendedProps.backgroundColor}`,
+            color: "#000000",
             height: "100%",
             fontWeight: "600",
             fontSize: "0.85rem",
@@ -126,8 +127,7 @@ class StudentList extends React.Component {
             {eventInfo.event.title} <br></br>
             {eventInfo.event.extendedProps.status === "presence" && (
               <>
-                Capacity: {eventInfo.event.extendedProps.capacity}
-                <br></br>
+                Capacity: {eventInfo.event.extendedProps.capacity}<br></br>
               </>
             )}
             {eventInfo.event.extendedProps.status === "presence"
@@ -192,21 +192,6 @@ class StudentList extends React.Component {
         this.setState({ alertType: "danger" });
         this.setState({ alertText: "There is a problem in removing Leture" });
       });
-    this.clearPageData();
-  };
-
-  clearPageData = () => {
-    this.setState({ lectures: [] });
-    this.setState({ students: [] });
-    this.setState({ courses: [] });
-    this.setState({ selectedLecture: 0 });
-    this.setState({ selectedCourse: 0 });
-    this.setState({ selectedColors: [] });
-    this.setState({ lectureColor: "" });
-    this.setState({ lecturetitle: "" });
-    this.setState({ studenttitle: "" });
-    this.setState({ selectedLecture: 1 });
-    this.getCourseList();
   };
 
   componentDidMount() {
@@ -266,7 +251,7 @@ class StudentList extends React.Component {
                   </h4>{" "}
                   <div>
                     <svg width="340" height="40">
-                      <text font-size="14" font-family="Verdana" x="7" y="22">
+                      <text fontSize="14" fontFamily="Verdana" x="7" y="22">
                         Remote Lectures
                       </text>
                       <rect
@@ -280,7 +265,7 @@ class StudentList extends React.Component {
                           stroke: "rgb(0,0,0)",
                         }}
                       />
-                      <text font-size="14" font-family="Verdana" x="169" y="22">
+                      <text fontSize="14" fontFamily="Verdana" x="169" y="22">
                         Presence Lectures
                       </text>
                       <rect
@@ -312,10 +297,8 @@ class StudentList extends React.Component {
                 <div className="col-12">
                   <div id="lecturelistview">
                     {this.formatEvents().filter((lecture) =>
-                      moment(lecture.start).isSameOrAfter(
-                        moment().startOf("day")
-                      )
-                    ).length > 0 ? (
+                            moment(lecture.start).isSameOrAfter(
+                              moment().startOf("day"))).length > 0 ? (
                       <ListGroup
                         as="ul"
                         variant="flush"
@@ -328,16 +311,15 @@ class StudentList extends React.Component {
                                 <div className="col-lg-3">
                                   <label>Lecture Name</label>
                                 </div>
-                                <div className="col-lg-2">
+                                <div className="col-lg-3">
                                   <label>Start</label>
                                 </div>
                                 <div className="col-lg-3">
                                   <label>End</label>
                                 </div>
-                                <div className="col-lg-2">
+                                <div className="col-lg-3">
                                   <label>Status</label>
                                 </div>
-                                <div className="col-lg-2"></div>
                               </div>
                             </div>
                           </div>
