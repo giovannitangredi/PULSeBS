@@ -16,4 +16,4 @@
 |   7  |   Wait for the Teacher Page to load |
 |   8  |   Click on the Select the Course button on one of the courses cards |
 |   9  |   Click on a lecture card on the Teacher Calendar|
-|   10 |   Scrool down until you see the Student list (if no students are book the following message will appear : no students booked for this lecture) |
+|   10 |   Scroll down until you see the Student list (if no students are book the following message will appear : no students booked for this lecture) |

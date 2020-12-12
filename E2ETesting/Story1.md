@@ -2,7 +2,7 @@
 
 - [End to end test for Story 1](#end-to-end-test-for-story-1)
   - [WRONG CREDENTIALS](#wrong-credentials)
-  - [Succeful Login](#succeful-login)
+  - [Successful Login](#successful-login)
   - [LOGOUT](#logout)
   - [Book a Seat from table](#book-a-seat-from-table)
   - [Book a Seat from calendar](#book-a-seat-from-calendar)
@@ -17,9 +17,9 @@
 |   4  |   Click on the password field  |
 |   5  |   Insert invalid password (for ex :notvalid)  |
 |   6  |   Click on the Submit button |
-|   7  |   An allert appears with the following message : You have inserted Wrong Credentials! Please try again |
+|   7  |   An alert appears with the following message : You have inserted Wrong Credentials! Please try again |
 
-## Succeful Login
+## Successful Login
 
 | Step | Description |
 |------|-------------|
@@ -27,9 +27,9 @@
 |   2  |   Click on the email field  |
 |   3  |   Insert valid email (for ex :s900000@students.politu.it)  |
 |   4  |   Click on the password field  |
-|   5  |   Insert valid password (for ex : passwrod)  |
+|   5  |   Insert valid password (for ex : password)  |
 |   6  |   Click on the Submit button |
-|   7  |   The login is succeful and you will be redirect to the student page |
+|   7  |   The login is successful and you will be redirect to the student page |
 
 ## LOGOUT
 
@@ -39,10 +39,10 @@
 |   2  |   Click on the email field  |
 |   3  |   Insert valid email (for ex :s900000@students.politu.it)  |
 |   4  |   Click on the password field  |
-|   5  |   Insert valid password (for ex : passwrod)  |
+|   5  |   Insert valid password (for ex : password)  |
 |   6  |   Click on the Submit button |
-|   7  |   The login is succeful and you will be redirect to the student page |
-|   8  |   Now click in the Logout Button in the upper roght corner |
+|   7  |   The login is successful and you will be redirect to the student page |
+|   8  |   Now click in the Logout Button in the upper right corner |
 |   9  |   the system start the logout  and you are redirect to the login page |
 
 ## Book a Seat from table
@@ -53,10 +53,10 @@
 |   2  |   Click on the email field  |
 |   3  |   Insert valid email (for ex :s900000@students.politu.it)  |
 |   4  |   Click on the password field  |
-|   5  |   Insert valid password (for ex : passwrod)  |
+|   5  |   Insert valid password (for ex : password)  |
 |   6  |   Click on the Submit button |
-|   7  |   The login is succeful and you will be redirect to the student page |
-|   8  |   Scrool until you see the Bookable List of lecture |
+|   7  |   The login is successful and you will be redirect to the student page |
+|   8  |   Scroll until you see the Bookable List of lecture |
 |   9  |   Click on the Book a Seat button on the right  close to a lecture |
 |   10 |   Wait for the Student Page to load |
 |   11 |   Now the booked lesson appears in the Booked Lecture list |
@@ -70,10 +70,10 @@
 |   2  |   Click on the email field  |
 |   3  |   Insert valid email (for ex :s900000@students.politu.it)  |
 |   4  |   Click on the password field  |
-|   5  |   Insert valid password (for ex : passwrod)  |
+|   5  |   Insert valid password (for ex : password)  |
 |   6  |   Click on the Submit button |
-|   7  |   The login is succeful and you will be redirect to the student page |
-|   8  |   Scrool until you see the Calendar |
+|   7  |   The login is successful and you will be redirect to the student page |
+|   8  |   Scroll until you see the Calendar |
 |   9  |   Find a blue card that indicate a bookable lecture and click on it |
 |   10 |   Click the  Ok button on the modal that appear |
 |   11 |   Wait for the Student Page to load |

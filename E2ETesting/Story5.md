@@ -14,7 +14,7 @@
 |   5  |   Insert valid password (for ex :password)  |
 |   6  |   Click on the Submit button |
 |   7  |   Wait for the Student Page to load |
-|   8  |   Scrool until you reach the Booked Lectures |
+|   8  |   Scroll until you reach the Booked Lectures |
 |   9  |   Click on the Unbook Button|
 |   10 |   Wait for the page to load |
-|   11 |   The lecture is unbooked and now the unbbok lecture should appear in the Bookable Lectures Table |
+|   11 |   The lecture is unbooked and now the unbook lecture should appear in the Bookable Lectures Table |
