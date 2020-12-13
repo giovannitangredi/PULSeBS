@@ -202,6 +202,9 @@ exports.uploadSchedule = async (req, res) => {
       };
     }
     await readFile(userId, path, "schedule", semesterId);
+    /*const prova = await knex.select("course", "lecturer","start","end","room","capacity","status")
+    .from("lecture");
+    console.log("ELENCO IN CONTROLER",prova)*/
     await knex("semester")
       .update({ inserted_lectures: 1 })
       .where("sid", semesterId); //no more insert of lecture for the selected semester

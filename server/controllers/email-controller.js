@@ -158,7 +158,7 @@ exports.getListOfLectures = async (from, to) => {
     .andWhere("lecture.start", "<", to)
     .groupBy(
       "lecture.id",
-      "lecture.name",
+      //"lecture.name",
       "course.name",
       "lecture.start",
       "user.name",

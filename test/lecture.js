@@ -433,6 +433,7 @@ describe("Cancel a booked lecture ", async function () {
   this.timeout(5000);
   const authenticatedUser = request.agent(app);
   before(async () => {
+    await knex("course_available_student").del();
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("course").del();
