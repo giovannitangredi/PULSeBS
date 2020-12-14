@@ -67,8 +67,8 @@ const teacherTuple = {
     id: 1,
     course: courseTuple.id,
     lecturer: teacherTuple.id,
-    start:"8:30",
-    end: "11:30",
+    start:"2020-09-28 08:30:00",
+    end: "2020-09-28 11:30:00",
     capacity: 120,
     status: "presence",
     room:1
@@ -84,7 +84,7 @@ const teacherTuple = {
 
   describe("Story 12 test", async function () {
     const authenticatedUser = request.agent(app);
-    this.timeout(100000);
+
     before(async () => {
       await knex("user").del();
       await knex("course").del();
@@ -136,6 +136,7 @@ const teacherTuple = {
           await knex("lecture").del();
           await knex("course_available_student").del();
           await knex("course").del();
+          await knex("_Variables").del();
         });
       });
 
@@ -183,6 +184,7 @@ const teacherTuple = {
           await knex("lecture").del();
           await knex("course_available_student").del();
           await knex("course").del();
+          await knex("_Variables").del();
         });
       });
 
@@ -222,7 +224,8 @@ describe("Upload Courses ", async () => {
       await knex("user").del();
       await knex("lecture").del();
       await knex("course").del();
-      await knex("course_available_student").del();      
+      await knex("course_available_student").del();  
+      await knex("_Variables").del();    
     });
   });
 
@@ -265,6 +268,7 @@ describe("Upload Enrollements ", async () => {
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("course").del();
+      await knex("_Variables").del();
     });
   });
 
@@ -297,25 +301,27 @@ describe("Upload Enrollements ", async () => {
       const res = await authenticatedUser.post(`/api/upload/schedule/${semesterTuple.sid}`)
       .attach('file',
        fs.readFileSync('./test/csvfiles/Schedule.csv'),'Schedule.csv')
-      
+    
       expect(res.status).to.equal(200);
 
-      const uploadedschedule = await knex
+   const uploadedschedule = await knex
       .select("course", "lecturer","start","end","room","capacity","status")
       .from("lecture");
-      //console.log("TEST",uploadedschedule)
-      expect(uploadedschedule.length).to.equal(16); //TODO check upload schedule
-      /*expect(uploadedschedule).to.have.deep.members([
-      {  
-         course:courseTuple.id,
-         lecturer:lectureTuple.id,
-         start:lectureTuple.start,
-         end:lectureTuple.end,
-         room:lectureTuple.room, 
+         //console.log("TEST",uploadedschedule); 
+    expect(uploadedschedule.length).to.equal(16); //TODO check upload schedule
+    expect(uploadedschedule).to.deep.include(
+      { 
          capacity:lectureTuple.capacity,
-         status:lectureTuple.status                            
+         course:lectureTuple.course,
+         end:lectureTuple.end,
+         lecturer:lectureTuple.lecturer,
+         room:lectureTuple.room ,
+         start:lectureTuple.start,
+         status:lectureTuple.status                      
       },
-     ]);   */  
+     ); 
+ 
+  
     });
     after(async () => {
       await knex("user").del();
@@ -323,6 +329,7 @@ describe("Upload Enrollements ", async () => {
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("semester").del();
+       await knex("_Variables").del();
     });
   }); 
 
