@@ -61,17 +61,6 @@ const enrollementTuple = {
   student_id: "900000",
 };
 
-const lectureTuple = {
-  id: 1,
-  course: courseTuple.id,
-  lecturer: teacherTuple.id,
-  start: "2020-09-28 08:30:00",
-  end: "2020-09-28 11:30:00",
-  capacity: 120,
-  status: "presence",
-  room: 1,
-};
-
 const semesterTuple = {
   sid: 1,
   name: "s1",
@@ -80,31 +69,31 @@ const semesterTuple = {
   inserted_lectures: 0,
 };
 
-describe("Story 12 test", async function () {
+describe("Story 12 test - As a support officer I want to upload the list of students, courses, teachers, lectures, and classes to setup the system", async function () {
   const authenticatedUser = request.agent(app);
 
   before(async () => {
     await knex("user").del();
     await knex("course").del();
     await knex("course_available_student").del();
-    await knex("lecture").del();
+    await knex("lecture").del();  
+    
+    await knex("user").insert(officerTuple); 
+    const res = await authenticatedUser
+    .post("/api/auth/login")
+    .send(officerCredentials);
+    expect(res.status).to.equal(200);
   });
 
   //Upload student
   describe("Upload student ", async () => {
     //now let's login the user before we run any tests
-    const authenticatedUser = request.agent(app);
     before(async () => {
       await knex("user").del();
       await knex("course").del();
       await knex("lecture").del();
       await knex("course_available_student").del();
-      await knex("user").insert(officerTuple);
-      const res = await authenticatedUser
-        .post("/api/auth/login")
-        .send(officerCredentials);
 
-      expect(res.status).to.equal(200);
     });
 
     it("should return  with status 200 and body", async () => {
@@ -135,7 +124,7 @@ describe("Story 12 test", async function () {
       ]);
     });
     after(async () => {
-      await knex("user").del();
+      await knex("user").del().where("id", ">","1");
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("course").del();
@@ -143,22 +132,13 @@ describe("Story 12 test", async function () {
     });
   });
 
-  //Upload Profressor
-  describe("Upload Profressor ", async () => {
-    //now let's login the user before we run any tests
-    const authenticatedUser = request.agent(app);
+  //Upload Professor
+  describe("Upload Professor ", async () => {
     before(async () => {
       await knex("user").del();
       await knex("course").del();
       await knex("lecture").del();
       await knex("course_available_student").del();
-      await knex("user").insert(officerTuple);
-
-      const res = await authenticatedUser
-        .post("/api/auth/login")
-        .send(officerCredentials);
-
-      expect(res.status).to.equal(200);
     });
 
     it("should return  with status 200", async () => {
@@ -187,7 +167,7 @@ describe("Story 12 test", async function () {
       ]);
     });
     after(async () => {
-      await knex("user").del();
+      await knex("user").del().where("id", ">","1");
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("course").del();
@@ -196,22 +176,12 @@ describe("Story 12 test", async function () {
   });
 
   // Upload courses
-
-  describe("Upload Courses ", async () => {
-    //now let's login the user before we run any tests
-    const authenticatedUser = request.agent(app);
+ describe("Upload Courses ", async () => {
     before(async () => {
       await knex("user").del();
       await knex("course").del();
       await knex("lecture").del();
       await knex("course_available_student").del();
-      await knex("user").insert(officerTuple);
-
-      const res = await authenticatedUser
-        .post("/api/auth/login")
-        .send(officerCredentials);
-
-      expect(res.status).to.equal(200);
     });
 
     it("should return  with status 200", async () => {
@@ -231,7 +201,7 @@ describe("Story 12 test", async function () {
       expect(uploadedcourses).to.have.deep.members([courseTuple]);
     });
     after(async () => {
-      await knex("user").del();
+      await knex("user").del().where("id", ">","1");
       await knex("lecture").del();
       await knex("course").del();
       await knex("course_available_student").del();
@@ -239,25 +209,15 @@ describe("Story 12 test", async function () {
     });
   });
 
-  // enrollements
-
-  describe("Upload Enrollements ", async () => {
-    //now let's login the user before we run any tests
-    const authenticatedUser = request.agent(app);
+  //Upload enrollements
+    describe("Upload Enrollements ", async () => {
     before(async () => {
       await knex("user").del();
       await knex("course").del();
       await knex("lecture").del();
       await knex("course_available_student").del();
-      await knex("user").insert(officerTuple);
       await knex("user").insert(userTuple);
       await knex("course").insert(courseTuple);
-
-      const res = await authenticatedUser
-        .post("/api/auth/login")
-        .send(officerCredentials);
-
-      expect(res.status).to.equal(200);
     });
 
     it("should return  with status 200", async () => {
@@ -277,7 +237,7 @@ describe("Story 12 test", async function () {
       expect(uploadedenrollements).to.have.deep.members([enrollementTuple]);
     });
     after(async () => {
-      await knex("user").del();
+      await knex("user").del().where("id", ">","1");
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("course").del();
@@ -286,10 +246,7 @@ describe("Story 12 test", async function () {
   });
 
   // Upload Schedule
-
   describe("Upload Schedule", async () => {
-    //now let's login the user before we run any tests
-    const authenticatedUser = request.agent(app);
     before(async () => {
       await knex("user").del();
       await knex("course").del();
@@ -298,16 +255,9 @@ describe("Story 12 test", async function () {
       await knex("semester").del();
       await knex("user").insert(userTuple);
       await knex("user").insert(teacherTuple);
-      await knex("user").insert(officerTuple);
       await knex("course").insert(courseTuple);
       await knex("semester").insert(semesterTuple);
       await knex("course_available_student").insert(enrollementTuple);
-
-      const res = await authenticatedUser
-        .post("/api/auth/login")
-        .send(officerCredentials);
-
-      expect(res.status).to.equal(200);
     });
 
     it("should return  with status 200", async () => {

@@ -220,7 +220,13 @@ exports.uploadSchedule = async (req, res) => {
       })
       .from("semester")
       .where("sid", semesterId);
-    if (semester[0].inserted_lectures === 1) {
+      if (semester.length !== 1) {
+        throw {
+          msg: `There is no semester ` + semesterId,
+          status: 505,
+        };
+      }
+      if (semester[0].inserted_lectures === 1) {
       throw {
         msg: `Already inserted the lecture for Semester ` + semesterId,
         status: 504,
@@ -273,12 +279,10 @@ const generateLectures = (semesterId, lecture) => {
       let tmp = start.clone().day(lecture.day);
       if (tmp.isSameOrAfter(start, "d")) {
         //check if the day of the first week is after the start date, if true add a date
-
         arr.push(createLecture(lecture, courseProf, tmp));
       }
       while (tmp.add(7, "days").isBefore(end)) {
         //generate all days until the end date adding 7 days each time
-
         arr.push(createLecture(lecture, courseProf, tmp));
       }
       //console.log("STEP 1n DOPO AVER CREATO IL GRUPPO DI LECTURE")
@@ -286,10 +290,9 @@ const generateLectures = (semesterId, lecture) => {
       resolve(arr.length);
     } catch (error) {
       reject({
-        msg: `There was an error`,
+        msg: `There was an error creating all the lecture based on course ${lecture.id} scheduled for ${lecture.day}` ,
         status: 503,
       });
-      //throw { msg: `There was an error`, status: 503 };
     }
   });
 };
