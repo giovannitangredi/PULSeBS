@@ -260,11 +260,11 @@ export const CourseDetail = (props) => {
   };
   return (
     <>
-      <div className="container">
-        <div className="d-flex w-100 justify-content-start shadow bg-light py-3 my-3 rounded border border-secondary">
-          <label className="px-3 font-weight-bold">Choose a date range: </label>
+      <div className="container col-sm-9">
+        <div className="d-flex w-100 justify-content-center shadow bg-white py-3 my-3 rounded border border-primary">
+          <span className="px-3 font-weight-bold align-middle py-1">Choose a date range: </span>
           <DatePickerComponent
-            className="mx-3"
+            className="mx-3 py-1"
             startDateHandle={datePickerHandle}
             endDateHandle={datePickerHandle2}
           />
@@ -272,20 +272,26 @@ export const CourseDetail = (props) => {
             Apply
           </Button>
         </div>
-        <div className="row">
-          <ListGroup
-            variant="flush"
-            className="shadow-sm py-3 mb-5 bg-white rounded col-md-3  p-4 m-4 "
-          >
-            <div className="col-sm-2">
-              <span className="badge BackgroundThemeColor">Courses:</span>
-            </div>
-            {myCourses && myCourses.map((item) => CourslistRenderer(item))}
-          </ListGroup>
-          <div className="shadow-sm p-4  mt-4 ml-4 bg-white rounded col-md-8">
+        <div className="row d-flex justify-content-between">
+          <div className="col-md-4 mt-3">
+            <ListGroup
+              variant="flush"
+              className="shadow-sm py-3 bg-white rounded border border-primary p-4"
+            >
+              <div >
+                <h5>Courses:</h5>
+              </div>
+              {myCourses && myCourses.map((item) => CourslistRenderer(item))}
+            </ListGroup>
+          </div>
+          
+          <div className="col-md-8">
+            <div className="shadow-sm border p-3 my-3 bg-white rounded border-primary">
+            <h5 className="mb-3">Weekly Stats</h5>
             <Table size="sm" className="pb-4 mb-4 shadow-sm">
               <thead>
                 <tr>
+                  <th>Course Code</th>
                   <th>Course Name</th>
                   <th>Week</th>
                   <th>Bookings avarage</th>
@@ -297,6 +303,7 @@ export const CourseDetail = (props) => {
                     return (
                       <React.Fragment key={index}>
                         <tr>
+                          <td>{item.course_id}</td>
                           <td>{item.course_name}</td>
                           <td>{item.week ? item.week : "-"}</td>
                           <td>{item.booking}</td>
@@ -304,33 +311,39 @@ export const CourseDetail = (props) => {
                       </React.Fragment>
                     );
                   })}
-                {!reserved || reserved.length > 0 ? (
+                {!bookedLectures || bookedLectures.length > 0 ? (
                   ""
                 ) : (
                   <tr>
                     <td colspan="4">
                       <div className="w-100 d-flex justify-content-center">
-                        <h4>No Record to show</h4>
+                        <h5>No Record to show</h5>
                       </div>
                     </td>
                   </tr>
                 )}
               </tbody>
             </Table>
+            </div>
+
+            <div className="shadow-sm border p-3 mb-3 bg-white rounded border-primary">
+            <h5 className="mb-3">Monthly Stats</h5>
             <Table size="sm" className="pb-4 mb-4 shadow-sm">
               <thead>
                 <tr>
+                  <th>Course Code</th>
                   <th>Course Name</th>
                   <th>Month</th>
                   <th>Bookings avarage</th>
                 </tr>
               </thead>
               <tbody>
-                {bookedLectures &&
+                {monthLectures &&
                   monthLectures.map((item, index) => {
                     return (
                       <React.Fragment key={index}>
                         <tr>
+                          <td>{item.course_id}</td>
                           <td>{item.course_name}</td>
                           <td>{item.month ? item.month : "-"}</td>
                           <td>{item.booking}</td>
@@ -338,26 +351,29 @@ export const CourseDetail = (props) => {
                       </React.Fragment>
                     );
                   })}
-                {!reserved || reserved.length > 0 ? (
+                {!monthLectures || monthLectures.length > 0 ? (
                   ""
                 ) : (
                   <tr>
                     <td colspan="4">
                       <div className="w-100 d-flex justify-content-center">
-                        <h4>No Record to show</h4>
+                        <h5>No Record to show</h5>
                       </div>
                     </td>
                   </tr>
                 )}
               </tbody>
             </Table>
+            </div>
 
-            <Table size="sm" className="  my-4   shadow-sm">
+            <div className="shadow-sm border p-3 mb-3 bg-white rounded border-primary">
+            <h5 className="mb-3">Lectures Stats</h5>
+            <Table size="sm" className="shadow-sm">
               <thead>
                 <tr>
+                  <th>Course Code</th>
                   <th>Course Name</th>
                   <th>Lecture Date</th>
-                  <th>Lecture Name</th>
                   <th>Bookings</th>
                 </tr>
               </thead>
@@ -367,9 +383,9 @@ export const CourseDetail = (props) => {
                     return (
                       <React.Fragment key={index}>
                         <tr>
+                          <td>{item.course_id}</td>
                           <td>{item.course_name}</td>
                           <td>{item.date}</td>
-                          <td>{item.lecture_name}</td>
                           <td>{item.booking}</td>
                         </tr>
                       </React.Fragment>
@@ -381,13 +397,18 @@ export const CourseDetail = (props) => {
                   <tr>
                     <td colspan="4">
                       <div className="w-100 d-flex justify-content-center">
-                        <h4>No Record to show</h4>
+                        <h5>No Record to show</h5>
                       </div>
                     </td>
                   </tr>
                 )}
               </tbody>
             </Table>
+            </div>
+            
+            
+
+            
           </div>
         </div>
       </div>
