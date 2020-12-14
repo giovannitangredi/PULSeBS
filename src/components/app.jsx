@@ -21,6 +21,10 @@ import "./../styles/styles.css";
 export const App = () => {
   /* https://cloford.com/resources/colours/500col.htm */
   const colors = [
+    "#FFCD24",
+    "#6CAB99",
+    "#B3C7DC",
+    "#8F51B5",
     "#FFB6C1",
     "#FFAEB9",
     "#EEA2AD",

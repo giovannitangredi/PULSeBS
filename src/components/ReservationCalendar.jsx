@@ -7,7 +7,7 @@ class ReservationCalendar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      greenColor: "#0CE100", 
+      greenColor: "#0CE100",
       blueColor: "#228bff",
       redColor: "#ff2b2b",
     };
@@ -76,16 +76,16 @@ class ReservationCalendar extends React.Component {
     if (eventInfo)
       return (
         <div
-        className=" text-wrap rounded row align-items-center m-0 d-flex justify-content-center"
-        style={{
-          width: "100%",
-          height: "100%",
-          color: "#000000",
-          fontWeight: "500",
-          fontSize: "0.85rem",
-        }}
-      >
-        <p className="my-2 text-center">
+          className=" text-wrap rounded row align-items-center m-0 d-flex justify-content-center"
+          style={{
+            width: "100%",
+            height: "100%",
+            color: "#000000",
+            fontWeight: "500",
+            fontSize: "0.85rem",
+          }}
+        >
+          <p className="my-2 text-center">
             {eventInfo.event.extendedProps.course}
             <br></br>
             {eventInfo.event.extendedProps.lecturer_name}{" "}

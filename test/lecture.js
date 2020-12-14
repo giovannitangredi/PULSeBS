@@ -33,9 +33,9 @@ const userTuple = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: testEmailAddress,
   role: "student",
-  city:"Poggio Ferro",
-  birthday:"1996-11-04",
-  ssn:"MK97060783"
+  city: "Poggio Ferro",
+  birthday: "1996-11-04",
+  ssn: "MK97060783",
 };
 
 const teacherTuple = {
@@ -45,9 +45,9 @@ const teacherTuple = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "john.doe@polito.it",
   role: "teacher",
-  city:"Milano",
-  birthday:"1971-11-04",
-  ssn:"MR17121943"
+  city: "Milano",
+  birthday: "1971-11-04",
+  ssn: "MR17121943",
 };
 
 const teacherCredentials = {
@@ -59,8 +59,8 @@ const courseTuple = {
   id: "1",
   name: "Software Engineering II",
   main_prof: teacherTuple.id,
-  year:1,
-  semester:1
+  year: 1,
+  semester: 1,
 };
 
 const lectureTuple = {
@@ -71,7 +71,7 @@ const lectureTuple = {
   end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
-  room:1
+  room: 1,
 };
 
 const futureLectureTuple = {
@@ -82,7 +82,7 @@ const futureLectureTuple = {
   end: moment().add(2, "days").add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
-  room:1
+  room: 1,
 };
 
 const courseStudentTuple = {
@@ -104,9 +104,9 @@ const expectedPreviousBooking = [
     lecturer_surname: teacherTuple.surname,
     start: lectureTuple.start,
     end: lectureTuple.end,
-    room:lectureTuple.room,
-    year:courseTuple.year,
-    semester:courseTuple.semester,
+    room: lectureTuple.room,
+    year: courseTuple.year,
+    semester: courseTuple.semester,
     capacity: 25,
     booked_at: lectureBookingTuple.booked_at,
     status: lectureTuple.status,
@@ -122,11 +122,11 @@ const expectedBookableLectures = [
     start: futureLectureTuple.start,
     end: futureLectureTuple.end,
     status: futureLectureTuple.status,
-    room:futureLectureTuple.room,
-    year:courseTuple.year,
-    semester:courseTuple.semester,
+    room: futureLectureTuple.room,
+    year: courseTuple.year,
+    semester: courseTuple.semester,
     capacity: futureLectureTuple.capacity,
-    booked_students: 0
+    booked_students: 0,
   },
 ];
 
@@ -363,7 +363,6 @@ describe("list of lectures scheduled for a course", async () => {
         capacity: lectureTuple.capacity,
         status: lectureTuple.status,
         room: lectureTuple.room,
-
       },
     ]);
   });
@@ -508,7 +507,7 @@ describe("Presence Lecture into distance one ", async function () {
       .from("lecture")
       .where("id", lectureTuple.id);
     expect(lectureChanged).to.have.deep.members([
-      { id:lectureTuple.id, status: "distance" },
+      { id: lectureTuple.id, status: "distance" },
     ]);
     expect(res.body.message).to.not.be.null;
   });

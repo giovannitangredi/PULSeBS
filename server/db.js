@@ -134,7 +134,7 @@ initTable("course_available_student", (table) => {
 
   table.string("student_id").notNullable();
   table.foreign("student_id").references("user.id");
-  table.primary(["course_id","student_id"]);
+  table.primary(["course_id", "student_id"]);
 });
 
 initTable("stats_time", (table) => {

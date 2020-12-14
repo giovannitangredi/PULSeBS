@@ -31,7 +31,7 @@ const DataSetupView = (props) => {
   const handleOnChange = (event) => {
     const fileBrowser = event.target;
     const fileSelected = fileBrowser.files[0];
-    if(fileSelected) {
+    if (fileSelected) {
       const filesList = { ...files };
       const newStatus = { ...uploadStatus };
       filesList[fileBrowser.id] = fileSelected;
@@ -73,7 +73,9 @@ const DataSetupView = (props) => {
         delete filesToUpload[key];
       } catch (error) {
         setMessage({
-          text: error.response ? error.response.data.message : `Error uploading ${key}`,
+          text: error.response
+            ? error.response.data.message
+            : `Error uploading ${key}`,
           type: "failure",
         });
         currentStatus[key] = "failed";
@@ -106,21 +108,23 @@ const DataSetupView = (props) => {
         onSubmit={handleOnSubmit}
       >
         {sendingOrder.map((item) => (
-          <Form.Row key={item} className="d-flex flex-row justify-content-center">
+          <Form.Row
+            key={item}
+            className="d-flex flex-row justify-content-center"
+          >
             <Form.Group className="col-sm-10">
               <Form.File custom>
-                <Form.File.Input 
+                <Form.File.Input
                   id={item}
                   accept=".csv"
-                  onChange={handleOnChange} 
+                  onChange={handleOnChange}
                 />
                 <Form.File.Label>
-                  {
-                    files[item] ? 
-                      <span className="font-weight-bold">{ files[item].name }</span> 
-                      : 
-                      `Upload file for ${item}`
-                  }
+                  {files[item] ? (
+                    <span className="font-weight-bold">{files[item].name}</span>
+                  ) : (
+                    `Upload file for ${item}`
+                  )}
                 </Form.File.Label>
               </Form.File>
             </Form.Group>
@@ -181,7 +185,9 @@ const ScheduleView = (props) => {
       })
       .catch((error) => {
         setMessage({
-          text: error.response ? error.response.data.message : "Error loading semesters",
+          text: error.response
+            ? error.response.data.message
+            : "Error loading semesters",
           type: "failure",
         });
       });
@@ -190,8 +196,8 @@ const ScheduleView = (props) => {
   const handleOnChange = (event) => {
     const fileBrowser = event.target;
     const fileSelected = fileBrowser.files[0];
-    
-    if(fileSelected) {
+
+    if (fileSelected) {
       setScheduleFile(fileSelected);
       setUploadStatus("");
     }
@@ -208,30 +214,27 @@ const ScheduleView = (props) => {
 
     const formData = new FormData();
     formData.append("file", scheduleFile);
-    setUploadStatus("uploading");	
-		try {	
-				await axios	
-					.post(`/upload/schedule/${semester}`,	
-						formData	
-					);	
-				setUploadStatus("completed");	
-				setMessage({	
-					text: "Schedule uploaded", 	
-					type: 'success'	
-				});	
-				// refresh the available semesters list	
-        setSemester("");
-        setScheduleFile(null);
-        loadSemesters();	
-		} catch (error) {	
-			setUploadStatus("failed");	
-			setMessage(	
-				{	
-					text: error.response ? error.response.data.message : "Error uploading schedule", 	
-					type: 'failure'	
-				}	
-			);		
-	  }
+    setUploadStatus("uploading");
+    try {
+      await axios.post(`/upload/schedule/${semester}`, formData);
+      setUploadStatus("completed");
+      setMessage({
+        text: "Schedule uploaded",
+        type: "success",
+      });
+      // refresh the available semesters list
+      setSemester("");
+      setScheduleFile(null);
+      loadSemesters();
+    } catch (error) {
+      setUploadStatus("failed");
+      setMessage({
+        text: error.response
+          ? error.response.data.message
+          : "Error uploading schedule",
+        type: "failure",
+      });
+    }
   };
   return (
     <Container className="d-flex flex-column pt-0 align-items-center rounded border border-primary col-10 bg-white">
@@ -244,18 +247,17 @@ const ScheduleView = (props) => {
         <Form.Row>
           <Form.Group className="col-sm-6">
             <Form.File custom>
-              <Form.File.Input 
+              <Form.File.Input
                 id="schedule"
                 accept=".csv"
-                onChange={handleOnChange} 
+                onChange={handleOnChange}
               />
               <Form.File.Label>
-                {
-                  scheduleFile ? 
-                    <span className="font-weight-bold">{ scheduleFile.name }</span> 
-                    : 
-                    "Upload schedule file"
-                }
+                {scheduleFile ? (
+                  <span className="font-weight-bold">{scheduleFile.name}</span>
+                ) : (
+                  "Upload schedule file"
+                )}
               </Form.File.Label>
             </Form.File>
           </Form.Group>
@@ -265,7 +267,7 @@ const ScheduleView = (props) => {
               as="select"
               value={semester}
               onChange={handleSemesterOnChange}
-              className={ semester !== "" ? "font-weight-bold" : "" }
+              className={semester !== "" ? "font-weight-bold" : ""}
             >
               <>
                 <option value={""}>Select a semester</option>

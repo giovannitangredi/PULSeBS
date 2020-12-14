@@ -67,7 +67,8 @@ const readFile = async (userId, path, type, semesterId) => {
     }
     let rows = [];
     var tot = 0;
-    const stream = fs.createReadStream(path)
+    const stream = fs
+      .createReadStream(path)
       .pipe(
         csv.parse({
           headers: headers[type],
@@ -87,23 +88,21 @@ const readFile = async (userId, path, type, semesterId) => {
           row.role = type;
         }
         if (type === "schedule") {
-          try{
+          try {
             const count = await generateLectures(semesterId, row);
             //console.log("STEP 2n DENTRO READ FILE",count);
             tot += count;
             stream.resume();
-          } catch (error) { 
+          } catch (error) {
             reject({
               status: 500,
               msg: `There was an error inserting the schedule`,
             });
           }
-          
         } else {
           rows.push(row);
           stream.resume();
         }
-        
       })
       .on("end", () => {
         //stream.pause();
@@ -237,7 +236,7 @@ exports.uploadSchedule = async (req, res) => {
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(error.status).send({
       message: error.msg,
     });
@@ -247,52 +246,52 @@ exports.uploadSchedule = async (req, res) => {
 
 const generateLectures = (semesterId, lecture) => {
   return new Promise(async (resolve, reject) => {
-  try {
-    const semester = await knex
-      .select({
-        start: "start",
-        end: "end",
-      })
-      .from("semester")
-      .where("sid", semesterId);
-    let semesterDate = semester[0];
+    try {
+      const semester = await knex
+        .select({
+          start: "start",
+          end: "end",
+        })
+        .from("semester")
+        .where("sid", semesterId);
+      let semesterDate = semester[0];
 
-    const course = await knex
-      .select({ main_prof: "main_prof" })
-      .from("course")
-      .where("id", lecture.id);
-    let courseProf = course[0];
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    const regex =
-      "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
-    if (lecture.time.match(regex) === null || !days.includes(lecture.day) ) {
-      resolve(0);
-    }
-    let start = moment(semesterDate.start);
-    let end = moment(semesterDate.end);
-    let arr = [];
-    let tmp = start.clone().day(lecture.day);
-    if (tmp.isSameOrAfter(start, "d")) {
-      //check if the day of the first week is after the start date, if true add a date
+      const course = await knex
+        .select({ main_prof: "main_prof" })
+        .from("course")
+        .where("id", lecture.id);
+      let courseProf = course[0];
+      const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      const regex =
+        "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
+      if (lecture.time.match(regex) === null || !days.includes(lecture.day)) {
+        resolve(0);
+      }
+      let start = moment(semesterDate.start);
+      let end = moment(semesterDate.end);
+      let arr = [];
+      let tmp = start.clone().day(lecture.day);
+      if (tmp.isSameOrAfter(start, "d")) {
+        //check if the day of the first week is after the start date, if true add a date
 
-      arr.push(createLecture(lecture, courseProf, tmp));
-    }
-    while (tmp.add(7, "days").isBefore(end)) {
-      //generate all days until the end date adding 7 days each time
+        arr.push(createLecture(lecture, courseProf, tmp));
+      }
+      while (tmp.add(7, "days").isBefore(end)) {
+        //generate all days until the end date adding 7 days each time
 
-      arr.push(createLecture(lecture, courseProf, tmp));
+        arr.push(createLecture(lecture, courseProf, tmp));
+      }
+      //console.log("STEP 1n DOPO AVER CREATO IL GRUPPO DI LECTURE")
+      await knex("lecture").insert(arr);
+      resolve(arr.length);
+    } catch (error) {
+      reject({
+        msg: `There was an error`,
+        status: 503,
+      });
+      //throw { msg: `There was an error`, status: 503 };
     }
-    //console.log("STEP 1n DOPO AVER CREATO IL GRUPPO DI LECTURE")
-    await knex("lecture").insert(arr);
-    resolve(arr.length);
-  } catch (error) {
-    reject({
-      msg: `There was an error`, 
-      status: 503 
-    });
-    //throw { msg: `There was an error`, status: 503 };
-  }
-});
+  });
 };
 
 const createLecture = (lecture, courseProf, date) => {

@@ -21,9 +21,9 @@ const userTuple = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "e_carra@qwerty.it",
   role: "student",
-  city:"Poggio Ferro",
-  birthday:"1996-11-04",
-  ssn:"MK97060783"
+  city: "Poggio Ferro",
+  birthday: "1996-11-04",
+  ssn: "MK97060783",
 };
 
 const teacherTuple = {
@@ -33,9 +33,9 @@ const teacherTuple = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "john.doe@polito.it",
   role: "teacher",
-  city:"Milano",
-  birthday:"1971-11-04",
-  ssn:"MK97060783"
+  city: "Milano",
+  birthday: "1971-11-04",
+  ssn: "MK97060783",
 };
 
 const managerTuple = {
@@ -45,9 +45,9 @@ const managerTuple = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "mario.castello@polito.it",
   role: "manager",
-  city:"Napoli",
-  birthday:"1961-11-04",
-  ssn:"UQ88181741"
+  city: "Napoli",
+  birthday: "1961-11-04",
+  ssn: "UQ88181741",
 };
 const teacherCredentials = {
   email: teacherTuple.email,
@@ -58,8 +58,8 @@ const courseTuple = {
   id: 1,
   name: "Software Engineering II",
   main_prof: teacherTuple.id,
-  year:1,
-  semester:1
+  year: 1,
+  semester: 1,
 };
 
 const courseStudentTuple = {
@@ -78,7 +78,7 @@ const lectureTuple = {
   end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
-  room:1
+  room: 1,
 };
 
 const lecture2Tuple = {
@@ -92,7 +92,7 @@ const lecture2Tuple = {
   end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
-  room:1
+  room: 1,
 };
 
 const lectureBookingTuple = {
