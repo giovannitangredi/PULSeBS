@@ -4,6 +4,20 @@ const csv = require("fast-csv");
 const moment = require("moment");
 const bcrypt = require("bcrypt");
 
+const clearFile = async (path) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      fs.unlinkSync(path);
+    } catch {
+      if (fs.existsSync(path)) {
+        clearFile(path);
+      }
+    }
+    if (!fs.existsSync(path)) resolve();
+    else reject();
+  });
+};
+
 const checkSupportOfficer = async (userId) => {
   const user = await knex
     .select({ role: "role" })
@@ -118,7 +132,7 @@ exports.uploadStudents = async (req, res) => {
       message: error.msg,
     });
   }
-  fs.unlinkSync(path);
+  await clearFile(path);
 };
 
 exports.uploadProfessors = async (req, res) => {
@@ -136,7 +150,7 @@ exports.uploadProfessors = async (req, res) => {
       message: error.msg,
     });
   }
-  fs.unlinkSync(path);
+  await clearFile(path);
 };
 
 exports.uploadCourses = async (req, res) => {
@@ -155,7 +169,7 @@ exports.uploadCourses = async (req, res) => {
     });
   }
 
-  fs.unlinkSync(path);
+  await clearFile(path);
 };
 
 exports.uploadEnrollments = async (req, res) => {
@@ -174,7 +188,7 @@ exports.uploadEnrollments = async (req, res) => {
     });
   }
 
-  fs.unlinkSync(path);
+  await clearFile(path);
 };
 
 exports.uploadSchedule = async (req, res) => {
@@ -202,8 +216,17 @@ exports.uploadSchedule = async (req, res) => {
       };
     }
     await readFile(userId, path, "schedule", semesterId);
-    const prova = await knex.select("course", "lecturer","start","end","room","capacity","status")
-    .from("lecture"); // TODO: Don't know why when I remove this prova line even when it is not used, related test fails
+    const prova = await knex
+      .select(
+        "course",
+        "lecturer",
+        "start",
+        "end",
+        "room",
+        "capacity",
+        "status"
+      )
+      .from("lecture"); // TODO: Don't know why when I remove this prova line even when it is not used, related test fails
     /*console.log("ELENCO IN CONTROLER",prova)*/
     await knex("semester")
       .update({ inserted_lectures: 1 })
@@ -217,7 +240,7 @@ exports.uploadSchedule = async (req, res) => {
       message: error.msg,
     });
   }
-  fs.unlinkSync(path);
+  await clearFile(path);
 };
 
 const generateLectures = async (semesterId, lecture) => {
@@ -236,10 +259,10 @@ const generateLectures = async (semesterId, lecture) => {
       .from("course")
       .where("id", lecture.id);
     let courseProf = course[0];
-    const days = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat","Sun"];
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const regex =
       "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
-    if (lecture.time.match(regex) === null || !days.includes(lecture.day) ) {
+    if (lecture.time.match(regex) === null || !days.includes(lecture.day)) {
       return 0;
     }
     let start = moment(semesterDate.start);
