@@ -34,6 +34,7 @@ export const ReservationPage = (props: any) => {
       .get(`/lectures/bookable`)
       .then((res) => {
         let lectures = res.data;
+        console.log(lectures);
         let now = new Date()
           .toISOString()
           .replace(/T/, " ")
@@ -65,19 +66,6 @@ export const ReservationPage = (props: any) => {
         setLoading(false);
       });
   };
-  const candidateLecture = (lectureID:any)=>{
-    setLoading(true);
-    axios
-      .post(`/lectures/${lectureID}/candidate`, { lecture_id: lectureID })
-      .then((res) => {
-        getReservations();
-        console.log(res)
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-  }
   const cancelBooking = (lectureID: any) => {
     setLoading(true);
     axios
@@ -107,26 +95,28 @@ export const ReservationPage = (props: any) => {
   return (
     <Container>
       <h1>Book a Lecture</h1>
-      {lectures2weeks.length===0 && <h2>There are no bookable in 2 weeks to show</h2>}
-      { lectures2weeks.length!== 0 &&
-      <BookingLectureList
-        lectures={lectures2weeks}
-        bookLecture={bookLecture}
-        candidateLecture={candidateLecture}
-      ></BookingLectureList>
-    }
+      {lectures2weeks.length === 0 && (
+        <h2>There are no bookable in 2 weeks to show</h2>
+      )}
+      {lectures2weeks.length !== 0 && (
+        <BookingLectureList
+          lectures={lectures2weeks}
+          bookLecture={bookLecture}
+        ></BookingLectureList>
+      )}
       <hr></hr>
       <h1>Booked Lectures</h1>
-      {bookedLectures2weeks.length===0 && <h2>There are no booked in 2 weeks to show</h2>}
-      { bookedLectures2weeks.length!== 0 &&
-      <BookedLectureList
-        lectures={bookedLectures2weeks}
-        cancelBooking={cancelBooking}
-      ></BookedLectureList>
-      }
+      {bookedLectures2weeks.length === 0 && (
+        <h2>There are no booked in 2 weeks to show</h2>
+      )}
+      {bookedLectures2weeks.length !== 0 && (
+        <BookedLectureList
+          lectures={bookedLectures2weeks}
+          cancelBooking={cancelBooking}
+        ></BookedLectureList>
+      )}
       <ReservationCalendar
         bookedLectures={bookedLectures}
-        candidateLecture={candidateLecture}
         lectures={lectures}
         bookLecture={bookLecture}
       />

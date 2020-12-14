@@ -43,28 +43,21 @@ exports.getBookingLectures = async (req, res) => {
     })
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
-    .then((queryResults) => {
-      if(queryResults.length){
-        let index = 0
-        queryResults.map(item => {
-          knex('waiting_list')
-            .where({
-              lecture_id: item.id,
-              student_id: studentId
-            }).then(result => {
-              index++
-              if (result.length) {
-                item.candidate = true
-              }
-              if (index === queryResults.length) {
-                res.json(queryResults)
-              }
-            })
+    .then(async (queryResults) => {
+      const stuff = await Promise.all(
+        queryResults.map(async (item) => {
+          var rItem = { ...item };
+          rItem.candidate =
+            (
+              await knex("waiting_list").where({
+                lecture_id: item.id,
+                student_id: studentId,
+              })
+            ).length > 0;
+          return rItem;
         })
-      }
-      else{
-        res.json(queryResults)
-      }
+      );
+      res.json(stuff);
     })
     .catch((err) => {
       res.json({
@@ -114,12 +107,47 @@ exports.newBooking = async (req, res) => {
   const lectureId = req.params.lectureId;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select({ name: "name" }, { start: "start" }, { status: "status" })
+    .select("name", "start", "status", "capacity")
     .from("lecture")
-    .where("id", lectureId)
-    .then(([lectureQueryResults]) => {
+    .where("id", lectureId) // needs to check whether user can book.
+    .then(async ([lectureQueryResults]) => {
       const lecture = lectureQueryResults;
-      if (lecture.status === "presence") {
+      
+      if (lecture.status !== "presence") {
+        throw `Lecture '${lecture.name}' is a remote one, can't be bookable.`;
+      }
+      const alreadyBooked =
+        (
+          await knex("lecture_booking").count("* as booked").where({
+            lecture_id: lectureId,
+            student_id: studentId,
+          })
+        )[0].booked > 0;
+      if (alreadyBooked) {
+        throw `You already booked lecture '${lecture.name}'.`;
+      }
+      const bookedSeats = (
+        await knex("lecture_booking")
+          .count("student_id as booked_seats")
+          .where({
+            lecture_id: lectureId,
+          })
+      )[0].booked_seats;
+      if (bookedSeats >= lecture.capacity) {
+        console.log("here");
+        knex("waiting_list")
+          .insert({
+            lecture_id: lectureId,
+            student_id: studentId,
+            booked_at: today,
+          })
+          .then(() => {
+            res.json({ message: `Candidate created.` });
+          })
+          .catch((err) => {
+            res.json({ message: `There was an error candidate` });
+          });
+      } else {
         knex("lecture_booking")
           .insert({
             // insert new record
@@ -167,53 +195,14 @@ exports.newBooking = async (req, res) => {
           })
           .catch((err) => {
             // Send a error message in response
-            res.json({ message: `There was an error creating the booking` });
+            throw `There was an error creating the booking.`;
           });
-      } else {
-        res.json({
-          message: `Lecture '${lecture.name}' is a remote one, can't be bookable`,
-        });
       }
     })
     .catch((err) => {
+      console.log(err);
       res.json({
-        message: `There was an error searching the lecture`,
-      });
-    });
-};
-
-exports.candidate = async (req, res) => {
-  const studentId = req.user && req.user.id;
-  const lectureId = req.params.lectureId;
-  const today = moment().format("YYYY-MM-DD HH:mm:ss");
-  knex
-    .select({ name: "name" }, { start: "start" }, { status: "status" })
-    .from("lecture")
-    .where("id", lectureId)
-    .then(([lectureQueryResults]) => {
-      const lecture = lectureQueryResults;
-      if (lecture.status === "presence") {
-        knex("waiting_list")
-          .insert({
-            lecture_id: lectureId,
-            student_id: studentId,
-            booked_at: today
-          })
-          .then(() => {
-            res.json({ message: `Candidate created.` });
-          })
-          .catch((err) => {
-            res.json({ message: `There was an error candidate` });
-          });
-      } else {
-        res.json({
-          message: `Lecture '${lecture.name}' is a remote one, can't be bookable`,
-        });
-      }
-    })
-    .catch((err) => {
-      res.json({
-        message: `There was an error searching the lecture`,
+        message: `There was an error booking the lecture: ${err}`,
       });
     });
 };
@@ -232,24 +221,18 @@ exports.cancelBooking = async (req, res) => {
       knex("waiting_list")
         .where("lecture_id", lectureId)
         .orderBy("booked_at", "asc")
-        .then((results) => {
+        .then(async (results) => {
           if (results.length) {
-            const { lecture_id, student_id, booked_at } = results[0]
-            knex("lecture_booking")
-              .insert({
-                lecture_id,
-                student_id,
-                booked_at
-              })
-              .then(() => {
-                knex("waiting_list")
-                  .where("lecture_id", lecture_id)
-                  .andWhere("student_id", student_id)
-                  .del()
-                  .then(() => {
-                    res.json({ message: `Booking canceled.` });
-                  })
-              })
+            const { lecture_id, student_id, booked_at } = results[0];
+            await knex("lecture_booking").insert({
+              lecture_id,
+              student_id,
+              booked_at,
+            });
+            await knex("waiting_list")
+              .where("lecture_id", lecture_id)
+              .andWhere("student_id", student_id)
+              .del();
           }
         })
         .catch((err) => {

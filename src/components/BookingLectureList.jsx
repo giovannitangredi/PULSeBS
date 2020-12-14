@@ -29,7 +29,6 @@ export const BookingLectureList = (props) => {
               key={lecture.id}
               lecture={lecture}
               bookLecture={props.bookLecture}
-              candidateLecture={props.candidateLecture}
             ></BookingLecture>
           ))}
       </tbody>

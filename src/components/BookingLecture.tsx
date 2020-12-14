@@ -5,16 +5,28 @@ export const BookingLecture = (props: any) => {
     if (evt) evt.preventDefault();
     props.bookLecture(props.lecture.id);
   };
-  const handleCandidate = (evt: any) => {
-    if (evt) evt.preventDefault();
-    props.candidateLecture(props.lecture.id);
-  }
   const styles = {
     col: {
       border: "ridge",
       borderWidth: "0 0.1em 0.1em 0.1em",
     },
   };
+
+  const actionButton =
+    props.lecture.status !== "distance" &&
+    props.lecture.booked_students < props.lecture.capacity ? (
+      <Button variant="primary" onClick={(event) => handleBooking(event)}>
+        Book a Seat
+      </Button>
+    ) : props.lecture.candidate ? (
+      <Button variant="secondary" disabled>
+        You are already in waiting list
+      </Button>
+    ) : (
+      <Button variant="warning" onClick={(event) => handleBooking(event)}>
+        Go in waiting list
+      </Button>
+    );
   return (
     <tr>
       <td style={styles.col}>{props.lecture.course}</td>
@@ -28,23 +40,7 @@ export const BookingLecture = (props: any) => {
       <td style={styles.col}>
         {props.lecture.booked_students}/{props.lecture.capacity}
       </td>
-      <td style={styles.col}>
-        {" "}
-        {props.lecture.booked_students < props.lecture.capacity &&
-          props.lecture.status != "distance" && (
-            <Button variant="primary" onClick={(event) => handleBooking(event)}>
-              Book a Seat
-            </Button>
-          )}
-        {props.lecture.booked_students >= props.lecture.capacity &&
-          props.lecture.status != "distance" && <>
-            {
-              props.lecture.candidate ?
-                <Button variant="secondary" disabled>Candidate</Button> :
-                <Button variant="warning" onClick={(event) => handleCandidate(event)}>Candidate</Button>
-            }
-          </>}
-      </td>
+      <td style={styles.col}> {actionButton}</td>
     </tr>
   );
 };

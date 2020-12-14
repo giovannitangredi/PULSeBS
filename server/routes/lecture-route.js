@@ -8,7 +8,6 @@ const router = express.Router();
 
 router.get("/bookable", lectureRoutes.getBookingLectures);
 router.post("/:lectureId/book", lectureRoutes.newBooking);
-router.post("/:lectureId/candidate", lectureRoutes.candidate);
 router.get("/previousbooking", lectureRoutes.getExistentBooking);
 router.get("/:lectureid/students", lectureRoutes.getBookedStudents);
 router.put("/:lectureid/convert", lectureRoutes.convertDistanceLecture);

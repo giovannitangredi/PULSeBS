@@ -9,27 +9,29 @@ class ReservationCalendar extends React.Component {
     this.state = {
       greenColor: "#36D745", // 3788d8 is blue and 37ecd8 is green
       blueColor: "dodgerblue",
-      redColor: "#F73D3D"
+      redColor: "#F73D3D",
     };
   }
 
   /* returns prepared information for calendar */
   formatEvents = () => {
-    console.log(this.props)
+    console.log(this.props);
     return this.props.lectures
-      .map(obj => {
-        let color = ''
+      .map((obj) => {
+        let color = "";
         if (obj.capacity === obj.booked_students) {
           if (obj.candidate) {
-            color = '#6c757d'
-          }
-          else {
-            color = '#ffc107'
+            color = "#6c757d";
+          } else {
+            color = "#ffc107";
           }
         } else {
-          color = obj.status === "distance" ? this.state.redColor : this.state.blueColor
+          color =
+            obj.status === "distance"
+              ? this.state.redColor
+              : this.state.blueColor;
         }
-        return { ...obj, color }
+        return { ...obj, color };
       })
       .concat(
         this.props.bookedLectures.map((obj) => ({
@@ -49,7 +51,7 @@ class ReservationCalendar extends React.Component {
           lecturer_name,
           lecturer_surname,
           color,
-          status
+          status,
         } = lecture;
         let startTime = new Date(start);
         let endTime = new Date(end);
@@ -69,7 +71,7 @@ class ReservationCalendar extends React.Component {
             lecturer_surname,
             color,
             name,
-            status
+            status,
           },
         };
       });
@@ -99,9 +101,12 @@ class ReservationCalendar extends React.Component {
             <br></br>
             {eventInfo.event.extendedProps.lecturer_name}{" "}
             {eventInfo.event.extendedProps.lecturer_surname}
-            {
-              eventInfo.event.extendedProps.status == "presence" && <><br />Capacity: {eventInfo.event.extendedProps.capacity}{" "}</>
-            }
+            {eventInfo.event.extendedProps.status == "presence" && (
+              <>
+                <br />
+                Capacity: {eventInfo.event.extendedProps.capacity}{" "}
+              </>
+            )}
           </p>
         </div>
       );
@@ -109,16 +114,14 @@ class ReservationCalendar extends React.Component {
   }
   /* if bookable try to book it */
   handleEventClick = ({ event }) => {
-    if (event._def.extendedProps.color == this.state.blueColor) {
-      if (window.confirm("Do you want to book this lecture?")) {
-        this.props.bookLecture(event._def.extendedProps.id)
-      }
-    }
-    else if(event._def.extendedProps.color == '#ffc107'){
-      if (window.confirm("Do you want to candidate this lecture?")) {
-        this.props.candidateLecture(event._def.extendedProps.id)
-      }
-    }
+    const { color } = event._def.extendedProps;
+    const confirmText =
+      color === this.state.blueColor
+        ? "Do you want to book this lecture?"
+        : color === "#ffc107" && "Do you want to candidate this lecture?";
+    confirmText &&
+      window.confirm(confirmText) &&
+      this.props.bookLecture(event._def.extendedProps.id);
   };
 
   render() {
