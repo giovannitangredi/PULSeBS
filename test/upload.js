@@ -67,8 +67,8 @@ const teacherTuple = {
     id: 1,
     course: courseTuple.id,
     lecturer: teacherTuple.id,
-    start:"8:30",
-    end: "11:30",
+    start:"2020-09-28 08:30:00",
+    end: "2020-09-28 11:30:00",
     capacity: 120,
     status: "presence",
     room:1
@@ -84,7 +84,7 @@ const teacherTuple = {
 
   describe("Story 12 test", async function () {
     const authenticatedUser = request.agent(app);
-    this.timeout(100000);
+
     before(async () => {
       await knex("user").del();
       await knex("course").del();
@@ -136,6 +136,7 @@ const teacherTuple = {
           await knex("lecture").del();
           await knex("course_available_student").del();
           await knex("course").del();
+          await knex("_Variables").del();
         });
       });
 
@@ -183,6 +184,7 @@ const teacherTuple = {
           await knex("lecture").del();
           await knex("course_available_student").del();
           await knex("course").del();
+          await knex("_Variables").del();
         });
       });
 
@@ -222,7 +224,8 @@ describe("Upload Courses ", async () => {
       await knex("user").del();
       await knex("lecture").del();
       await knex("course").del();
-      await knex("course_available_student").del();      
+      await knex("course_available_student").del();  
+      await knex("_Variables").del();    
     });
   });
 
@@ -265,6 +268,7 @@ describe("Upload Enrollements ", async () => {
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("course").del();
+      await knex("_Variables").del();
     });
   });
 
@@ -311,6 +315,7 @@ describe("Upload Enrollements ", async () => {
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("semester").del();
+      await knex("_Variables").del();
     });
   }); 
 
