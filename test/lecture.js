@@ -535,7 +535,7 @@ describe("Presence Lecture into distance one ", async function () {
   });
 });
 
-describe("Test story 15", async function () {
+describe("Test story 15: As a student I want to get notified when I am taken from the waiting list so that I can attend the lecture", async function () {
   const authenticatedUser = request.agent(app);
   this.timeout(15000);
   before(async () => {
