@@ -9,15 +9,30 @@ class ReservationCalendar extends React.Component {
     this.state = {
       greenColor: "#36D745", // 3788d8 is blue and 37ecd8 is green
       blueColor: "dodgerblue",
-      redColor: "#F73D3D"
+      redColor: "#F73D3D",
     };
   }
 
   /* returns prepared information for calendar */
   formatEvents = () => {
-    console.log(this.props)
+    console.log(this.props);
     return this.props.lectures
-      .map((obj) => ({ ...obj, color: obj.status === "distance" ? this.state.redColor : this.state.blueColor }))
+      .map((obj) => {
+        let color = "";
+        if (obj.capacity === obj.booked_students) {
+          if (obj.candidate) {
+            color = "#6c757d";
+          } else {
+            color = "#ffc107";
+          }
+        } else {
+          color =
+            obj.status === "distance"
+              ? this.state.redColor
+              : this.state.blueColor;
+        }
+        return { ...obj, color };
+      })
       .concat(
         this.props.bookedLectures.map((obj) => ({
           ...obj,
@@ -36,7 +51,7 @@ class ReservationCalendar extends React.Component {
           lecturer_name,
           lecturer_surname,
           color,
-          status
+          status,
         } = lecture;
         let startTime = new Date(start);
         let endTime = new Date(end);
@@ -56,7 +71,7 @@ class ReservationCalendar extends React.Component {
             lecturer_surname,
             color,
             name,
-            status
+            status,
           },
         };
       });
@@ -86,9 +101,12 @@ class ReservationCalendar extends React.Component {
             <br></br>
             {eventInfo.event.extendedProps.lecturer_name}{" "}
             {eventInfo.event.extendedProps.lecturer_surname}
-            {
-              eventInfo.event.extendedProps.status == "presence" && <><br/>Capacity: {eventInfo.event.extendedProps.capacity}{" "}</>
-            }
+            {eventInfo.event.extendedProps.status == "presence" && (
+              <>
+                <br />
+                Capacity: {eventInfo.event.extendedProps.capacity}{" "}
+              </>
+            )}
           </p>
         </div>
       );
@@ -96,9 +114,14 @@ class ReservationCalendar extends React.Component {
   }
   /* if bookable try to book it */
   handleEventClick = ({ event }) => {
-    if (event._def.extendedProps.color == this.state.blueColor)
-      if (window.confirm("Do you want to book this lecture?"))
-        this.props.bookLecture(event._def.extendedProps.id);
+    const { color } = event._def.extendedProps;
+    const confirmText =
+      color === this.state.blueColor
+        ? "Do you want to book this lecture?"
+        : color === "#ffc107" && "Do you want to candidate this lecture?";
+    confirmText &&
+      window.confirm(confirmText) &&
+      this.props.bookLecture(event._def.extendedProps.id);
   };
 
   render() {
@@ -109,7 +132,6 @@ class ReservationCalendar extends React.Component {
             border={"secondary"}
             style={{
               width: "100%",
-
               background: "rgb(254 254 254)",
             }}
           >
@@ -118,7 +140,7 @@ class ReservationCalendar extends React.Component {
               <div className="d-flex justify-content-between">
                 <h4>Lectures</h4>{" "}
                 <div>
-                  <svg width="510" height="40">
+                  <svg width="850" height="40">
                     <text fontSize="14" fontFamily="Verdana" x="7" y="22">
                       Booked Lectures
                     </text>
@@ -157,6 +179,34 @@ class ReservationCalendar extends React.Component {
                       height="30"
                       style={{
                         fill: `${this.state.redColor}`,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    <text fontSize="14" fontFamily="Verdana" x="510" y="22">
+                      Full Lectures
+                    </text>
+                    <rect
+                      x="605"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: `#ffc107`,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    <text fontSize="14" fontFamily="Verdana" x="645" y="22">
+                      In Waiting List
+                    </text>
+                    <rect
+                      x="755"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: `#6c757d`,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
