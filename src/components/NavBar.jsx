@@ -29,7 +29,7 @@ export const NavBar = (props) => {
   return (
     <Navbar>
       <Navbar.Brand>
-        Welcome, {props.user.name + " " + props.user.surname}
+      {`${props.user.name} ${props.user.surname}`} <u>{props.user.id}</u>
       </Navbar.Brand>
       <Nav>
         {props.user &&
