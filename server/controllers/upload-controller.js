@@ -52,8 +52,8 @@ const readFile = async (userId, path, type, semesterId) => {
       return;
     }
     let rows = [];
-    //var totInsert = 0;
-    fs.createReadStream(path)
+    var tot = 0;
+    const stream = fs.createReadStream(path)
       .pipe(
         csv.parse({
           headers: headers[type],
@@ -65,23 +65,34 @@ const readFile = async (userId, path, type, semesterId) => {
           msg: error,
         });
       })
-      .on("data", (row) => {
+      .on("data", async (row) => {
+        stream.pause();
+        console.log("STEP 0n")
         if (["student", "teacher"].includes(type)) {
           row.password_hash = bcrypt.hashSync("password", 1);
           row.role = type;
         }
         if (type === "schedule") {
-          generateLectures(semesterId, row).catch((error) => {
+          try{
+            const count = await generateLectures(semesterId, row);
+            console.log("STEP 2n DENTRO READ FILE",count);
+            tot += count;
+            stream.resume();
+          } catch (error) { 
             reject({
               status: 500,
               msg: `There was an error inserting the schedule`,
             });
-          });
+          }
+          
         } else {
           rows.push(row);
+          stream.resume();
         }
+        
       })
       .on("end", () => {
+        //stream.pause();
         if (type != "schedule") {
           var chunkSize = 100;
           knex
@@ -97,7 +108,8 @@ const readFile = async (userId, path, type, semesterId) => {
               });
             });
         } else {
-          resolve();
+          console.log("STEP 3 FINE DENTRO READ FILE",tot)
+          resolve(tot);
         }
       });
   });
@@ -202,9 +214,10 @@ exports.uploadSchedule = async (req, res) => {
       };
     }
     await readFile(userId, path, "schedule", semesterId);
-    /*const prova = await knex.select("course", "lecturer","start","end","room","capacity","status")
+    console.log("STEP 4 DOPO READFILE (FINE)")
+   /*const prova = await knex.select("course", "lecturer","start","end","room","capacity","status")
     .from("lecture");
-    console.log("ELENCO IN CONTROLER",prova)*/
+    console.log("STEP 4 ELENCO IN CONTROLER",prova)*/
     await knex("semester")
       .update({ inserted_lectures: 1 })
       .where("sid", semesterId); //no more insert of lecture for the selected semester
@@ -213,6 +226,7 @@ exports.uploadSchedule = async (req, res) => {
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
+    console.log(error)
     res.status(error.status).send({
       message: error.msg,
     });
@@ -220,7 +234,8 @@ exports.uploadSchedule = async (req, res) => {
   fs.unlinkSync(path);
 };
 
-const generateLectures = async (semesterId, lecture) => {
+const generateLectures = (semesterId, lecture) => {
+  return new Promise(async (resolve, reject) => {
   try {
     const semester = await knex
       .select({
@@ -240,7 +255,7 @@ const generateLectures = async (semesterId, lecture) => {
     const regex =
       "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
     if (lecture.time.match(regex) === null || !days.includes(lecture.day) ) {
-      return 0;
+      resolve(0);
     }
     let start = moment(semesterDate.start);
     let end = moment(semesterDate.end);
@@ -256,11 +271,17 @@ const generateLectures = async (semesterId, lecture) => {
 
       arr.push(createLecture(lecture, courseProf, tmp));
     }
+    console.log("STEP 1n DOPO AVER CREATO IL GRUPPO DI LECTURE")
     await knex("lecture").insert(arr);
-    return arr.length;
+    resolve(arr.length);
   } catch (error) {
-    throw { msg: `There was an error`, status: 503 };
+    reject({
+      msg: `There was an error`, 
+      status: 503 
+    });
+    //throw { msg: `There was an error`, status: 503 };
   }
+});
 };
 
 const createLecture = (lecture, courseProf, date) => {

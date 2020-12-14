@@ -297,25 +297,13 @@ describe("Upload Enrollements ", async () => {
       const res = await authenticatedUser.post(`/api/upload/schedule/${semesterTuple.sid}`)
       .attach('file',
        fs.readFileSync('./test/csvfiles/Schedule.csv'),'Schedule.csv')
-      
+       console.log("STEP 5 TEST")
       expect(res.status).to.equal(200);
-
+      
       const uploadedschedule = await knex
       .select("course", "lecturer","start","end","room","capacity","status")
       .from("lecture");
-      //console.log("TEST",uploadedschedule)
-      expect(uploadedschedule.length).to.equal(16); //TODO check upload schedule
-      /*expect(uploadedschedule).to.have.deep.members([
-      {  
-         course:courseTuple.id,
-         lecturer:lectureTuple.id,
-         start:lectureTuple.start,
-         end:lectureTuple.end,
-         room:lectureTuple.room, 
-         capacity:lectureTuple.capacity,
-         status:lectureTuple.status                            
-      },
-     ]);   */  
+      expect(uploadedschedule.length).to.equal(16); 
     });
     after(async () => {
       await knex("user").del();
