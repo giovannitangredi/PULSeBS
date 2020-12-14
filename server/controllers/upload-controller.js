@@ -81,7 +81,7 @@ const readFile = async (userId, path, type, semesterId) => {
       })
       .on("data", async (row) => {
         stream.pause();
-        console.log("STEP 0n")
+        //console.log("STEP 0n")
         if (["student", "teacher"].includes(type)) {
           row.password_hash = bcrypt.hashSync("password", 1);
           row.role = type;
@@ -89,7 +89,7 @@ const readFile = async (userId, path, type, semesterId) => {
         if (type === "schedule") {
           try{
             const count = await generateLectures(semesterId, row);
-            console.log("STEP 2n DENTRO READ FILE",count);
+            //console.log("STEP 2n DENTRO READ FILE",count);
             tot += count;
             stream.resume();
           } catch (error) { 
@@ -112,7 +112,7 @@ const readFile = async (userId, path, type, semesterId) => {
           knex
             .batchInsert(tables[type], rows, chunkSize)
             .then(() => {
-              console.log("SUCCESS");
+              //console.log("SUCCESS");
               resolve(rows.length);
             })
             .catch((err) => {
@@ -122,7 +122,7 @@ const readFile = async (userId, path, type, semesterId) => {
               });
             });
         } else {
-          console.log("STEP 3 FINE DENTRO READ FILE",tot)
+          //console.log("STEP 3 FINE DENTRO READ FILE",tot)
           resolve(tot);
         }
       });
@@ -228,10 +228,7 @@ exports.uploadSchedule = async (req, res) => {
       };
     }
     await readFile(userId, path, "schedule", semesterId);
-    console.log("STEP 4 DOPO READFILE (FINE)")
-   /*const prova = await knex.select("course", "lecturer","start","end","room","capacity","status")
-    .from("lecture");
-    console.log("STEP 4 ELENCO IN CONTROLER",prova)*/
+    //console.log("STEP 4 DOPO READFILE (FINE)")
     await knex("semester")
       .update({ inserted_lectures: 1 })
       .where("sid", semesterId); //no more insert of lecture for the selected semester
@@ -285,7 +282,7 @@ const generateLectures = (semesterId, lecture) => {
 
       arr.push(createLecture(lecture, courseProf, tmp));
     }
-    console.log("STEP 1n DOPO AVER CREATO IL GRUPPO DI LECTURE")
+    //console.log("STEP 1n DOPO AVER CREATO IL GRUPPO DI LECTURE")
     await knex("lecture").insert(arr);
     resolve(arr.length);
   } catch (error) {

@@ -301,7 +301,6 @@ describe("Upload Enrollements ", async () => {
       const res = await authenticatedUser.post(`/api/upload/schedule/${semesterTuple.sid}`)
       .attach('file',
        fs.readFileSync('./test/csvfiles/Schedule.csv'),'Schedule.csv')
-       console.log("STEP 5 TEST")
       expect(res.status).to.equal(200);
       
       const uploadedschedule = await knex

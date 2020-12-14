@@ -185,7 +185,7 @@ exports.getSystemStats = async (req, res) => {
     .where("id", user)
     .then((result) => {
       if (result[0].role != "manager") {
-        console.log(result.role);
+        //console.log(result.role);
         res.status(401).json({
           message: "Unauthorize acces only managers can acces this query",
         });

@@ -25,7 +25,7 @@ exports.sendMail = async (email, subject, body) => {
     html: body, // html body
   });
 
-  console.log("Message sent: %s", info.messageId);
+  //console.log("Message sent: %s", info.messageId);
 };
 
 exports.fetchEmails = async (imap) => {
