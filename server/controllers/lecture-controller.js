@@ -233,6 +233,7 @@ exports.cancelBooking = async (req, res) => {
               .where("lecture_id", lecture_id)
               .andWhere("student_id", student_id)
               .del();
+            sendCandidateToReserveChangeEmail(lecture_id,student_id);
           }
           res.json({ message: "Booking canceled." });
         })

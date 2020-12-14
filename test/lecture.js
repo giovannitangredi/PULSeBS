@@ -80,6 +80,18 @@ const lectureTuple = {
   status: "presence",
 };
 
+const lowCapacityLectureTuple = {
+  id: 2,
+  name: "Lecture 1",
+  course: courseTuple.id,
+  lecturer: teacherTuple.id,
+  start: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  capacity: 1,
+  status: "presence",
+  //room: 1,
+};
+
 const futureLectureTuple = {
   id: 1,
   name: "Lecture 1",
@@ -102,8 +114,8 @@ const lectureBookingTuple = {
   booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
 };
 
-const lectureBooking2Tuple = {
-  lecture_id: lectureTuple.id,
+const lowCapacityLectureBookingTuple = {
+  lecture_id: lowCapacityLectureTuple.id,
   student_id: student2Tuple.id,
   booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
 };
@@ -549,9 +561,9 @@ describe("Test story 15: As a student I want to get notified when I am taken fro
     await knex("user").insert(student2Tuple);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
-    await knex("lecture").insert(lectureTuple);
+    await knex("lecture").insert(lowCapacityLectureTuple);
     await knex("course_available_student").insert(courseStudentTuple);
-    await knex("lecture_booking").insert(lectureBooking2Tuple); // user 3 booked
+    await knex("lecture_booking").insert(lowCapacityLectureBookingTuple); // user 3 booked
   });
 
   describe("Student 1 should receive an email when he is taken from the waiting list", async () => {
@@ -569,7 +581,7 @@ describe("Test story 15: As a student I want to get notified when I am taken fro
         .expect(200);
 
       const res = await authenticatedUser
-        .post(`/api/lectures/${lectureTuple.id}/candidate`)
+        .post(`/api/lectures/${lowCapacityLectureTuple.id}/book`)
         .expect(200, { message: "Candidate created." });
     });
 
@@ -580,7 +592,7 @@ describe("Test story 15: As a student I want to get notified when I am taken fro
         .expect(200);
 
       await authenticatedUser
-        .delete(`/api/lectures/${lectureTuple.id}/cancelBook`)
+        .delete(`/api/lectures/${lowCapacityLectureTuple.id}/cancelBook`)
         .expect(200);
     });
 
