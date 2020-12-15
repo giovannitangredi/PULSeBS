@@ -95,7 +95,8 @@ const readFile = async (userId, path, type, semesterId) => {
           reject(
           {msg: "Wrong file",
           status: 501}
-          )}
+          )
+        return;}
           check = true;
         if (["student", "teacher"].includes(type)) {
           row.password_hash = bcrypt.hashSync("password", 1);
