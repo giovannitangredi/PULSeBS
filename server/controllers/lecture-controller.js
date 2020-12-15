@@ -233,6 +233,7 @@ exports.cancelBooking = async (req, res) => {
               .where("lecture_id", lecture_id)
               .andWhere("student_id", student_id)
               .del();
+            sendCandidateToReserveChangeEmail(lecture_id,student_id);
           }
           res.json({ message: "Booking canceled." });
         })
@@ -444,4 +445,54 @@ sendEmailsForCancelledLecture = async (lectureId) => {
   } catch (err) {
     console.log(`There was an error cancelling the lecture: ${err}`);
   }
+};
+
+sendCandidateToReserveChangeEmail=async (lectureId,studentId) => {
+  const result = await knex
+  .select(
+    { id: "user.id" },
+    { name: "user.name" },
+    { surname: "user.surname" },
+    { email: "user.email" },
+    { lectureName: "lecture.name" },
+    { lectureStart: "lecture.start" },
+    { lectureCourseName: "course.name" },
+  )
+  .from("lecture_booking")
+  .join("user", "lecture_booking.student_id", "=", "user.id")
+  .join("lecture", "lecture.id", "=", "lecture_booking.lecture_id")
+  .join("course", "lecture.course", "=", "course.id")
+  .where("lecture_booking.lecture_id", lectureId)
+  .andWhere("user.id",studentId).limit(1);
+
+const emailSubject = "You are moved from candidate list to Reserved List";
+const emailBody = (
+  name,
+  surname,
+  lectureName,
+  lectureCourseName,
+  lectureStart
+) => `Dear ${name} ${surname},<br/> \
+  Your request state for lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} has changed from candidate to reserve. Now you can participate in this lecture,\
+  <br/>The PULSeBS Team`;
+
+  const queue = result.map((item) =>
+  emailController.sendMail(
+    item.email,
+    emailSubject,
+    emailBody(
+      item.name,
+      item.surname,
+      item.lectureName,
+      item.lectureCourseName,
+      item.lectureStart
+    )
+  )
+);
+try {
+  await Promise.all(queue);
+} catch (err) {
+  console.log(`There was an error cancelling the lecture: ${err}`);
+}
+
 };
