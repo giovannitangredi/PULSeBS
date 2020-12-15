@@ -14,7 +14,7 @@ export const DatePickerComponent = (props) => {
     setEndDate(edate);
   };
   return (
-    <>
+    <div className={props.className}>
       <DatePicker
         selected={startDate}
         onChange={(date) => startDateHandler(date)}
@@ -32,6 +32,6 @@ export const DatePickerComponent = (props) => {
         endDate={endDate}
         minDate={startDate}
       />
-    </>
+    </div>
   );
 };

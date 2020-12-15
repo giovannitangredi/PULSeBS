@@ -5,16 +5,21 @@ Pandemic University Lecture Seat Booking System SE2 Project
 ## Docker configuration
 
 To run the app you must do the following :
-- Pull the image from docker hub 
+
+- Pull the image from docker hub
+
 ```sh
 docker pull giovannitangredi/pulsebs:<tag>
 ```
+
 - then run it with the following command
+
 ```sh
 docker run -p 3000:3000 -p 4001:4001 giovannitangredi/pulsebs:<tag>
-``` 
+```
 
 User inside the system :
+
 - s274930@studenti.polito.it student
 - mario.rossi@polito.it teacher
 - s280113@studenti.polito.it student

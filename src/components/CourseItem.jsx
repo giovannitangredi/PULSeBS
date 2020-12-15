@@ -19,7 +19,9 @@ const courseItem = (props) => {
         </Card.Header>
         <Card.Body>
           <Card.Title>{course.name}</Card.Title>
-          <Card.Text>Course Description.</Card.Text>
+          <Card.Text>
+            Year {course.year} Semester {course.semester}
+          </Card.Text>
           <Button
             variant="primary"
             onClick={() => {

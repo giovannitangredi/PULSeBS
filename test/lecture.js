@@ -27,21 +27,27 @@ const userCredentials = {
 };
 
 const userTuple = {
-  id: 1,
+  id: "1",
   name: "Enrico",
   surname: "Carraro",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: testEmailAddress,
   role: "student",
+  city: "Poggio Ferro",
+  birthday: "1996-11-04",
+  ssn: "MK97060783",
 };
 
 const teacherTuple = {
-  id: 2,
+  id: "2",
   name: "John",
   surname: "Doe",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "john.doe@polito.it",
   role: "teacher",
+  city: "Milano",
+  birthday: "1971-11-04",
+  ssn: "MR17121943",
 };
 
 const teacherCredentials = {
@@ -50,31 +56,33 @@ const teacherCredentials = {
 };
 
 const courseTuple = {
-  id: 1,
+  id: "1",
   name: "Software Engineering II",
   main_prof: teacherTuple.id,
+  year: 1,
+  semester: 1,
 };
 
 const lectureTuple = {
   id: 1,
-  name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
   end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
+  room: 1,
 };
 
 const futureLectureTuple = {
   id: 1,
-  name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment().add(2, "days").format("YYYY-MM-DD HH:mm:ss"),
   end: moment().add(2, "days").add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
+  room: 1,
 };
 
 const courseStudentTuple = {
@@ -91,13 +99,15 @@ const lectureBookingTuple = {
 const expectedPreviousBooking = [
   {
     id: lectureTuple.id,
-    name: lectureTuple.name,
     course: courseTuple.name,
     lecturer_name: teacherTuple.name,
     lecturer_surname: teacherTuple.surname,
     start: lectureTuple.start,
     end: lectureTuple.end,
-    capacity: lectureTuple.capacity,
+    room: lectureTuple.room,
+    year: courseTuple.year,
+    semester: courseTuple.semester,
+    capacity: 25,
     booked_at: lectureBookingTuple.booked_at,
     status: lectureTuple.status,
   },
@@ -106,15 +116,17 @@ const expectedPreviousBooking = [
 const expectedBookableLectures = [
   {
     id: futureLectureTuple.id,
-    name: futureLectureTuple.name,
     course: courseTuple.name,
     lecturer_name: teacherTuple.name,
     lecturer_surname: teacherTuple.surname,
     start: futureLectureTuple.start,
     end: futureLectureTuple.end,
+    status: futureLectureTuple.status,
+    room: futureLectureTuple.room,
+    year: courseTuple.year,
+    semester: courseTuple.semester,
     capacity: futureLectureTuple.capacity,
     booked_students: 0,
-    status: futureLectureTuple.status,
   },
 ];
 
@@ -289,7 +301,7 @@ describe("List of students booked for a lecture", async () => {
     );
     expect(res.status).to.equal(200);
   });
-  it("should return one student booked", async () => {
+  it("should return the student booked", async () => {
     const res = await authenticatedUser.get(
       `/api/lectures/${lectureBookingTuple.lecture_id}/students`
     );
@@ -342,7 +354,6 @@ describe("list of lectures scheduled for a course", async () => {
     expect(res.body).to.have.deep.members([
       {
         id: lectureTuple.id,
-        name: lectureTuple.name,
         course: lectureTuple.course,
         lecturer_id: teacherTuple.id,
         lecturer_name: teacherTuple.name,
@@ -351,6 +362,7 @@ describe("list of lectures scheduled for a course", async () => {
         end: lectureTuple.end,
         capacity: lectureTuple.capacity,
         status: lectureTuple.status,
+        room: lectureTuple.room,
       },
     ]);
   });
@@ -363,7 +375,7 @@ describe("list of lectures scheduled for a course", async () => {
 });
 
 //Teacher cancel a lecture 1h before
-describe("Teacher cancel a lecture 1 hour before  ", async function () { 
+describe("Teacher cancel a lecture 1 hour before  ", async function () {
   const authenticatedUser = request.agent(app);
   this.timeout(15000);
   let newEmailPromise;
@@ -384,7 +396,7 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
       .post("/api/auth/login")
       .send(teacherCredentials)
       .expect(200);
-    
+
     await emailController.deleteEmails(imap);
     newEmailPromise = emailController.waitForNewEmail(imap);
   });
@@ -415,11 +427,12 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
 });
 
 //Cancel a lecture booked by a student
-describe("Cancel a booked lecture ", async function ()  {
+describe("Cancel a booked lecture ", async function () {
   //now let's login the user before we run any tests
-  this.timeout(5000)
+  this.timeout(5000);
   const authenticatedUser = request.agent(app);
   before(async () => {
+    await knex("course_available_student").del();
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("course").del();
@@ -458,7 +471,6 @@ describe("Cancel a booked lecture ", async function ()  {
     await knex("course_available_student").del();
   });
 });
-
 
 // Turn a presence lecture into distance one
 describe("Presence Lecture into distance one ", async function () {

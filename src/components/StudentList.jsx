@@ -77,7 +77,7 @@ class StudentList extends React.Component {
   formatEvents() {
     return this.state.lectures.map((lecture) => {
       const {
-        name,
+        room,
         end,
         start,
         capacity,
@@ -89,8 +89,13 @@ class StudentList extends React.Component {
       let startTime = new Date(start);
       let endTime = new Date(end);
 
+      let date = moment(start).format("dddd, MMMM Do YYYY");
+      let time = moment(start)
+        .format("HH:mm")
+        .concat("-" + moment(end).format("HH:mm"));
+
       return {
-        title: name,
+        //name: name,
         start: startTime,
         end: endTime,
         backgroundColor: status === "distance" ? "#F73D3D" : "dodgerblue",
@@ -99,8 +104,11 @@ class StudentList extends React.Component {
           capacity: capacity,
           booked_students: booked_students,
           status: status,
+          room: room,
+          date: date,
+          time: time,
           id,
-          name,
+          //name,
         },
       };
     });
@@ -123,10 +131,10 @@ class StudentList extends React.Component {
           }}
         >
           <p style={{ textAlign: "center" }} className="my-auto">
-            {eventInfo.event.title} <br></br>
+            Room {eventInfo.event.extendedProps.room} <br></br>
             {eventInfo.event.extendedProps.status === "presence" && (
               <>
-                Capacity: {eventInfo.event.extendedProps.capacity}
+                Seats: {eventInfo.event.extendedProps.capacity}
                 <br></br>
               </>
             )}
@@ -176,37 +184,26 @@ class StudentList extends React.Component {
     setTimeout(() => {
       this.setState({ alertShow: false });
     }, 3000);
-    this.scrolltoview("CoursesElement");
+    //this.scrolltoview("CoursesElement");
   };
   cancelLectureHandle = (lecture) => {
     this.handleBooking();
 
     console.log(lecture.extendedProps.id);
-    axios
-      .delete(`/lectures/${lecture.extendedProps.id}`, {})
-      .then((response) => {
-        this.setState({ alertType: "success" });
-        this.setState({ alertText: "Lecture has canceled sucssesfully" });
-      })
-      .catch((error) => {
-        this.setState({ alertType: "danger" });
-        this.setState({ alertText: "There is a problem in removing Leture" });
-      });
-    this.clearPageData();
-  };
-
-  clearPageData = () => {
-    this.setState({ lectures: [] });
-    this.setState({ students: [] });
-    this.setState({ courses: [] });
-    this.setState({ selectedLecture: 0 });
-    this.setState({ selectedCourse: 0 });
-    this.setState({ selectedColors: [] });
-    this.setState({ lectureColor: "" });
-    this.setState({ lecturetitle: "" });
-    this.setState({ studenttitle: "" });
-    this.setState({ selectedLecture: 1 });
-    this.getCourseList();
+    const course = this.state.selectedCourse;
+    course &&
+      course.id &&
+      axios
+        .delete(`/lectures/${lecture.extendedProps.id}`, {})
+        .then((res) => {
+          this.setState({ alertType: "success" });
+          this.setState({ alertText: "Lecture has canceled sucssesfully" });
+          this.getLecturesList(course);
+        })
+        .catch((error) => {
+          this.setState({ alertType: "danger" });
+          this.setState({ alertText: "There is a problem in removing Leture" });
+        });
   };
 
   componentDidMount() {
@@ -218,7 +215,9 @@ class StudentList extends React.Component {
     return (
       <>
         {this.state.alertShow && (
-          <Alert variant={this.state.alertType}>{this.state.alertText}</Alert>
+          <Alert className="fixed-top" variant={this.state.alertType}>
+            {this.state.alertText}
+          </Alert>
         )}
 
         <div id="CoursesElement" className="container">
@@ -262,7 +261,7 @@ class StudentList extends React.Component {
                 {" "}
                 <div className="d-flex justify-content-between">
                   <h4>
-                    <b>{this.state.lecturetitle}</b> Lectures
+                    <b>{this.state.lecturetitle}</b>
                   </h4>{" "}
                   <div>
                     <svg width="340" height="40">
@@ -322,19 +321,19 @@ class StudentList extends React.Component {
                         style={{ margin: "1rem 0rem" }}
                       >
                         <ListGroup.Item key="head">
-                          <div className="d-flex w-100 justify-content-between">
+                          <div className="d-flex w-100 justify-content-center">
                             <div className="container">
                               <div className="row">
-                                <div className="col-lg-3">
-                                  <label>Lecture Name</label>
+                                <div className="col-lg-2 d-flex justify-content-center">
+                                  <label>Room</label>
                                 </div>
-                                <div className="col-lg-2">
-                                  <label>Start</label>
+                                <div className="col-lg-3 d-flex justify-content-center">
+                                  <label>Date</label>
                                 </div>
-                                <div className="col-lg-3">
-                                  <label>End</label>
+                                <div className="col-lg-3 d-flex justify-content-center">
+                                  <label>Time</label>
                                 </div>
-                                <div className="col-lg-2">
+                                <div className="col-lg-2 d-flex justify-content-center">
                                   <label>Status</label>
                                 </div>
                                 <div className="col-lg-2"></div>
@@ -392,13 +391,16 @@ class StudentList extends React.Component {
                         <div className="d-flex w-100 justify-content-between">
                           <div className="container">
                             <div className="row">
-                              <div className="col-lg-4">
+                              <div className="col-lg-2 d-flex justify-content-center">
+                                <label>Id</label>
+                              </div>
+                              <div className="col-lg-3 d-flex justify-content-center">
                                 <label>Name</label>
                               </div>
-                              <div className="col-lg-4">
-                                <label>LastName</label>
+                              <div className="col-lg-3 d-flex justify-content-center">
+                                <label>Surname</label>
                               </div>
-                              <div className="col-lg-4">
+                              <div className="col-lg-4 d-flex justify-content-center">
                                 <label>Email</label>
                               </div>
                             </div>

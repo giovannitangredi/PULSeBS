@@ -4,7 +4,7 @@ const knex = require("./../db");
 exports.getCourses = async (req, res) => {
   const userId = req.user && req.user.id;
   knex
-    .select("id", "name", "main_prof")
+    .select("id", "name", "main_prof", "year", "semester")
     .from("course")
     .where("main_prof", userId)
     .then((queryResults) => {

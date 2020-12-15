@@ -7,17 +7,23 @@ class ReservationCalendar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      greenColor: "#36D745", // 3788d8 is blue and 37ecd8 is green
-      blueColor: "dodgerblue",
-      redColor: "#F73D3D"
+      greenColor: "#0CE100",
+      blueColor: "#228bff",
+      redColor: "#ff2b2b",
     };
   }
 
   /* returns prepared information for calendar */
   formatEvents = () => {
-    console.log(this.props)
+    console.log(this.props);
     return this.props.lectures
-      .map((obj) => ({ ...obj, color: obj.status === "distance" ? this.state.redColor : this.state.blueColor }))
+      .map((obj) => ({
+        ...obj,
+        color:
+          obj.status === "distance"
+            ? this.state.redColor
+            : this.state.blueColor,
+      }))
       .concat(
         this.props.bookedLectures.map((obj) => ({
           ...obj,
@@ -26,7 +32,7 @@ class ReservationCalendar extends React.Component {
       )
       .map((lecture) => {
         const {
-          name,
+          //name,
           end,
           start,
           capacity,
@@ -36,17 +42,19 @@ class ReservationCalendar extends React.Component {
           lecturer_name,
           lecturer_surname,
           color,
-          status
+          status,
+          room,
         } = lecture;
         let startTime = new Date(start);
         let endTime = new Date(end);
 
         return {
-          title: name,
+          //title: name,
           start: startTime,
           end: endTime,
           backgroundColor: color,
           display: "block",
+          borderColor: "#000000",
           extendedProps: {
             capacity: capacity,
             booked_students: booked_students,
@@ -55,8 +63,9 @@ class ReservationCalendar extends React.Component {
             lecturer_name,
             lecturer_surname,
             color,
-            name,
-            status
+            room,
+            //name,
+            status,
           },
         };
       });
@@ -67,29 +76,27 @@ class ReservationCalendar extends React.Component {
     if (eventInfo)
       return (
         <div
-          className="rounded row align-items-center justify-content-center"
+          className=" text-wrap rounded row align-items-center m-0 d-flex justify-content-center"
           style={{
-            width: "104%",
-            height: "104%",
-            marginLeft: "-2%",
-            marginTop: "-2%",
+            width: "100%",
+            height: "100%",
             color: "#000000",
             fontWeight: "500",
             fontSize: "0.85rem",
-            
-            border: "4px solid #000000;",
           }}
         >
-          <p>
-            {eventInfo.event.title}
-            <br></br>
+          <p className="my-2 text-center">
             {eventInfo.event.extendedProps.course}
             <br></br>
             {eventInfo.event.extendedProps.lecturer_name}{" "}
             {eventInfo.event.extendedProps.lecturer_surname}
-            {
-              eventInfo.event.extendedProps.status == "presence" && <><br/>Capacity: {eventInfo.event.extendedProps.capacity}{" "}</>
-            }
+            {eventInfo.event.extendedProps.status == "presence" && (
+              <>
+                <br />
+                Room {eventInfo.event.extendedProps.room} Seats:{" "}
+                {eventInfo.event.extendedProps.capacity}
+              </>
+            )}
           </p>
         </div>
       );

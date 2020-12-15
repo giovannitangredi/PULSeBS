@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import {
-  Table,
-  Button,
-  ListGroup,
-} from "react-bootstrap";
+import { Table, Button, ListGroup } from "react-bootstrap";
 import axios from "axios";
 import { DatePickerComponent } from "./DatePickerComponent";
 
@@ -15,8 +11,8 @@ export const CourseDetail = (props) => {
   const [reserved, setReserved] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-//  const [weeksBetween, setWeeksBetween] = useState([]);
-//  const [monthsBetween, setMonthsBetween] = useState([]);
+  //  const [weeksBetween, setWeeksBetween] = useState([]);
+  //  const [monthsBetween, setMonthsBetween] = useState([]);
   const [monthLectures, setMonthLectures] = useState([]);
 
   /* get http call */
@@ -49,7 +45,7 @@ export const CourseDetail = (props) => {
       if (filter != undefined) {
         if (enabled) {
           newFilter.push(filter);
-           setcourseFilter(newFilter);
+          setcourseFilter(newFilter);
         } else {
           newFilter = newFilter.filter((x) => x != filter);
           setcourseFilter(newFilter);
@@ -69,12 +65,12 @@ export const CourseDetail = (props) => {
           week.startDate.getWeek().toString()
       );
     });
-   // setWeeksBetween(weekdays);
+    // setWeeksBetween(weekdays);
     let months = [];
     getMonthList(startDate, endDate).forEach((month) => {
       months.push(month);
     });
-   // setMonthsBetween(months);
+    // setMonthsBetween(months);
 
     let promiseArray = [];
     let promiseArray2 = [];
@@ -136,10 +132,11 @@ export const CourseDetail = (props) => {
           });
         });
         setReserved(
-          reservations.filter((l) => 
-            l.date >= moment(startDate).format("YYYY-MM-DD") &&
-            l.date <= moment(endDate).format("YYYY-MM-DD")
-          ) 
+          reservations.filter(
+            (l) =>
+              l.date >= moment(startDate).format("YYYY-MM-DD") &&
+              l.date <= moment(endDate).format("YYYY-MM-DD")
+          )
         );
       })
       .catch((reason) => {
@@ -263,11 +260,13 @@ export const CourseDetail = (props) => {
   };
   return (
     <>
-      <div className="container">
-        <div className="d-flex w-100 justify-content-start shadow bg-light py-3 my-3 rounded border border-secondary">
-          <label className="px-3 font-weight-bold">Choose a date range: </label>
+      <div className="container col-sm-9">
+        <div className="d-flex w-100 justify-content-center shadow bg-white py-3 my-3 rounded border border-primary">
+          <span className="px-3 font-weight-bold align-middle py-1">
+            Choose a date range:{" "}
+          </span>
           <DatePickerComponent
-            className="mx-3"
+            className="mx-3 py-1"
             startDateHandle={datePickerHandle}
             endDateHandle={datePickerHandle2}
           />
@@ -275,122 +274,139 @@ export const CourseDetail = (props) => {
             Apply
           </Button>
         </div>
-        <div className="row">
-          <ListGroup
-            variant="flush"
-            className="shadow-sm py-3 mb-5 bg-white rounded col-md-3  p-4 m-4 "
-          >
-            <div className="col-sm-2">
-              <span className="badge BackgroundThemeColor">Courses:</span>
-            </div>
-            {myCourses && myCourses.map((item) => CourslistRenderer(item))}
-          </ListGroup>
-          <div className="shadow-sm p-4  mt-4 ml-4 bg-white rounded col-md-8">
-            <Table size="sm" className="pb-4 mb-4 shadow-sm">
-              <thead>
-                <tr>
-                  <th>Course Name</th>
-                  <th>Week</th>
-                  <th>Bookings avarage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookedLectures &&
-                  bookedLectures.map((item, index) => {
-                    return (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <td>{item.course_name}</td>
-                          <td>{item.week ? item.week : "-"}</td>
-                          <td>{item.booking}</td>
-                        </tr>
-                      </React.Fragment>
-                    );
-                  })}
-                {!reserved || reserved.length > 0 ? (
-                  ""
-                ) : (
-                  <tr>
-                    <td colspan="4">
-                      <div className="w-100 d-flex justify-content-center">
-                        <h4>No Record to show</h4>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-            <Table size="sm" className="pb-4 mb-4 shadow-sm">
-              <thead>
-                <tr>
-                  <th>Course Name</th>
-                  <th>Month</th>
-                  <th>Bookings avarage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookedLectures &&
-                  monthLectures.map((item, index) => {
-                    return (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <td>{item.course_name}</td>
-                          <td>{item.month ? item.month : "-"}</td>
-                          <td>{item.booking}</td>
-                        </tr>
-                      </React.Fragment>
-                    );
-                  })}
-                {!reserved || reserved.length > 0 ? (
-                  ""
-                ) : (
-                  <tr>
-                    <td colspan="4">
-                      <div className="w-100 d-flex justify-content-center">
-                        <h4>No Record to show</h4>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
+        <div className="row d-flex justify-content-between">
+          <div className="col-md-4 mt-3">
+            <ListGroup
+              variant="flush"
+              className="shadow-sm py-3 bg-white rounded border border-primary p-4"
+            >
+              <div>
+                <h5>Courses:</h5>
+              </div>
+              {myCourses && myCourses.map((item) => CourslistRenderer(item))}
+            </ListGroup>
+          </div>
 
-            <Table size="sm" className="  my-4   shadow-sm">
-              <thead>
-                <tr>
-                  <th>Course Name</th>
-                  <th>Lecture Date</th>
-                  <th>Lecture Name</th>
-                  <th>Bookings</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reserved &&
-                  reserved.map((item, index) => {
-                    return (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <td>{item.course_name}</td>
-                          <td>{item.date}</td>
-                          <td>{item.lecture_name}</td>
-                          <td>{item.booking}</td>
-                        </tr>
-                      </React.Fragment>
-                    );
-                  })}
-                {!reserved || reserved.length > 0 ? (
-                  ""
-                ) : (
+          <div className="col-md-8">
+            <div className="shadow-sm border p-3 my-3 bg-white rounded border-primary">
+              <h5 className="mb-3">Weekly Stats</h5>
+              <Table size="sm" className="pb-4 mb-4 shadow-sm">
+                <thead>
                   <tr>
-                    <td colspan="4">
-                      <div className="w-100 d-flex justify-content-center">
-                        <h4>No Record to show</h4>
-                      </div>
-                    </td>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Week</th>
+                    <th>Bookings avarage</th>
                   </tr>
-                )}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {bookedLectures &&
+                    bookedLectures.map((item, index) => {
+                      return (
+                        <React.Fragment key={index}>
+                          <tr>
+                            <td>{item.course_id}</td>
+                            <td>{item.course_name}</td>
+                            <td>{item.week ? item.week : "-"}</td>
+                            <td>{item.booking}</td>
+                          </tr>
+                        </React.Fragment>
+                      );
+                    })}
+                  {!bookedLectures || bookedLectures.length > 0 ? (
+                    ""
+                  ) : (
+                    <tr>
+                      <td colspan="4">
+                        <div className="w-100 d-flex justify-content-center">
+                          <h5>No Record to show</h5>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
+
+            <div className="shadow-sm border p-3 mb-3 bg-white rounded border-primary">
+              <h5 className="mb-3">Monthly Stats</h5>
+              <Table size="sm" className="pb-4 mb-4 shadow-sm">
+                <thead>
+                  <tr>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Month</th>
+                    <th>Bookings avarage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthLectures &&
+                    monthLectures.map((item, index) => {
+                      return (
+                        <React.Fragment key={index}>
+                          <tr>
+                            <td>{item.course_id}</td>
+                            <td>{item.course_name}</td>
+                            <td>{item.month ? item.month : "-"}</td>
+                            <td>{item.booking}</td>
+                          </tr>
+                        </React.Fragment>
+                      );
+                    })}
+                  {!monthLectures || monthLectures.length > 0 ? (
+                    ""
+                  ) : (
+                    <tr>
+                      <td colspan="4">
+                        <div className="w-100 d-flex justify-content-center">
+                          <h5>No Record to show</h5>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
+
+            <div className="shadow-sm border p-3 mb-3 bg-white rounded border-primary">
+              <h5 className="mb-3">Lectures Stats</h5>
+              <Table size="sm" className="shadow-sm">
+                <thead>
+                  <tr>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Lecture Date</th>
+                    <th>Bookings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reserved &&
+                    reserved.map((item, index) => {
+                      return (
+                        <React.Fragment key={index}>
+                          <tr>
+                            <td>{item.course_id}</td>
+                            <td>{item.course_name}</td>
+                            <td>{item.date}</td>
+                            <td>{item.booking}</td>
+                          </tr>
+                        </React.Fragment>
+                      );
+                    })}
+                  {!reserved || reserved.length > 0 ? (
+                    ""
+                  ) : (
+                    <tr>
+                      <td colspan="4">
+                        <div className="w-100 d-flex justify-content-center">
+                          <h5>No Record to show</h5>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
           </div>
         </div>
       </div>

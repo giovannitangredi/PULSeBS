@@ -10,6 +10,7 @@ export const NavBar = (props) => {
     ],
     student: [{ title: "Home", path: "/student" }],
     manager: [{ title: "Home", path: "/manager" }],
+    supportOfficer: [{ title: "Home", path: "/supportOfficer" }],
   };
 
   const handleLogout = (ev) => {
@@ -28,15 +29,17 @@ export const NavBar = (props) => {
   return (
     <Navbar>
       <Navbar.Brand>
-        Welcome, {props.user.name + " " + props.user.surname}
+        {`${props.user.name} ${props.user.surname}`} <u>{props.user.id}</u>
       </Navbar.Brand>
-      <Nav>{props.user &&
-      links[props.user.role].map((link) => (
-        <NavLink key={link.title} to={link.path} exact className="nav-link">
-          {link.title}
-        </NavLink>
-      ))}</Nav>
-  
+      <Nav>
+        {props.user &&
+          links[props.user.role].map((link) => (
+            <NavLink key={link.title} to={link.path} exact className="nav-link">
+              {link.title}
+            </NavLink>
+          ))}
+      </Nav>
+
       <Navbar.Collapse className="justify-content-end">
         <Button variant="primary" onClick={(ev) => handleLogout(ev)}>
           {" "}

@@ -28,7 +28,17 @@ exports.get = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   knex
-    .select("id", "name", "surname", "email", "password_hash", "role")
+    .select(
+      "id",
+      "name",
+      "surname",
+      "password_hash",
+      "email",
+      "role",
+      "city",
+      "birthday",
+      "ssn"
+    )
     .from("user")
     .where("email", email)
     .then((queryResults) => {
@@ -52,6 +62,9 @@ exports.login = async (req, res) => {
           surname: userDetails.surname,
           email: userDetails.email,
           role: userDetails.role,
+          city: userDetails.city,
+          birthday: userDetails.birthday,
+          ssn: userDetails.ssn,
         });
       } else {
         throw new Error("Invalid credentials.");
