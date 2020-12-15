@@ -30,13 +30,15 @@ export const NavBar = (props) => {
       <Navbar.Brand>
         Welcome, {props.user.name + " " + props.user.surname}
       </Navbar.Brand>
-      <Nav>{props.user &&
-      links[props.user.role].map((link) => (
-        <NavLink key={link.title} to={link.path} exact className="nav-link">
-          {link.title}
-        </NavLink>
-      ))}</Nav>
-  
+      <Nav>
+        {props.user &&
+          links[props.user.role].map((link) => (
+            <NavLink key={link.title} to={link.path} exact className="nav-link">
+              {link.title}
+            </NavLink>
+          ))}
+      </Nav>
+
       <Navbar.Collapse className="justify-content-end">
         <Button variant="primary" onClick={(ev) => handleLogout(ev)}>
           {" "}

@@ -156,7 +156,7 @@ class ReservationCalendar extends React.Component {
                       }}
                     />
                     <text fontSize="14" fontFamily="Verdana" x="169" y="22">
-                      UnBooked Lectures
+                      Unbooked Lectures
                     </text>
                     <rect
                       x="309"
@@ -198,7 +198,7 @@ class ReservationCalendar extends React.Component {
                       }}
                     />
                     <text fontSize="14" fontFamily="Verdana" x="645" y="22">
-                      In Waiting List
+                      On The Waiting List
                     </text>
                     <rect
                       x="755"

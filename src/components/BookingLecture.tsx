@@ -20,11 +20,11 @@ export const BookingLecture = (props: any) => {
       </Button>
     ) : props.lecture.candidate ? (
       <Button variant="secondary" disabled>
-        You are already in waiting list
+        You are on the waiting list
       </Button>
     ) : (
       <Button variant="warning" onClick={(event) => handleBooking(event)}>
-        Go in waiting list
+        Enter the waiting list
       </Button>
     );
   return (

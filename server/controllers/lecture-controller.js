@@ -112,7 +112,7 @@ exports.newBooking = async (req, res) => {
     .where("id", lectureId) // needs to check whether user can book.
     .then(async ([lectureQueryResults]) => {
       const lecture = lectureQueryResults;
-      
+
       if (lecture.status !== "presence") {
         throw `Lecture '${lecture.name}' is a remote one, can't be bookable.`;
       }

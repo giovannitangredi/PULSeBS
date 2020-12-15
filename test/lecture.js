@@ -363,7 +363,7 @@ describe("list of lectures scheduled for a course", async () => {
 });
 
 //Teacher cancel a lecture 1h before
-describe("Teacher cancel a lecture 1 hour before  ", async function () { 
+describe("Teacher cancel a lecture 1 hour before  ", async function () {
   const authenticatedUser = request.agent(app);
   this.timeout(15000);
   let newEmailPromise;
@@ -384,7 +384,7 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
       .post("/api/auth/login")
       .send(teacherCredentials)
       .expect(200);
-    
+
     await emailController.deleteEmails(imap);
     newEmailPromise = emailController.waitForNewEmail(imap);
   });
@@ -415,9 +415,9 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
 });
 
 //Cancel a lecture booked by a student
-describe("Cancel a booked lecture ", async function ()  {
+describe("Cancel a booked lecture ", async function () {
   //now let's login the user before we run any tests
-  this.timeout(5000)
+  this.timeout(5000);
   const authenticatedUser = request.agent(app);
   before(async () => {
     await knex("user").del();
@@ -458,7 +458,6 @@ describe("Cancel a booked lecture ", async function ()  {
     await knex("course_available_student").del();
   });
 });
-
 
 // Turn a presence lecture into distance one
 describe("Presence Lecture into distance one ", async function () {

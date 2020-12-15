@@ -67,7 +67,7 @@ const lectureTuple = {
     .format("YYYY-MM-DD HH:mm:ss"),
   end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
-  status: "presence"
+  status: "presence",
 };
 
 const lecture2Tuple = {
@@ -81,7 +81,7 @@ const lecture2Tuple = {
     .format("YYYY-MM-DD HH:mm:ss"),
   end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
-  status: "presence"
+  status: "presence",
 };
 
 const lectureBookingTuple = {
@@ -124,9 +124,9 @@ describe("Usage test", async function () {
         .post("/api/auth/login")
         .send(teacherCredentials)
         .expect(200);
-        await knex("stats_lecture").del();
-        await knex("stats_time").del();
-        await knex("stats_usage").del();
+      await knex("stats_lecture").del();
+      await knex("stats_time").del();
+      await knex("stats_usage").del();
       await knex("lecture_booking").insert(lectureBookingTuple); //+1 Lecture 1 (user 1)
       await knex("lecture_booking").insert(lecture2BookingTuple); //+1 Lecture 2 (user 1)
       await knex("lecture_booking").insert(lectureBookingTuple2); //+1 Lecture 1 (user 2)
@@ -174,9 +174,9 @@ describe("Usage test", async function () {
         .post("/api/auth/login")
         .send(teacherCredentials)
         .expect(200);
-        await knex("stats_lecture").del();
-        await knex("stats_time").del();
-        await knex("stats_usage").del();
+      await knex("stats_lecture").del();
+      await knex("stats_time").del();
+      await knex("stats_usage").del();
       await knex("lecture_booking").insert(lectureBookingTuple); //+1 Lecture 1 (user 1)
       await knex("lecture_booking").insert(lecture2BookingTuple); //+1 Lecture 2 (user 1)
       await knex("lecture_booking").insert(lectureBookingTuple2); //+1 Lecture 1 (user 2)
@@ -223,9 +223,9 @@ describe("Usage test", async function () {
         .post("/api/auth/login")
         .send(teacherCredentials)
         .expect(200);
-        await knex("stats_lecture").del();
-        await knex("stats_time").del();
-        await knex("stats_usage").del();
+      await knex("stats_lecture").del();
+      await knex("stats_time").del();
+      await knex("stats_usage").del();
       await knex("lecture_booking").insert(lectureBookingTuple); //+1 Lecture 1 (user 1)
       await knex("lecture_booking").insert(lecture2BookingTuple); //+1 Lecture 2 (user 1)
       await knex("lecture_booking").insert(lectureBookingTuple2); //+1 Lecture 1 (user 2)
@@ -441,7 +441,7 @@ describe("Return course  lecture stats ", async () => {
         cancellations: 0,
         attendances: 1,
         bookings: 1,
-        date: moment(lectureTuple.start).format("YYYY-MM-DD")
+        date: moment(lectureTuple.start).format("YYYY-MM-DD"),
       },
     ]);
   });
