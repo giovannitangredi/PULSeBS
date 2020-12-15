@@ -81,18 +81,6 @@ const lectureTuple = {
   status: "presence",
 };
 
-const lowCapacityLectureTuple = {
-  id: 2,
-  name: "Lecture 1",
-  course: courseTuple.id,
-  lecturer: teacherTuple.id,
-  start: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
-  end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
-  capacity: 1,
-  status: "presence",
-  //room: 1,
-};
-
 const futureLectureTuple = {
   id: 1,
   name: "Lecture 1",
@@ -133,12 +121,6 @@ const lectureBookingTuple = {
 
 const limitedCapacityLectureBookingTuple = {
   lecture_id: limitedCapacityLectureTuple.id,
-  student_id: studentTuple2.id,
-  booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
-};
-
-const lowCapacityLectureBookingTuple = {
-  lecture_id: lowCapacityLectureTuple.id,
   student_id: studentTuple2.id,
   booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
 };
@@ -221,6 +203,13 @@ describe("Lecture test", async function () {
   });
 
   describe("Waiting list insertion", async () => {
+    let newEmailPromise;
+
+    before(async () => {
+      await emailController.deleteEmails(imap);
+      newEmailPromise = emailController.waitForNewEmail(imap);
+    });
+
     beforeEach(async () => {
       await knex("lecture_booking").insert(limitedCapacityLectureBookingTuple);
       await knex("waiting_list").insert({
@@ -254,6 +243,14 @@ describe("Lecture test", async function () {
           })
         ).length
       ).to.equal(1);
+    });
+
+    it("Student should receive an email to be notified that has been moved from waiting to reservation list", async () => {
+      const email = await newEmailPromise;
+      expect(email.subject).to.match(
+        /You are moved from candidate list to Reserved List/
+      );
+      expect(email.body).to.match(/has changed from candidate to reserve/);
     });
 
     afterEach(async () => {
@@ -638,65 +635,5 @@ describe("Presence Lecture into distance one ", async function () {
     await knex("lecture").del();
     await knex("lecture_booking").del();
     await knex("course").del();
-  });
-});
-
-describe("Test story 15: As a student I want to get notified when I am taken from the waiting list so that I can attend the lecture", async function () {
-  const authenticatedUser = request.agent(app);
-  this.timeout(15000);
-  before(async () => {
-    await knex("user").del();
-    await knex("course").del();
-    await knex("lecture").del();
-    await knex("lecture_booking").del();
-    await knex("course_available_student").del();
-    await knex("waiting_list").del();
-    await knex("user").insert(studentTuple1);
-    await knex("user").insert(studentTuple2);
-    await knex("user").insert(teacherTuple);
-    await knex("course").insert(courseTuple);
-    await knex("lecture").insert(lowCapacityLectureTuple);
-    await knex("course_available_student").insert(courseStudent1Tuple);
-    await knex("course_available_student").insert(courseStudent2Tuple);
-    await knex("lecture_booking").insert(lowCapacityLectureBookingTuple); // user 3 booked
-  });
-
-  describe("Student 1 should receive an email when he is taken from the waiting list", async () => {
-    let newEmailPromise;
-
-    before(async () => {
-      await emailController.deleteEmails(imap);
-      newEmailPromise = emailController.waitForNewEmail(imap);
-    });
-
-    it("Student 1 requests to be added in waiting list: should return a 200 response", async () => {
-      await authenticatedUser
-        .post("/api/auth/login")
-        .send(student1Credentials)
-        .expect(200);
-
-      const res = await authenticatedUser
-        .post(`/api/lectures/${lowCapacityLectureTuple.id}/book`)
-        .expect(200, { message: "You've been added to the waiting list." });
-    });
-
-    it("Student 2 cancels the booking: should return a 200 response", async () => {
-      await authenticatedUser
-        .post("/api/auth/login")
-        .send(student2Credentials)
-        .expect(200);
-
-      await authenticatedUser
-        .delete(`/api/lectures/${lowCapacityLectureTuple.id}/cancelbook`)
-        .expect(200);
-    });
-
-    it("Student 1 should receive an email", async () => {
-      const email = await newEmailPromise;
-      expect(email.subject).to.match(
-        /You are moved from candidate list to Reserved List/
-      );
-      expect(email.body).to.match(/has changed from candidate to reserve/);
-    });
   });
 });
