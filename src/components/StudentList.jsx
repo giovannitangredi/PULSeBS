@@ -336,6 +336,7 @@ class StudentList extends React.Component {
                                 <div className="col-lg-2 d-flex justify-content-center">
                                   <label>Status</label>
                                 </div>
+                                <div className="col-lg-2"></div>
                               </div>
                             </div>
                           </div>

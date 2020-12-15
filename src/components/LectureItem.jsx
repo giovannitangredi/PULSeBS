@@ -57,8 +57,8 @@ const LectureItem = ({ lecture, handleConvert, handleBooking }) => {
                 >
                   Cancel
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
