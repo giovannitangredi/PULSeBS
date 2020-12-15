@@ -26,23 +26,30 @@ const checkSupportOfficer = async (userId) => {
     .catch(() => {
       throw { msg: `There was an error retrieving user info`, status: 400 };
     });
-  if (user.length == 1 && !["supportOfficer"].includes(user[0].role)) {
+  if (user.length === 1 && "supportOfficer" !== user[0].role) {
     return false;
   }
   return true;
 };
-/*
-const checkDuplicate = async (values) => {  //check duplicate elements (same id)
-  //console.log(values)
-  let valueArr = values.map(function(item){ return item.id });
-  valueArr.some(function(item, idx){ 
-    console.log(valueArr.indexOf(item) != idx)
-    return valueArr.indexOf(item) != idx    //return true if ther is duplicate
-});
-}*/
+
+const checkHeaders = (h1, h2) => {
+  if (h1.length !== h2.length) return false;
+  for (var i = 0, len = h1.length; i < len; i++){
+      if (h1[i] !== h2[i]){
+          return false;
+      }
+  }
+  return true; 
+}
 
 const readFile = async (userId, path, type, semesterId) => {
-  //type: student, teacher, course, enrollment, schedule
+  const firstRow = {
+    student: ["Id","Name","Surname","City","OfficialEmail","Birthday","SSN"],
+    teacher: ["Number","GivenName","Surname","OfficialEmail","SSN"],
+    course: ["Code","Year","Semester","Course","Teacher"],
+    enrollment: ["Code","Student"],
+    schedule: ["Code","Room","Day","Seats","Time"],
+  };
   const headers = {
     student: ["id", "name", "surname", "city", "email", "birthday", "ssn"],
     teacher: ["id", "name", "surname", "email", "ssn"],
@@ -57,6 +64,7 @@ const readFile = async (userId, path, type, semesterId) => {
     enrollment: "course_available_student",
     schedule: "lecture",
   };
+
   return new Promise(async (resolve, reject) => {
     if (!(await checkSupportOfficer(userId))) {
       reject({
@@ -66,12 +74,20 @@ const readFile = async (userId, path, type, semesterId) => {
       return;
     }
     let rows = [];
-    var tot = 0;
     const stream = fs
       .createReadStream(path)
       .pipe(
         csv.parse({
-          headers: headers[type],
+          headers: header => 
+          {
+            if (checkHeaders(header,firstRow[type])) {return headers[type];}
+            else {
+              reject({
+                msg: "Wrong file",
+                status: 501
+              })
+            }
+          },
           renameHeaders: true,
         })
       )
@@ -82,16 +98,13 @@ const readFile = async (userId, path, type, semesterId) => {
       })
       .on("data", async (row) => {
         stream.pause();
-        //console.log("STEP 0n")
         if (["student", "teacher"].includes(type)) {
           row.password_hash = bcrypt.hashSync("password", 1);
           row.role = type;
         }
         if (type === "schedule") {
           try {
-            const count = await generateLectures(semesterId, row);
-            //console.log("STEP 2n DENTRO READ FILE",count);
-            tot += count;
+            await generateLectures(semesterId, row);
             stream.resume();
           } catch (error) {
             reject({
@@ -105,13 +118,11 @@ const readFile = async (userId, path, type, semesterId) => {
         }
       })
       .on("end", () => {
-        //stream.pause();
         if (type != "schedule") {
           var chunkSize = 100;
           knex
             .batchInsert(tables[type], rows, chunkSize)
             .then(() => {
-              //console.log("SUCCESS");
               resolve(rows.length);
             })
             .catch((err) => {
@@ -121,8 +132,7 @@ const readFile = async (userId, path, type, semesterId) => {
               });
             });
         } else {
-          //console.log("STEP 3 FINE DENTRO READ FILE",tot)
-          resolve(tot);
+          resolve();
         }
       });
   });
@@ -233,12 +243,10 @@ exports.uploadSchedule = async (req, res) => {
       };
     }
     await readFile(userId, path, "schedule", semesterId);
-    //console.log("STEP 4 DOPO READFILE (FINE)")
     await knex("semester")
       .update({ inserted_lectures: 1 })
       .where("sid", semesterId); //no more insert of lecture for the selected semester
     res.status(200).send({
-      //tot_insert: tot,
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
   } catch (error) {
@@ -271,7 +279,7 @@ const generateLectures = (semesterId, lecture) => {
       const regex =
         "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
       if (lecture.time.match(regex) === null || !days.includes(lecture.day)) {
-        resolve(0);
+        resolve();
       }
       let start = moment(semesterDate.start);
       let end = moment(semesterDate.end);
@@ -285,9 +293,8 @@ const generateLectures = (semesterId, lecture) => {
         //generate all days until the end date adding 7 days each time
         arr.push(createLecture(lecture, courseProf, tmp));
       }
-      //console.log("STEP 1n DOPO AVER CREATO IL GRUPPO DI LECTURE")
       await knex("lecture").insert(arr);
-      resolve(arr.length);
+      resolve();
     } catch (error) {
       reject({
         msg: `There was an error creating all the lecture based on course ${lecture.id} scheduled for ${lecture.day}` ,
@@ -298,12 +305,13 @@ const generateLectures = (semesterId, lecture) => {
 };
 
 const createLecture = (lecture, courseProf, date) => {
-  let row = {};
-  row.course = lecture.id;
-  row.lecturer = courseProf.main_prof;
-  row.capacity = lecture.capacity;
-  row.status = "presence";
-  row.room = lecture.room;
+  let row = {
+    course: lecture.id,
+    lecturer: courseProf.main_prof,
+    capacity: lecture.capacity,
+    status: "presence",
+    room: lecture.room
+  };  
   let times = lecture.time.split("-");
   let [hour, minute] = times[0].split(":");
   date.set({ hour, minute });

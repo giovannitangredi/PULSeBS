@@ -10,7 +10,6 @@ exports.getBookingLectures = async (req, res) => {
   knex
     .select(
       { id: "lecture.id" },
-      //{ name: "lecture.name" },
       { course: "course.name" },
       { lecturer_name: "user.name" },
       { lecturer_surname: "user.surname" },
@@ -61,7 +60,6 @@ exports.getExistentBooking = async (req, res) => {
   knex
     .select(
       { id: "lecture.id" },
-      //{ name: "lecture.name" },
       { course: "course.name" },
       { lecturer_name: "user.name" },
       { lecturer_surname: "user.surname" },
@@ -97,7 +95,7 @@ exports.newBooking = async (req, res) => {
   const lectureId = req.params.lectureId;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select(/*{ name: "name" },*/ { start: "start" }, { status: "status" })
+    .select({ start: "start" }, { status: "status" })
     .from("lecture")
     .where("id", lectureId)
     .then(([lectureQueryResults]) => {
@@ -123,7 +121,6 @@ exports.newBooking = async (req, res) => {
             // Get the lecture information
             const lectureQuery = knex
               .select(
-                //{ name: "lecture.name" },
                 { courseName: "course.name" },
                 { start: "start" }
               )
@@ -191,7 +188,6 @@ exports.getScheduledLectures = async (req, res) => {
   knex
     .select(
       { id: "l.id" },
-      //{ name: "l.name" },
       { course: "l.course" },
       { start: "l.start" },
       { end: "l.end" },
@@ -249,7 +245,6 @@ exports.convertDistanceLecture = async (req, res) => {
     .format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
-      //{ name: "name" },
       { start: "start" },
       { status: "status" },
       { lecturer: "lecturer" }
@@ -344,7 +339,6 @@ const sendEmailsForCancelledLecture = async (lectureId) => {
       { name: "user.name" },
       { surname: "user.surname" },
       { email: "user.email" },
-      //{ lectureName: "lecture.name" },
       { lectureCourseName: "course.name" },
       { lectureStart: "lecture.start" }
     )
@@ -358,11 +352,10 @@ const sendEmailsForCancelledLecture = async (lectureId) => {
   const emailBody = (
     name,
     surname,
-    //lectureName,
     lectureCourseName,
     lectureStart
   ) => `Dear ${name} ${surname},<br/> \
-    Your booked lecture of the course ${lectureCourseName} scheduled for ${lectureStart} is canceled by the teacher,\
+  The lecture from the ${lectureCourseName} course you booked, that was scheduled for ${lectureStart}, was cancelled by the teacher,\
     <br/>The PULSeBS Team`;
 
   const queue = result.map((item) =>
@@ -372,7 +365,6 @@ const sendEmailsForCancelledLecture = async (lectureId) => {
       emailBody(
         item.name,
         item.surname,
-        //item.lectureName,
         item.lectureCourseName,
         item.lectureStart
       )

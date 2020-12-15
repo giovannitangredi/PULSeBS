@@ -87,7 +87,6 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
 
   //Upload student
   describe("Upload student ", async () => {
-    //now let's login the user before we run any tests
     before(async () => {
       await knex("user").del();
       await knex("course").del();
@@ -101,8 +100,8 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
         .post(`/api/upload/students`)
         .attach(
           "file",
-          fs.readFileSync("./test/csvfiles/Students.csv"),
-          "Students.csv"
+          fs.readFileSync("./test/csvfiles/Enrollement.csv"),
+          "Enrollement.csv"
         );
 
       expect(res.status).to.equal(200);
