@@ -14,7 +14,7 @@ const officerCredentials = {
   password: "password",
 };
 
-const userTuple = {
+const studentTuple = {
   id: "900000",
   name: "Ambra",
   surname: "Ferri",
@@ -25,6 +25,11 @@ const userTuple = {
   ssn: "MK97060783",
   role: "student",
 };
+
+const studentCredentials = {
+  email: studentTuple.email,
+  password: "password",
+}
 
 const teacherTuple = {
   id: "d9000",
@@ -72,19 +77,6 @@ const semesterTuple = {
 describe("Story 12 test - As a support officer I want to upload the list of students, courses, teachers, lectures, and classes to setup the system", async function () {
   const authenticatedUser = request.agent(app);
 
-  before(async () => {
-    await knex("user").del();
-    await knex("course").del();
-    await knex("course_available_student").del();
-    await knex("lecture").del();  
-    
-    await knex("user").insert(officerTuple); 
-    const res = await authenticatedUser
-    .post("/api/auth/login")
-    .send(officerCredentials);
-    expect(res.status).to.equal(200);
-  });
-
   //Upload student
   describe("Upload student ", async () => {
     before(async () => {
@@ -92,7 +84,11 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       await knex("course").del();
       await knex("lecture").del();
       await knex("course_available_student").del();
-
+      await knex("user").insert(officerTuple); 
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials)
+      .expect(200);
     });
 
     it("should return  with status 200 and body", async () => {
@@ -112,16 +108,17 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
         .where("role", "student");
       expect(uploadedstudent).to.have.deep.members([
         {
-          id: userTuple.id,
-          name: userTuple.name,
-          surname: userTuple.surname,
-          city: userTuple.city,
-          email: userTuple.email,
-          birthday: userTuple.birthday,
-          ssn: userTuple.ssn,
+          id: studentTuple.id,
+          name: studentTuple.name,
+          surname: studentTuple.surname,
+          city: studentTuple.city,
+          email: studentTuple.email,
+          birthday: studentTuple.birthday,
+          ssn: studentTuple.ssn,
         },
       ]);
     });
+
     after(async () => {
       await knex("user").del().where("id", ">","1");
       await knex("lecture").del();
@@ -131,13 +128,51 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
     });
   });
 
+  describe("Upload student when not logged as support officer", async () => {
+    before(async () => {
+      await knex("user").del();
+      await knex("user").insert(studentTuple);
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(studentCredentials)
+      .expect(200);
+    });
+
+    it("should return an unauthorized error", async () => {
+      const res = await authenticatedUser
+        .post(`/api/upload/students`)
+        .attach(
+          "file",
+          fs.readFileSync("./test/csvfiles/Students.csv"),
+          "Students.csv"
+        );
+
+      expect(res.status).to.equal(401);
+    });
+
+    it("user table should not contain students", async () => {
+      expect(
+        (await knex("user")
+          .where("role", "student")
+          .andWhere("id", "<>", studentTuple.id)
+        ).length
+      ).to.equal(0);
+    });
+
+    after(async () => {
+      await knex("user").del();
+    });
+  });
+  
   //Upload Professor
   describe("Upload Professor ", async () => {
     before(async () => {
       await knex("user").del();
-      await knex("course").del();
-      await knex("lecture").del();
-      await knex("course_available_student").del();
+      await knex("user").insert(officerTuple); 
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials)
+      .expect(200);
     });
 
     it("should return  with status 200", async () => {
@@ -166,11 +201,42 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       ]);
     });
     after(async () => {
-      await knex("user").del().where("id", ">","1");
-      await knex("lecture").del();
-      await knex("course_available_student").del();
-      await knex("course").del();
-      await knex("_Variables").del();
+      await knex("user").del();
+    });
+  });
+
+  describe("Upload teacher when not logged as support officer", async () => {
+    before(async () => {
+      await knex("user").del();
+      await knex("user").insert(studentTuple);
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(studentCredentials)
+      .expect(200);
+    });
+
+    it("should return an unauthorized error", async () => {
+      const res = await authenticatedUser
+        .post(`/api/upload/teachers`)
+        .attach(
+          "file",
+          fs.readFileSync("./test/csvfiles/Profressors.csv"),
+          "Profressors.csv"
+        );
+
+      expect(res.status).to.equal(401);
+    });
+
+    it("user table should not contain teachers", async () => {
+      expect(
+        (await knex("user")
+          .where("role", "teacher")
+        ).length
+      ).to.equal(0);
+    });
+
+    after(async () => {
+      await knex("user").del();
     });
   });
 
@@ -179,8 +245,11 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
     before(async () => {
       await knex("user").del();
       await knex("course").del();
-      await knex("lecture").del();
-      await knex("course_available_student").del();
+      await knex("user").insert(officerTuple); 
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials)
+      .expect(200);
     });
 
     it("should return  with status 200", async () => {
@@ -200,11 +269,44 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       expect(uploadedcourses).to.have.deep.members([courseTuple]);
     });
     after(async () => {
-      await knex("user").del().where("id", ">","1");
-      await knex("lecture").del();
+      await knex("user").del();
       await knex("course").del();
-      await knex("course_available_student").del();
-      await knex("_Variables").del();
+    });
+  });
+
+  describe("Upload Courses when not logged as support officer", async () => {
+    before(async () => {
+      await knex("user").del();
+      await knex("course").del();
+      await knex("user").insert(studentTuple); 
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(studentCredentials)
+      .expect(200);
+    });
+
+    it("should return an unauthorized error", async () => {
+      const res = await authenticatedUser
+        .post(`/api/upload/courses`)
+        .attach(
+          "file",
+          fs.readFileSync("./test/csvfiles/Courses.csv"),
+          "Courses.csv"
+        );
+
+      expect(res.status).to.equal(401);
+    });
+
+    it("course table should be empty", async () => {
+      expect(
+        (await knex("course")
+        ).length
+      ).to.equal(0);
+    });
+
+    after(async () => {
+      await knex("user").del();
+      await knex("course").del();
     });
   });
 
@@ -213,10 +315,14 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
     before(async () => {
       await knex("user").del();
       await knex("course").del();
-      await knex("lecture").del();
       await knex("course_available_student").del();
-      await knex("user").insert(userTuple);
+      await knex("user").insert(officerTuple); 
+      await knex("user").insert(studentTuple);
       await knex("course").insert(courseTuple);
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials)
+      .expect(200);
     });
 
     it("should return  with status 200", async () => {
@@ -236,11 +342,51 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       expect(uploadedenrollements).to.have.deep.members([enrollementTuple]);
     });
     after(async () => {
-      await knex("user").del().where("id", ">","1");
-      await knex("lecture").del();
       await knex("course_available_student").del();
+      await knex("user").del();
       await knex("course").del();
-      await knex("_Variables").del();
+    });
+  });
+
+  //Upload enrollements
+  describe("Upload Enrollements when not logged as support officer", async () => {
+    before(async () => {
+      await knex("user").del();
+      await knex("course").del();
+      await knex("course_available_student").del();
+      await knex("user").insert(officerTuple); 
+      await knex("user").insert(studentTuple);
+      await knex("course").insert(courseTuple);
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(studentCredentials)
+      .expect(200);
+    });
+
+    it("should return an unauthorized error", async () => {
+      const res = await authenticatedUser
+        .post(`/api/upload/enrollments`)
+        .attach(
+          "file",
+          fs.readFileSync("./test/csvfiles/Enrollement.csv"),
+          "Enrollement.csv"
+        );
+
+      expect(res.status).to.equal(401);
+
+    });
+
+    it("course_available_student table should be empty", async () => {
+      expect(
+        (await knex("course_available_student")
+        ).length
+      ).to.equal(0);
+    });
+
+    after(async () => {
+      await knex("course_available_student").del();
+      await knex("user").del();
+      await knex("course").del();
     });
   });
 
@@ -252,11 +398,16 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("semester").del();
-      await knex("user").insert(userTuple);
+      await knex("user").insert(studentTuple);
       await knex("user").insert(teacherTuple);
+      await knex("user").insert(officerTuple); 
       await knex("course").insert(courseTuple);
       await knex("semester").insert(semesterTuple);
       await knex("course_available_student").insert(enrollementTuple);
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials)
+      .expect(200);
     });
 
     it("should return  with status 200", async () => {
@@ -288,7 +439,55 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       await knex("lecture").del();
       await knex("course_available_student").del();
       await knex("semester").del();
-      await knex("_Variables").del();
     });
   });
+
+  // Upload Schedule
+  describe("Upload Schedule when not logged as support officer", async () => {
+    before(async () => {
+      await knex("user").del();
+      await knex("course").del();
+      await knex("lecture").del();
+      await knex("course_available_student").del();
+      await knex("semester").del();
+      await knex("user").insert(studentTuple);
+      await knex("user").insert(teacherTuple);
+      await knex("user").insert(officerTuple); 
+      await knex("course").insert(courseTuple);
+      await knex("semester").insert(semesterTuple);
+      await knex("course_available_student").insert(enrollementTuple);
+      await authenticatedUser
+      .post("/api/auth/login")
+      .send(studentCredentials)
+      .expect(200);
+    });
+
+    it("should return an unauthorized error", async () => {
+      const res = await authenticatedUser
+        .post(`/api/upload/schedule/${semesterTuple.sid}`)
+        .attach(
+          "file",
+          fs.readFileSync("./test/csvfiles/Schedule.csv"),
+          "Schedule.csv"
+        );
+      expect(res.status).to.equal(401);
+    });
+
+    it("lecture table should be empty", async () => {
+      expect(
+        (await knex("lecture")
+        ).length
+      ).to.equal(0);
+    });
+
+    after(async () => {
+      await knex("user").del();
+      await knex("course").del();
+      await knex("lecture").del();
+      await knex("course_available_student").del();
+      await knex("semester").del();
+    });
+  });
+
+
 });
