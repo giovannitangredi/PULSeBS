@@ -100,8 +100,8 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
         .post(`/api/upload/students`)
         .attach(
           "file",
-          fs.readFileSync("./test/csvfiles/Enrollement.csv"),
-          "Enrollement.csv"
+          fs.readFileSync("./test/csvfiles/Students.csv"),
+          "Students.csv"
         );
 
       expect(res.status).to.equal(200);

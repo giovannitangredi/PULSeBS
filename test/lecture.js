@@ -416,7 +416,7 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
   it("student booked should receive an email", async () => {
     const email = await newEmailPromise;
     expect(email.subject).to.match(/Lecture cancel information/);
-    expect(email.body).to.match(/is canceled by the teacher/);
+    expect(email.body).to.match(/was cancelled by the teacher/);
   });
   after(async () => {
     await knex("user").del();
