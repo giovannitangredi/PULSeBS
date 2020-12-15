@@ -24,4 +24,4 @@ jobs:
       run : docker build . --file Dockerfile --tag pulsebs:$(date +%s)
          
     - name : Docker Push
-      run : docker push ${{secrets.DOCKER_USER}}/pulsebs
+      run : docker push ${{secrets.DOCKER_USER}}/pulsebs:$(date +%s)
