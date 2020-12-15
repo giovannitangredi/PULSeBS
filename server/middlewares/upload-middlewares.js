@@ -21,5 +21,9 @@ const storage = multer.diskStorage({
   },
 });
 
-const uploadFile = multer({ storage: storage, fileFilter: csvFilter });
+const uploadFile = multer({ storage: storage, fileFilter: csvFilter, 
+  limits: {
+  fileSize: 8000000 // 8MB max file
+}
+});
 module.exports = uploadFile;
