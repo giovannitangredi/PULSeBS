@@ -65,7 +65,7 @@ exports.fetchEmails = async (imap) => {
  */
 exports.waitForNewEmail = async (imap) => {
   return new Promise(async (resolve, reject) => {
-    connection = await imaps.connect({
+    let connection = await imaps.connect({
       imap,
       onmail: async function () {
         var searchCriteria = ["UNSEEN"];

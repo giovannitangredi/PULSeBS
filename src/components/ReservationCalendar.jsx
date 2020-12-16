@@ -72,7 +72,6 @@ class ReservationCalendar extends React.Component {
             booked,
             start: startTime,
             room,
-            status,
           },
         };
       });

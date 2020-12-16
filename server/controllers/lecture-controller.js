@@ -7,7 +7,6 @@ exports.getBookingLectures = async (req, res) => {
   const studentId = req.user && req.user.id;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
-  const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
       { id: "lecture.id" },
@@ -72,7 +71,6 @@ exports.getBookingLectures = async (req, res) => {
 exports.getExistentBooking = async (req, res) => {
   const studentId = req.user && req.user.id;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
-  const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
       { id: "lecture.id" },
@@ -408,7 +406,7 @@ exports.deleteLecture = async (req, res) => {
   }
 };
 
-sendEmailsForCancelledLecture = async (lectureId) => {
+const sendEmailsForCancelledLecture = async (lectureId) => {
   const result = await knex
     .select(
       { id: "user.id" },
@@ -453,7 +451,7 @@ sendEmailsForCancelledLecture = async (lectureId) => {
   }
 };
 
-sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
+const sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
   try {
     const [result] = await knex
       .select(
