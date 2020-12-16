@@ -230,7 +230,11 @@ exports.cancelBooking = async (req, res) => {
         .where("lecture_id", lectureId)
         .orderBy("booked_at", "asc")
         .limit(1);
-      if (!waiting) return;
+      if (!waiting)
+      {
+        res.json({ message: "Booking cancelled." });
+        return;
+      }
       const { lecture_id, student_id, booked_at } = waiting;
 
       await knex("lecture_booking").insert({
