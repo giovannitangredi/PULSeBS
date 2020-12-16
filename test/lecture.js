@@ -543,7 +543,7 @@ describe("Cancel a booked lecture ", async function () {
   //now let's login the user before we run any tests
   this.timeout(5000);
   const authenticatedUser = request.agent(app);
-  before(async () => {
+  beforeEach(async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("course").del();
@@ -574,7 +574,7 @@ describe("Cancel a booked lecture ", async function () {
     expect(res).to.have.property("body");
     expect(res.body.message).to.equal(`Booking cancelled.`);
   });
-  after(async () => {
+  afterEach(async () => {
     await knex("user").del();
     await knex("course").del();
     await knex("lecture").del();
