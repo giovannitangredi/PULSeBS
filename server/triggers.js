@@ -81,7 +81,10 @@ exports.convert_trigger = `CREATE TRIGGER IF NOT EXISTS convert AFTER UPDATE OF 
 
     DELETE FROM lecture_booking
         WHERE lecture_id = OLD.id;
-       
+
+    DELETE FROM waiting_list
+        WHERE lecture_id = OLD.id;
+        
     INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.id));
 
     UPDATE stats_usage 
@@ -100,6 +103,9 @@ exports.deleteLecture_trigger = `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFO
     INSERT INTO _Trigger(name) VALUES ('cancellation_trigger');
 
     DELETE FROM lecture_booking
+        WHERE lecture_id = OLD.id;
+
+    DELETE FROM waiting_list
         WHERE lecture_id = OLD.id;
     
     INSERT INTO _Variables(name,int_value) VALUES('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.id));
