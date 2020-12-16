@@ -44,6 +44,7 @@ exports.getBookingLectures = async (req, res) => {
     })
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
+    .orderBy("start", "asc")
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -77,6 +78,7 @@ exports.getExistentBooking = async (req, res) => {
     .join("user", "lecture.lecturer", "user.id")
     .join("course", "lecture.course", "course.id")
     .where("lecture_booking.student_id", studentId)
+    .orderBy("start", "asc")
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -151,7 +153,7 @@ exports.newBooking = async (req, res) => {
           });
       } else {
         res.json({
-          message: `Lecture '${lecture.name}' is a remote one, can't be bookable`,
+          message: `Lecture of the course ${lecture.courseName} is a remote one, can't be bookable`,
         });
       }
     })
