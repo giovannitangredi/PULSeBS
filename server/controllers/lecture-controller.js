@@ -223,32 +223,33 @@ exports.cancelBooking = async (req, res) => {
     .where("lecture_id", lectureId)
     .andWhere("student_id", studentId)
     .del()
-    .then(() => {
-      knex("waiting_list")
+    .then(async (result) => {
+      if (result === 0) throw "No booking to cancel.";
+
+      const [waiting] = await knex("waiting_list")
         .where("lecture_id", lectureId)
         .orderBy("booked_at", "asc")
-        .then(async (results) => {
-          if (results.length) {
-            const { lecture_id, student_id, booked_at } = results[0];
-            await knex("lecture_booking").insert({
-              lecture_id,
-              student_id,
-              booked_at,
-            });
-            await knex("waiting_list")
-              .where("lecture_id", lecture_id)
-              .andWhere("student_id", student_id)
-              .del();
-            sendCandidateToReserveChangeEmail(lecture_id, student_id);
-          }
-          res.json({ message: "Booking canceled." });
-        })
-        .catch((err) => {
-          res.json({ message: "There was an error canceling the booking." });
-        });
+        .limit(1);
+      if (!waiting) return;
+      const { lecture_id, student_id, booked_at } = waiting;
+
+      await knex("lecture_booking").insert({
+        lecture_id,
+        student_id,
+        booked_at,
+      });
+      await knex("waiting_list")
+        .where("lecture_id", lecture_id)
+        .andWhere("student_id", student_id)
+        .del();
+
+      sendCandidateToReserveChangeEmail(lecture_id, student_id);
+      res.json({ message: "Booking cancelled." });
     })
     .catch((err) => {
-      res.json({ message: "There was an error canceling the booking." });
+      res
+        .status(400)
+        .json({ message: `There was an error canceling the booking: ${err}` });
     });
 };
 // Get the list of lectures scheduled for a course
