@@ -119,7 +119,7 @@ class StudentList extends React.Component {
     if (eventInfo)
       return (
         <div
-          className="rounded row align-items-center justify-content-center"
+          className="text-wrap rounded row align-items-center m-0 d-flex justify-content-center"
           style={{
             color: `${eventInfo.event.extendedProps.backgroundColor}`,
             height: "100%",
@@ -127,7 +127,7 @@ class StudentList extends React.Component {
             fontSize: "0.85rem",
           }}
         >
-          <div className="d-flex flex-column">
+          <div className="my-2 text-center">
           <img className=" flex-fill align-self-center" src= {eventInfo.event.extendedProps.status === "presence"
               ? "./imgs/presence.png"
               : "./imgs/online.png"}

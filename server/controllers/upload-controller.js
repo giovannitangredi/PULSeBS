@@ -279,6 +279,7 @@ const generateLectures = (semesterId, lecture) => {
         "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
       if (lecture.time.match(regex) === null || !days.includes(lecture.day)) {
         resolve();
+        return;
       }
       let start = moment(semesterDate.start);
       let end = moment(semesterDate.end);

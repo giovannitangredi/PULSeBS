@@ -87,9 +87,8 @@ class ReservationCalendar extends React.Component {
             width: "100%",
             height: "100%",
             color: "#000000",
-            fontWeight: "500",
+            fontWeight: "600",
             fontSize: "0.85rem",
-            border: "4px solid #000000",
           }}
         >
           <p className="my-2 text-center">
