@@ -130,7 +130,15 @@ class StudentList extends React.Component {
             fontSize: "0.85rem",
           }}
         >
-          <p style={{ textAlign: "center" }} className="my-auto">
+          <div className="d-flex flex-column">
+          <img className=" flex-fill align-self-center" src= {eventInfo.event.extendedProps.status === "presence"
+              ? "./imgs/presence.png"
+              : "./imgs/online.png"}
+               style={{
+            height: "23px",
+            width:"23px"
+          }}/>
+          <p style={{ textAlign: "center" }} className="my-auto  flex-fill ">
             Room {eventInfo.event.extendedProps.room} <br></br>
             {eventInfo.event.extendedProps.status === "presence" && (
               <>
@@ -142,6 +150,7 @@ class StudentList extends React.Component {
               ? "Lecture in presence"
               : "Remote lecture"}
           </p>
+          </div>
         </div>
       );
     else return null;
