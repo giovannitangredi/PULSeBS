@@ -12,6 +12,22 @@ export const BookingLecture = (props: any) => {
       borderWidth: "0 0.1em 0.1em 0.1em",
     },
   };
+
+  const actionButton =
+    props.lecture.status !== "distance" &&
+    props.lecture.booked_students < props.lecture.capacity ? (
+      <Button variant="primary" onClick={(event) => handleBooking(event)}>
+        Book a Seat
+      </Button>
+    ) : props.lecture.candidate ? (
+      <Button variant="secondary" disabled>
+        You are on the waiting list
+      </Button>
+    ) : (
+      <Button variant="warning" onClick={(event) => handleBooking(event)}>
+        Enter the waiting list
+      </Button>
+    );
   return (
     <tr>
       <td style={styles.col}>{props.lecture.course}</td>
@@ -40,19 +56,7 @@ export const BookingLecture = (props: any) => {
           "Online"
         )}
       </td>
-      <td style={styles.col}>
-        {" "}
-        {props.lecture.booked_students < props.lecture.capacity &&
-          props.lecture.status != "distance" && (
-            <Button variant="primary" onClick={(event) => handleBooking(event)}>
-              Book a Seat
-            </Button>
-          )}
-        {props.lecture.booked_students >= props.lecture.capacity &&
-          props.lecture.status != "distance" && (
-            <Button variant="warning">Full</Button>
-          )}
-      </td>
+      <td style={styles.col}> {actionButton}</td>
     </tr>
   );
 };

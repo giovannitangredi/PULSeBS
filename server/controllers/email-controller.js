@@ -5,6 +5,12 @@ var imaps = require("imap-simple");
 let nodemailer = require("nodemailer");
 const simpleParser = require("mailparser").simpleParser;
 
+/**
+ * Send an email
+ * @param {*} email  mail address of the receiver
+ * @param {*} subject mail subject
+ * @param {*} body mail text
+ */
 exports.sendMail = async (email, subject, body) => {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
@@ -26,6 +32,10 @@ exports.sendMail = async (email, subject, body) => {
   });
 };
 
+/**
+ * Return an array containing all the emails in the inbox.
+ * An email is an object { subject, body }
+ */
 exports.fetchEmails = async (imap) => {
   const connection = await imaps.connect({ imap });
   await connection.openBox("INBOX");
@@ -50,9 +60,12 @@ exports.fetchEmails = async (imap) => {
   );
 };
 
+/**
+ * Wait until a new email arrives and return an object { subject, body }
+ */
 exports.waitForNewEmail = async (imap) => {
   return new Promise(async (resolve, reject) => {
-    let connection = await imaps.connect({
+    connection = await imaps.connect({
       imap,
       onmail: async function () {
         var searchCriteria = ["UNSEEN"];
@@ -80,6 +93,9 @@ exports.waitForNewEmail = async (imap) => {
   });
 };
 
+/**
+ * Delete all the emails in the inbox
+ */
 exports.deleteEmails = async (imap) => {
   const connection = await imaps.connect({ imap });
   await connection.openBox("INBOX");

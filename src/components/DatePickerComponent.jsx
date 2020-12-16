@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { propTypes } from "react-bootstrap/esm/Image";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 

@@ -115,9 +115,9 @@ class StudentList extends React.Component {
   }
 
   renderEventContent(eventInfo) {
-    /*function format(n) {
+    function format(n) {
       return n > 9 ? "" + n : "0" + n;
-    }*/
+    }
 
     if (eventInfo)
       return (
@@ -125,6 +125,7 @@ class StudentList extends React.Component {
           className="rounded row align-items-center justify-content-center"
           style={{
             color: `${eventInfo.event.extendedProps.backgroundColor}`,
+            color: "#000000",
             height: "100%",
             fontWeight: "600",
             fontSize: "0.85rem",
@@ -274,7 +275,7 @@ class StudentList extends React.Component {
                   </h4>{" "}
                   <div>
                     <svg width="340" height="40">
-                      <text font-size="14" font-family="Verdana" x="7" y="22">
+                      <text fontSize="14" fontFamily="Verdana" x="7" y="22">
                         Remote Lectures
                       </text>
                       <rect
@@ -288,7 +289,7 @@ class StudentList extends React.Component {
                           stroke: "rgb(0,0,0)",
                         }}
                       />
-                      <text font-size="14" font-family="Verdana" x="169" y="22">
+                      <text fontSize="14" fontFamily="Verdana" x="169" y="22">
                         Presence Lectures
                       </text>
                       <rect
@@ -345,7 +346,6 @@ class StudentList extends React.Component {
                                 <div className="col-lg-2 d-flex justify-content-center">
                                   <label>Status</label>
                                 </div>
-                                <div className="col-lg-2"></div>
                               </div>
                             </div>
                           </div>

@@ -20,13 +20,7 @@ const imap = {
   authTimeout: 3000,
 };
 
-//the data we need to pass to the login method
-const userCredentials = {
-  email: testEmailAddress,
-  password: "password",
-};
-
-const userTuple = {
+const studentTuple1 = {
   id: "1",
   name: "Enrico",
   surname: "Carraro",
@@ -36,6 +30,16 @@ const userTuple = {
   city: "Poggio Ferro",
   birthday: "1996-11-04",
   ssn: "MK97060783",
+};
+
+const studentTuple2 = {
+  id: "3",
+  name: "Name",
+  surname: "Surname",
+  password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
+  email: "student2@studenti.polito.it",
+  role: "student",
+  ssn: "MK98060783",
 };
 
 const teacherTuple = {
@@ -48,6 +52,18 @@ const teacherTuple = {
   city: "Milano",
   birthday: "1971-11-04",
   ssn: "MR17121943",
+};
+
+//the data we need to pass to the login method
+const student1Credentials = {
+  email: testEmailAddress,
+  password: "password",
+};
+
+//the data we need to pass to the login method
+const student2Credentials = {
+  email: studentTuple2.email,
+  password: "password",
 };
 
 const teacherCredentials = {
@@ -85,14 +101,36 @@ const futureLectureTuple = {
   room: 1,
 };
 
-const courseStudentTuple = {
+const limitedCapacityLectureTuple = {
+  id: 2,
+  course: courseTuple.id,
+  lecturer: teacherTuple.id,
+  start: moment().add(5, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().add(8, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  capacity: 1,
+  status: "presence",
+  room: 5
+};
+
+const courseStudent1Tuple = {
   course_id: courseTuple.id,
-  student_id: userTuple.id,
+  student_id: studentTuple1.id,
+};
+
+const courseStudent2Tuple = {
+  course_id: courseTuple.id,
+  student_id: studentTuple2.id,
 };
 
 const lectureBookingTuple = {
   lecture_id: lectureTuple.id,
-  student_id: userTuple.id,
+  student_id: studentTuple1.id,
+  booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+};
+
+const limitedCapacityLectureBookingTuple = {
+  lecture_id: limitedCapacityLectureTuple.id,
+  student_id: studentTuple2.id,
   booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
 };
 
@@ -127,32 +165,39 @@ const expectedBookableLectures = [
     semester: courseTuple.semester,
     capacity: futureLectureTuple.capacity,
     booked_students: 0,
+    candidate: false,
+    status: futureLectureTuple.status,
   },
 ];
 
 describe("Lecture test", async function () {
   const authenticatedUser = request.agent(app);
+  const authenticatedUser2 = request.agent(app);
   this.timeout(15000);
   before(async () => {
     await knex("user").del();
     await knex("course").del();
     await knex("lecture").del();
     await knex("lecture_booking").del();
+    await knex("waiting_list").del();
     await knex("course_available_student").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
+    await knex("user").insert(studentTuple2);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
-    await knex("course_available_student").insert(courseStudentTuple);
+    await knex("lecture").insert(limitedCapacityLectureTuple);
+    await knex("course_available_student").insert(courseStudent1Tuple);
+    await knex("course_available_student").insert(courseStudent2Tuple);
   });
 
   describe("reservation test", async () => {
     let newEmailPromise;
 
     before(async () => {
-      const res = await authenticatedUser
+      await authenticatedUser
         .post("/api/auth/login")
-        .send(userCredentials)
+        .send(student1Credentials)
         .expect(200);
 
       await emailController.deleteEmails(imap);
@@ -160,7 +205,7 @@ describe("Lecture test", async function () {
     });
 
     it("book a seat: should return a 200 response", async () => {
-      const res = await authenticatedUser
+      await authenticatedUser
         .post(`/api/lectures/${lectureTuple.id}/book`)
         .expect(200, { message: "Booking created." });
     });
@@ -168,6 +213,87 @@ describe("Lecture test", async function () {
     it("should receive an email", async () => {
       const email = await newEmailPromise;
       expect(email.body).to.match(/You have successfully booked a seat/);
+    });
+  });
+
+  describe("Waiting list insertion", async () => {
+    let newEmailPromise;
+
+    before(async () => {
+      await emailController.deleteEmails(imap);
+      newEmailPromise = emailController.waitForNewEmail(imap);
+    });
+
+    beforeEach(async () => {
+      await knex("lecture_booking").insert(limitedCapacityLectureBookingTuple);
+      await knex("waiting_list").insert({
+        lecture_id: limitedCapacityLectureTuple.id,
+        student_id: studentTuple1.id,
+        booked_at: moment().format("YYYY-MM-DD hh:mm:ss"),
+      });
+      await authenticatedUser
+        .post("/api/auth/login")
+        .send(student2Credentials)
+        .expect(200);
+    });
+
+    it("student cancels their booking when the waiting list is not empty: should return 200 and book the lecture for the first student on the waiting list.", async () => {
+      await authenticatedUser
+        .delete(`/api/lectures/${limitedCapacityLectureTuple.id}/cancelbook`)
+        .expect(200, { message: "Booking cancelled." });
+      expect(
+        (
+          await knex("waiting_list").where({
+            lecture_id: limitedCapacityLectureTuple.id,
+            student_id: studentTuple1.id,
+          })
+        ).length
+      ).to.equal(0);
+      expect(
+        (
+          await knex("lecture_booking").where({
+            lecture_id: limitedCapacityLectureTuple.id,
+            student_id: studentTuple1.id,
+          })
+        ).length
+      ).to.equal(1);
+    });
+
+    it("Student should receive an email to be notified that has been moved from waiting to reservation list", async () => {
+      const email = await newEmailPromise;
+      expect(email.subject).to.match(
+        /You are moved from candidate list to Reserved List/
+      );
+      expect(email.body).to.match(/has changed from candidate to reserve/);
+    });
+
+    afterEach(async () => {
+      await knex("lecture_booking").del();
+      await knex("waiting_list").del();
+    });
+  });
+
+  describe("Pop first item of waiting list to lecture bookings", async () => {
+    beforeEach(async () => {
+      await knex("lecture_booking").insert(limitedCapacityLectureBookingTuple);
+      await authenticatedUser
+        .post("/api/auth/login")
+        .send(student1Credentials)
+        .expect(200);
+    });
+
+    it("should return 200 and message about the waiting list the first a students books a lecture with no more seats, a 400 error the following times.", async () => {
+      await authenticatedUser
+        .post(`/api/lectures/${limitedCapacityLectureTuple.id}/book`)
+        .expect(200, { message: "You've been added to the waiting list." });
+
+      await authenticatedUser
+        .post(`/api/lectures/${limitedCapacityLectureTuple.id}/book`)
+        .expect(400);
+    });
+    afterEach(async () => {
+      await knex("lecture_booking").del();
+      await knex("waiting_list").del();
     });
   });
 
@@ -209,15 +335,15 @@ describe("GET /api/lectures/bookable", async function () {
     await knex("lecture_booking").del();
     await knex("course").del();
     await knex("course_available_student").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(futureLectureTuple);
 
-    await knex("course_available_student").insert(courseStudentTuple);
+    await knex("course_available_student").insert(courseStudent1Tuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(userCredentials);
+      .send(student1Credentials);
 
     expect(res.status).to.equal(200);
   });
@@ -248,7 +374,7 @@ describe("GET /api/lectures/previousbooking", async () => {
     await knex("lecture").del();
     await knex("lecture_booking").del();
     await knex("course").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
@@ -256,7 +382,7 @@ describe("GET /api/lectures/previousbooking", async () => {
 
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(userCredentials);
+      .send(student1Credentials);
 
     expect(res.status).to.equal(200);
   });
@@ -284,14 +410,14 @@ describe("List of students booked for a lecture", async () => {
   before(async () => {
     await knex("user").del();
     await knex("lecture_booking").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(userCredentials);
+      .send(student1Credentials);
 
     expect(res.status).to.equal(200);
   });
@@ -308,9 +434,9 @@ describe("List of students booked for a lecture", async () => {
     expect(res.body.length).to.equal(1);
     expect(res.body).to.have.deep.members([
       {
-        id: userTuple.id,
-        name: userTuple.name,
-        surname: userTuple.surname,
+        id: studentTuple1.id,
+        name: studentTuple1.name,
+        surname: studentTuple1.surname,
         email: testEmailAddress,
       },
     ]);
@@ -330,13 +456,13 @@ describe("list of lectures scheduled for a course", async () => {
   before(async () => {
     await knex("user").del();
     await knex("lecture").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(userCredentials);
+      .send(student1Credentials);
 
     expect(res.status).to.equal(200);
   });
@@ -385,11 +511,11 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
     await knex("lecture").del();
     await knex("lecture_booking").del();
     await knex("course_available_student").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(futureLectureTuple);
-    await knex("course_available_student").insert(courseStudentTuple);
+    await knex("course_available_student").insert(courseStudent1Tuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
 
     await authenticatedUser
@@ -431,21 +557,21 @@ describe("Cancel a booked lecture ", async function () {
   //now let's login the user before we run any tests
   this.timeout(5000);
   const authenticatedUser = request.agent(app);
-  before(async () => {
+  beforeEach(async () => {
     await knex("course_available_student").del();
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("course").del();
     await knex("lecture").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
-    await knex("course_available_student").insert(courseStudentTuple);
+    await knex("course_available_student").insert(courseStudent1Tuple);
     await knex("lecture").insert(lectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
-      .send(userCredentials);
+      .send(student1Credentials);
 
     expect(res.status).to.equal(200);
   });
@@ -461,9 +587,9 @@ describe("Cancel a booked lecture ", async function () {
       `/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`
     );
     expect(res).to.have.property("body");
-    expect(res.body.message).to.equal(`Booking canceled.`);
+    expect(res.body.message).to.equal(`Booking cancelled.`);
   });
-  after(async () => {
+  afterEach(async () => {
     await knex("user").del();
     await knex("course").del();
     await knex("lecture").del();
@@ -483,7 +609,7 @@ describe("Presence Lecture into distance one ", async function () {
     await knex("lecture").del();
     await knex("course").del();
     await knex("lecture_booking").del();
-    await knex("user").insert(userTuple);
+    await knex("user").insert(studentTuple1);
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
@@ -493,7 +619,7 @@ describe("Presence Lecture into distance one ", async function () {
       .send(teacherCredentials);
     const resStudent = await authenticatedStudent
       .post("/api/auth/login")
-      .send(userCredentials);
+      .send(student1Credentials);
     expect(res.status).to.equal(200);
   });
   it("should return status 204", async () => {

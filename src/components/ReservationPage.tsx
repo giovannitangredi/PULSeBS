@@ -34,6 +34,7 @@ export const ReservationPage = (props: any) => {
       .get(`/lectures/bookable`)
       .then((res) => {
         let lectures = res.data;
+        console.log(lectures);
         let now = new Date()
           .toISOString()
           .replace(/T/, " ")
@@ -95,7 +96,7 @@ export const ReservationPage = (props: any) => {
     <Container>
       <h1>Book a Lecture</h1>
       {lectures2weeks.length === 0 && (
-        <h2>There are no bookable in 2 weeks to show</h2>
+        <h4>There are no bookable lectures in the next two weeks.</h4>
       )}
       {lectures2weeks.length !== 0 && (
         <BookingLectureList
@@ -106,7 +107,7 @@ export const ReservationPage = (props: any) => {
       <hr></hr>
       <h1>Booked Lectures</h1>
       {bookedLectures2weeks.length === 0 && (
-        <h2>There are no booked in 2 weeks to show</h2>
+        <h4>There are no lectures booked in the next two weeks.</h4>
       )}
       {bookedLectures2weeks.length !== 0 && (
         <BookedLectureList

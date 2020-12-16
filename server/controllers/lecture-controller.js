@@ -7,6 +7,7 @@ exports.getBookingLectures = async (req, res) => {
   const studentId = req.user && req.user.id;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const deadline = moment(today).add(12, "hours").format("YYYY-MM-DD HH:mm:ss");
+  const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
       { id: "lecture.id" },
@@ -44,9 +45,21 @@ exports.getBookingLectures = async (req, res) => {
     })
     .andWhere("course_available_student.student_id", studentId) //select only lectures that student can attend
     .andWhere("start", ">", deadline) //deadline (before 12 hours)
-    .orderBy("start", "asc")
-    .then((queryResults) => {
-      res.json(queryResults);
+    .then(async (queryResults) => {
+      const stuff = await Promise.all(
+        queryResults.map(async (item) => {
+          var rItem = { ...item };
+          rItem.candidate =
+            (
+              await knex("waiting_list").where({
+                lecture_id: item.id,
+                student_id: studentId,
+              })
+            ).length > 0;
+          return rItem;
+        })
+      );
+      res.json(stuff);
     })
     .catch((err) => {
       res.json({
@@ -58,6 +71,8 @@ exports.getBookingLectures = async (req, res) => {
 //Get existent bookings by one student
 exports.getExistentBooking = async (req, res) => {
   const studentId = req.user && req.user.id;
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const dateShown = moment(today).add(2, "weeks").format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
       { id: "lecture.id" },
@@ -97,12 +112,54 @@ exports.newBooking = async (req, res) => {
   const lectureId = req.params.lectureId;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select({ start: "start" }, { status: "status" })
+    .select({ start: "start" }, { status: "status" }, {capacity: "capacity"}, { courseName: "course.name" })
     .from("lecture")
-    .where("id", lectureId)
-    .then(([lectureQueryResults]) => {
+    .join("course", "lecture.course", "=", "course.id")
+    .where("lecture.id", lectureId) // needs to check whether user can book.
+    .then(async ([lectureQueryResults]) => {
       const lecture = lectureQueryResults;
-      if (lecture.status === "presence") {
+
+      if (lecture.status !== "presence") {
+        throw `Lecture of the course ${lecture.courseName} is a remote one, can't be bookable`;
+      }
+      const alreadyBooked =
+        (
+          await knex("lecture_booking").count("* as booked").where({
+            lecture_id: lectureId,
+            student_id: studentId,
+          })
+        )[0].booked > 0;
+      if (alreadyBooked) {
+        throw `You already booked lecture.`;
+      }
+      if (
+        (
+          await knex("waiting_list").where({
+            lecture_id: lectureId,
+            student_id: studentId,
+          })
+        ).length !== 0
+      ) {
+        throw "You are already part of the waiting list.";
+      }
+      const bookedSeats = (
+        await knex("lecture_booking")
+          .count("student_id as booked_seats")
+          .where({
+            lecture_id: lectureId,
+          })
+      )[0].booked_seats;
+      if (bookedSeats >= lecture.capacity) {
+        knex("waiting_list")
+          .insert({
+            lecture_id: lectureId,
+            student_id: studentId,
+            booked_at: today,
+          })
+          .then(() => {
+            res.json({ message: `You've been added to the waiting list.` });
+          });
+      } else {
         knex("lecture_booking")
           .insert({
             // insert new record
@@ -149,17 +206,14 @@ exports.newBooking = async (req, res) => {
           })
           .catch((err) => {
             // Send a error message in response
-            res.json({ message: `There was an error creating the booking` });
+            throw `There was an error creating the booking.`;
           });
-      } else {
-        res.json({
-          message: `Lecture of the course ${lecture.courseName} is a remote one, can't be bookable`,
-        });
       }
     })
     .catch((err) => {
-      res.json({
-        message: `There was an error searching the lecture`,
+      console.log(err);
+      res.status(400).json({
+        message: `There was an error booking the lecture: ${err}`,
       });
     });
 };
@@ -170,20 +224,40 @@ exports.cancelBooking = async (req, res) => {
   const lectureId = req.params.lectureid;
   const studentId = req.user && req.user.id;
 
-  // Delete booking lecture in lecture_booking table
   knex("lecture_booking")
     .where("lecture_id", lectureId)
     .andWhere("student_id", studentId)
     .del()
-    .then(() => {
-      res.json({ message: `Booking canceled.` });
+    .then(async (result) => {
+      if (result === 0) throw "No booking to cancel.";
+
+      const [waiting] = await knex("waiting_list")
+        .where("lecture_id", lectureId)
+        .orderBy("booked_at", "asc")
+        .limit(1);
+      if (waiting) {
+        const { lecture_id, student_id, booked_at } = waiting;
+
+        await knex("lecture_booking").insert({
+          lecture_id,
+          student_id,
+          booked_at,
+        });
+        await knex("waiting_list")
+          .where("lecture_id", lecture_id)
+          .andWhere("student_id", student_id)
+          .del();
+
+        sendCandidateToReserveChangeEmail(lecture_id, student_id);
+      }
+      res.json({ message: "Booking cancelled." });
     })
     .catch((err) => {
-      // Send a error message in response
-      res.json({ message: `There was an error canceling the booking` });
+      res
+        .status(400)
+        .json({ message: `There was an error canceling the booking: ${err}` });
     });
 };
-
 // Get the list of lectures scheduled for a course
 exports.getScheduledLectures = async (req, res) => {
   const courseId = req.params.courseid;
@@ -334,7 +408,7 @@ exports.deleteLecture = async (req, res) => {
   }
 };
 
-const sendEmailsForCancelledLecture = async (lectureId) => {
+sendEmailsForCancelledLecture = async (lectureId) => {
   const result = await knex
     .select(
       { id: "user.id" },
@@ -374,6 +448,55 @@ const sendEmailsForCancelledLecture = async (lectureId) => {
   );
   try {
     await Promise.all(queue);
+  } catch (err) {
+    console.log(`There was an error cancelling the lecture: ${err}`);
+  }
+};
+
+sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
+  try {
+    const [result] = await knex
+      .select(
+        { id: "user.id" },
+        { name: "user.name" },
+        { surname: "user.surname" },
+        { email: "user.email" },
+        { lectureStart: "lecture.start" },
+        { lectureCourseName: "course.name" }
+      )
+      .from("lecture_booking")
+      .join("user", "lecture_booking.student_id", "=", "user.id")
+      .join("lecture", "lecture.id", "=", "lecture_booking.lecture_id")
+      .join("course", "lecture.course", "=", "course.id")
+      .where("lecture_booking.lecture_id", lectureId)
+      .andWhere("user.id", studentId)
+      .limit(1);
+
+    console.log(result);
+    if (!result) throw "Lecture does not exist.";
+
+    const emailSubject = "You are moved from candidate list to Reserved List";
+    const emailBody = (
+      name,
+      surname,
+      lectureName,
+      lectureCourseName,
+      lectureStart
+    ) => `Dear ${name} ${surname},<br/> \
+  Your request state for lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} has changed from candidate to reserve. Now you can participate in this lecture,\
+  <br/>The PULSeBS Team`;
+
+    await emailController.sendMail(
+      result.email,
+      emailSubject,
+      emailBody(
+        result.name,
+        result.surname,
+        result.lectureName,
+        result.lectureCourseName,
+        result.lectureStart
+      )
+    );
   } catch (err) {
     console.log(`There was an error cancelling the lecture: ${err}`);
   }

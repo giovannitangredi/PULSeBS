@@ -49,7 +49,7 @@ export const CourseDetail = (props) => {
         } else {
           newFilter = newFilter.filter((x) => x != filter);
           setcourseFilter(newFilter);
-          setcourseFilter(newFilter);
+          await setcourseFilter(newFilter);
         }
       }
     }
@@ -176,9 +176,9 @@ export const CourseDetail = (props) => {
     );
   };
   /*get list of weeks between two dates */
-  const getMonthList = (startD, endD) => {
-    var dateStart = moment(startD);
-    var dateEnd = moment(endD);
+  const getMonthList = (startDate, endDate) => {
+    var dateStart = moment(startDate);
+    var dateEnd = moment(endDate);
     var timeValues = [];
 
     while (dateStart.format("YYYY-MM") <= dateEnd.format("YYYY-MM")) {
