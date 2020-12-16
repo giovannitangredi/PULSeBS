@@ -221,6 +221,34 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
+                     <text fontSize="14" fontFamily="Verdana" x="510" y="22">
+                      Full Lectures
+                    </text>
+                    <rect
+                      x="605"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: `#ffc107`,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
+                    <text fontSize="14" fontFamily="Verdana" x="645" y="22">
+                      In Waiting List
+                    </text>
+                    <rect
+                      x="755"
+                      y="3"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: `#6c757d`,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
                   </svg>
                 </div>
               </div>
