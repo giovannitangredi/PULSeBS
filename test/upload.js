@@ -76,7 +76,7 @@ const semesterTuple = {
 
 describe("Story 12 test - As a support officer I want to upload the list of students, courses, teachers, lectures, and classes to setup the system", async function () {
   const authenticatedUser = request.agent(app);
-
+  this.timeout(5000);
   //Upload student
   describe("Upload student ", async () => {
     before(async () => {
@@ -91,7 +91,25 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       .expect(200);
     });
 
-    it("should return  with status 200 and body", async () => {
+    it("should return an error 501 when the file is not correct", async () => {
+      const res = await authenticatedUser.post(`/api/upload/students`)
+      .attach(
+        "file",
+        fs.readFileSync("./test/csvfiles/Profressors.csv"),
+        "Profressors.csv"
+      );
+      expect(res.status).to.equal(501);
+    });
+    it("user table should not contain wrong data", async () => {
+      expect(
+        (await knex("user")
+          .where("role", "student")
+          .andWhere("id", "<>", officerTuple.id)
+        ).length
+      ).to.equal(0);
+    });
+
+    it("should return with status 200 and body", async () => {
       const res = await authenticatedUser
         .post(`/api/upload/students`)
         .attach(
@@ -175,6 +193,24 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       .expect(200);
     });
 
+    it("should return an error 501 when the file is not correct", async () => {
+      const res = await authenticatedUser.post(`/api/upload/teachers`)
+      .attach(
+        "file",
+        fs.readFileSync("./test/csvfiles/Students.csv"),
+        "Students.csv"
+      );
+      expect(res.status).to.equal(501);
+    });
+    it("user table should not contain wrong data", async () => {
+      expect(
+        (await knex("user")
+          .where("role", "student")
+          .andWhere("id", "<>", officerTuple.id)
+        ).length
+      ).to.equal(0);
+    });
+
     it("should return  with status 200", async () => {
       const res = await authenticatedUser
         .post(`/api/upload/teachers`)
@@ -252,6 +288,22 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       .expect(200);
     });
 
+    it("should return an error 501 when the file is not correct", async () => {
+      const res = await authenticatedUser.post(`/api/upload/courses`)
+      .attach(
+        "file",
+        fs.readFileSync("./test/csvfiles/Profressors.csv"),
+        "Profressors.csv"
+      );
+      expect(res.status).to.equal(501);
+    });
+    it("user table should not contain wrong data", async () => {
+      expect(
+        (await knex.select().from("course")
+        ).length
+      ).to.equal(0);
+    });
+
     it("should return  with status 200", async () => {
       const res = await authenticatedUser
         .post(`/api/upload/courses`)
@@ -323,6 +375,22 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       .post("/api/auth/login")
       .send(officerCredentials)
       .expect(200);
+    });
+
+    it("should return an error 501 when the file is not correct", async () => {
+      const res = await authenticatedUser.post(`/api/upload/enrollments`)
+      .attach(
+        "file",
+        fs.readFileSync("./test/csvfiles/Profressors.csv"),
+        "Profressors.csv"
+      );
+      expect(res.status).to.equal(501);
+    });
+    it("user table should not contain wrong data", async () => {
+      expect(
+        (await knex.select().from("course_available_student")
+        ).length
+      ).to.equal(0);
     });
 
     it("should return  with status 200", async () => {
@@ -408,6 +476,22 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       .post("/api/auth/login")
       .send(officerCredentials)
       .expect(200);
+    });
+
+    it("should return an error 501 when the file is not correct", async () => {
+      const res = await authenticatedUser.post(`/api/upload/schedule/${semesterTuple.sid}`)
+      .attach(
+        "file",
+        fs.readFileSync("./test/csvfiles/Profressors.csv"),
+        "Profressors.csv"
+      );
+      expect(res.status).to.equal(501);
+    });
+    it("user table should not contain wrong data", async () => {
+      expect(
+        (await knex.select().from("lecture_booking")
+        ).length
+      ).to.equal(0);
     });
 
     it("should return  with status 200", async () => {

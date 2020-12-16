@@ -65,8 +65,6 @@ const readFile = async (userId, path, type, semesterId) => {
     enrollment: "course_available_student",
     schedule: "lecture",
   };
-  let prova;
-
   return new Promise(async (resolve, reject) => {
     if (!(await checkSupportOfficer(userId))) {
       reject({
@@ -76,28 +74,27 @@ const readFile = async (userId, path, type, semesterId) => {
       return;
     }
     let rows = [];
-    let check = false;
+    //let check = false;
     const stream = fs
       .createReadStream(path)
       .pipe(
         csv.parse({
           headers: header => 
           {
-            prova=[...header];
-            return headers[type];
+            if (checkHeaders(header,firstRow[type])) {return headers[type];}
+            else {
+              reject({
+                msg: "Wrong file",
+                status: 501
+              });
+              return;
+            }
           },
           renameHeaders: true,
         })
       )
       .on("data", async (row) => {    
         stream.pause();
-        if (!check && !checkHeaders(prova,firstRow[type])) {          
-          reject(
-          {msg: "Wrong file",
-          status: 501}
-          )
-        return;}
-          check = true;
         if (["student", "teacher"].includes(type)) {
           row.password_hash = bcrypt.hashSync("password", 1);
           row.role = type;
@@ -117,7 +114,7 @@ const readFile = async (userId, path, type, semesterId) => {
         stream.resume();
       })
       .on("error", (error) => {
-      reject(error);
+        return;
     })
       .on("end", () => {
         if (type != "schedule") {
