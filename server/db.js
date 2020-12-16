@@ -118,18 +118,15 @@ initTable(
   triggers.cancellation_trigger
 );
 
-initTable(
-  "waiting_list",
-  (table) => {
-    table.integer("lecture_id").notNullable();
-    table.foreign("lecture_id").references("lecture.id");
+initTable("waiting_list", (table) => {
+  table.integer("lecture_id").notNullable();
+  table.foreign("lecture_id").references("lecture.id");
 
-    table.integer("student_id").notNullable();
-    table.foreign("student_id").references("user.id");
+  table.integer("student_id").notNullable();
+  table.foreign("student_id").references("user.id");
 
-    table.datetime("booked_at").notNullable();
-  }
-);
+  table.datetime("booked_at").notNullable();
+});
 
 initTable("course_available_student", (table) => {
   table.integer("course_id").notNullable();

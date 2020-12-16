@@ -35,7 +35,7 @@ exports.sendMail = async (email, subject, body) => {
 };
 
 /**
- * Return an array containing all the emails in the inbox. 
+ * Return an array containing all the emails in the inbox.
  * An email is an object { subject, body }
  */
 exports.fetchEmails = async (imap) => {

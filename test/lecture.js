@@ -226,7 +226,7 @@ describe("Lecture test", async function () {
     it("student cancels their booking when the waiting list is not empty: should return 200 and book the lecture for the first student on the waiting list.", async () => {
       await authenticatedUser
         .delete(`/api/lectures/${limitedCapacityLectureTuple.id}/cancelbook`)
-        .expect(200, { message: "Booking canceled." });
+        .expect(200, { message: "Booking cancelled." });
       expect(
         (
           await knex("waiting_list").where({
@@ -572,7 +572,7 @@ describe("Cancel a booked lecture ", async function () {
       `/api/lectures/${lectureBookingTuple.lecture_id}/cancelbook`
     );
     expect(res).to.have.property("body");
-    expect(res.body.message).to.equal(`Booking canceled.`);
+    expect(res.body.message).to.equal(`Booking cancelled.`);
   });
   after(async () => {
     await knex("user").del();

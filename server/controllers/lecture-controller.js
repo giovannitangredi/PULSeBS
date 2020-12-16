@@ -455,50 +455,49 @@ sendEmailsForCancelledLecture = async (lectureId) => {
 };
 
 sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
-  const result = await knex
-    .select(
-      { id: "user.id" },
-      { name: "user.name" },
-      { surname: "user.surname" },
-      { email: "user.email" },
-      { lectureName: "lecture.name" },
-      { lectureStart: "lecture.start" },
-      { lectureCourseName: "course.name" }
-    )
-    .from("lecture_booking")
-    .join("user", "lecture_booking.student_id", "=", "user.id")
-    .join("lecture", "lecture.id", "=", "lecture_booking.lecture_id")
-    .join("course", "lecture.course", "=", "course.id")
-    .where("lecture_booking.lecture_id", lectureId)
-    .andWhere("user.id", studentId)
-    .limit(1);
+  try {
+    const [result] = await knex
+      .select(
+        { id: "user.id" },
+        { name: "user.name" },
+        { surname: "user.surname" },
+        { email: "user.email" },
+        { lectureName: "lecture.name" },
+        { lectureStart: "lecture.start" },
+        { lectureCourseName: "course.name" }
+      )
+      .from("lecture_booking")
+      .join("user", "lecture_booking.student_id", "=", "user.id")
+      .join("lecture", "lecture.id", "=", "lecture_booking.lecture_id")
+      .join("course", "lecture.course", "=", "course.id")
+      .where("lecture_booking.lecture_id", lectureId)
+      .andWhere("user.id", studentId)
+      .limit(1);
 
-  const emailSubject = "You are moved from candidate list to Reserved List";
-  const emailBody = (
-    name,
-    surname,
-    lectureName,
-    lectureCourseName,
-    lectureStart
-  ) => `Dear ${name} ${surname},<br/> \
+    if (!result) throw "Lecture does not exist.";
+
+    const emailSubject = "You are moved from candidate list to Reserved List";
+    const emailBody = (
+      name,
+      surname,
+      lectureName,
+      lectureCourseName,
+      lectureStart
+    ) => `Dear ${name} ${surname},<br/> \
   Your request state for lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} has changed from candidate to reserve. Now you can participate in this lecture,\
   <br/>The PULSeBS Team`;
 
-  const queue = result.map((item) =>
-    emailController.sendMail(
-      item.email,
+    await emailController.sendMail(
+      result.email,
       emailSubject,
       emailBody(
-        item.name,
-        item.surname,
-        item.lectureName,
-        item.lectureCourseName,
-        item.lectureStart
+        result.name,
+        result.surname,
+        result.lectureName,
+        result.lectureCourseName,
+        result.lectureStart
       )
-    )
-  );
-  try {
-    await Promise.all(queue);
+    );
   } catch (err) {
     console.log(`There was an error cancelling the lecture: ${err}`);
   }
