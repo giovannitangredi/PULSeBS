@@ -21,7 +21,7 @@ const imap = {
 };
 
 const studentTuple1 = {
-  id: 1,
+  id: "1",
   name: "Enrico",
   surname: "Carraro",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
@@ -33,12 +33,13 @@ const studentTuple1 = {
 };
 
 const studentTuple2 = {
-  id: 3,
+  id: "3",
   name: "Name",
   surname: "Surname",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "student2@studenti.polito.it",
   role: "student",
+  ssn: "MK98060783",
 };
 
 const teacherTuple = {
@@ -102,13 +103,13 @@ const futureLectureTuple = {
 
 const limitedCapacityLectureTuple = {
   id: 2,
-  name: "Exclusive Lecture",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment().add(5, "hours").format("YYYY-MM-DD HH:mm:ss"),
   end: moment().add(8, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 1,
   status: "presence",
+  room: 5
 };
 
 const courseStudent1Tuple = {

@@ -112,9 +112,10 @@ exports.newBooking = async (req, res) => {
   const lectureId = req.params.lectureId;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select({ start: "start" }, { status: "status" })
+    .select({ start: "start" }, { status: "status" }, {capacity: "capacity"}, { courseName: "course.name" })
     .from("lecture")
-    .where("id", lectureId) // needs to check whether user can book.
+    .join("course", "lecture.course", "=", "course.id")
+    .where("lecture.id", lectureId) // needs to check whether user can book.
     .then(async ([lectureQueryResults]) => {
       const lecture = lectureQueryResults;
 
@@ -129,7 +130,7 @@ exports.newBooking = async (req, res) => {
           })
         )[0].booked > 0;
       if (alreadyBooked) {
-        throw `You already booked lecture '${lecture.name}'.`;
+        throw `You already booked lecture.`;
       }
       if (
         (
@@ -460,7 +461,6 @@ sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
         { name: "user.name" },
         { surname: "user.surname" },
         { email: "user.email" },
-        { lectureName: "lecture.name" },
         { lectureStart: "lecture.start" },
         { lectureCourseName: "course.name" }
       )
