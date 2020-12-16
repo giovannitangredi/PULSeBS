@@ -151,12 +151,12 @@ class ReservationCalendar extends React.Component {
                 <h4>Lectures</h4>{" "}
                 <div>
                   <svg width="850" height="40">
-                    <text fontSize="14" fontFamily="Verdana" x="7" y="22">
+                    <text fontSize="14" fontFamily="Verdana" x="40" y="22">
                       Booked Lectures
                     </text>
                     <rect
-                      x="129"
-                      y="3"
+                      x="165"
+                      y="4"
                       width="30"
                       height="30"
                       style={{
@@ -165,11 +165,11 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    <text fontSize="14" fontFamily="Verdana" x="169" y="22">
+                    <text fontSize="14" fontFamily="Verdana" x="210" y="22">
                       Unbooked Lectures
                     </text>
                     <rect
-                      x="309"
+                      x="350"
                       y="3"
                       width="30"
                       height="30"
@@ -179,11 +179,11 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    <text fontSize="14" fontFamily="Verdana" x="350" y="22">
+                    <text fontSize="14" fontFamily="Verdana" x="395" y="22">
                       Remote Lectures
                     </text>
                     <rect
-                      x="475"
+                      x="520"
                       y="3"
                       width="30"
                       height="30"
@@ -193,11 +193,11 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    <text fontSize="14" fontFamily="Verdana" x="510" y="22">
+                    <text fontSize="14" fontFamily="Verdana" x="565" y="22">
                       Full Lectures
                     </text>
                     <rect
-                      x="605"
+                      x="660"
                       y="3"
                       width="30"
                       height="30"
@@ -207,11 +207,11 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    <text fontSize="14" fontFamily="Verdana" x="645" y="22">
-                      Waiting List
+                    <text fontSize="14" fontFamily="Verdana" x="703" y="22">
+                     In Waiting List
                     </text>
                     <rect
-                      x="755"
+                      x="810"
                       y="3"
                       width="30"
                       height="30"
@@ -221,34 +221,7 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                     <text fontSize="14" fontFamily="Verdana" x="510" y="22">
-                      Full Lectures
-                    </text>
-                    <rect
-                      x="605"
-                      y="3"
-                      width="30"
-                      height="30"
-                      style={{
-                        fill: `#ffc107`,
-                        strokeWidth: 1,
-                        stroke: "rgb(0,0,0)",
-                      }}
-                    />
-                    <text fontSize="14" fontFamily="Verdana" x="645" y="22">
-                      In Waiting List
-                    </text>
-                    <rect
-                      x="755"
-                      y="3"
-                      width="30"
-                      height="30"
-                      style={{
-                        fill: `#6c757d`,
-                        strokeWidth: 1,
-                        stroke: "rgb(0,0,0)",
-                      }}
-                    />
+                   
                   </svg>
                 </div>
               </div>
