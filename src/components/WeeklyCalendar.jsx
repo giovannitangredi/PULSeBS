@@ -10,7 +10,7 @@ class WeeklyCalendar extends React.Component {
       <div>
         <h5>{this.props.title}</h5>
         <FullCalendar
-          initialView="timeGridWeek"
+          initialView="dayGridMonth"
           defaultView="dayGridMonth"
           slotMinTime="08:00:00"
           slotMaxTime="20:00:00"

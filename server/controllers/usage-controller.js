@@ -150,7 +150,7 @@ exports.getBookingStats = async (req, res) => {
       knex
         .select(
           { lecture_id: "sl.lecture_id" },
-          { lecture_name: "sl.lecture_name" },
+          //{ lecture_name: "sl.lecture_name" },
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { date: "st.date" },
@@ -185,7 +185,7 @@ exports.getSystemStats = async (req, res) => {
     .where("id", user)
     .then((result) => {
       if (result[0].role != "manager") {
-        console.log(result.role);
+        //console.log(result.role);
         res.status(401).json({
           message: "Unauthorize acces only managers can acces this query",
         });
@@ -231,7 +231,7 @@ exports.getAllLecturesStats = async (req, res) => {
     });
   knex
     .select(
-      { lecture: "sl.lecture_name" },
+      //{ lecture: "sl.lecture_name" },
       { course: "sl.course_name" },
       { courseId: "sl.course_id" },
       { cancellations: "su.cancellations" },
@@ -309,7 +309,7 @@ exports.getCourseLecturesStats = async (req, res) => {
   const courseid = req.params.courseid;
   knex
     .select(
-      { lecture: "sl.lecture_name" },
+      //{ lecture: "sl.lecture_name" },
       { course: "sl.course_name" },
       { cancellations: "su.cancellations" },
       { attendances: "su.attendance" },

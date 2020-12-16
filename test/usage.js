@@ -15,30 +15,39 @@ const managerCredentials = {
 };
 
 const userTuple = {
-  id: 1,
+  id: "1",
   name: "Enrico",
   surname: "Carraro",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "e_carra@qwerty.it",
   role: "student",
+  city: "Poggio Ferro",
+  birthday: "1996-11-04",
+  ssn: "MK97060783",
 };
 
 const teacherTuple = {
-  id: 2,
+  id: "2",
   name: "John",
   surname: "Doe",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "john.doe@polito.it",
   role: "teacher",
+  city: "Milano",
+  birthday: "1971-11-04",
+  ssn: "MK97060783",
 };
 
 const managerTuple = {
-  id: 3,
+  id: "3",
   name: "Mario",
   surname: "Castello",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "mario.castello@polito.it",
   role: "manager",
+  city: "Napoli",
+  birthday: "1961-11-04",
+  ssn: "UQ88181741",
 };
 const teacherCredentials = {
   email: teacherTuple.email,
@@ -49,6 +58,8 @@ const courseTuple = {
   id: 1,
   name: "Software Engineering II",
   main_prof: teacherTuple.id,
+  year: 1,
+  semester: 1,
 };
 
 const courseStudentTuple = {
@@ -58,7 +69,6 @@ const courseStudentTuple = {
 
 const lectureTuple = {
   id: 1,
-  name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment()
@@ -68,11 +78,11 @@ const lectureTuple = {
   end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
+  room: 1,
 };
 
 const lecture2Tuple = {
   id: 2,
-  name: "Lecture 2",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment()
@@ -82,6 +92,7 @@ const lecture2Tuple = {
   end: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
+  room: 1,
 };
 
 const lectureBookingTuple = {
@@ -339,7 +350,6 @@ describe("Return all the lecture stats ", async () => {
     expect(res.body.length).to.equal(1);
     expect(res.body).to.have.deep.members([
       {
-        lecture: lectureTuple.name,
         course: courseTuple.name,
         courseId: courseTuple.id,
         cancellations: 0,
@@ -436,7 +446,6 @@ describe("Return course  lecture stats ", async () => {
     expect(res.body.length).to.equal(1);
     expect(res.body).to.have.deep.members([
       {
-        lecture: lectureTuple.name,
         course: courseTuple.name,
         cancellations: 0,
         attendances: 1,

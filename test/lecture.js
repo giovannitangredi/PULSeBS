@@ -27,6 +27,9 @@ const studentTuple1 = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: testEmailAddress,
   role: "student",
+  city: "Poggio Ferro",
+  birthday: "1996-11-04",
+  ssn: "MK97060783",
 };
 
 const studentTuple2 = {
@@ -39,12 +42,15 @@ const studentTuple2 = {
 };
 
 const teacherTuple = {
-  id: 2,
+  id: "2",
   name: "John",
   surname: "Doe",
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "john.doe@polito.it",
   role: "teacher",
+  city: "Milano",
+  birthday: "1971-11-04",
+  ssn: "MR17121943",
 };
 
 //the data we need to pass to the login method
@@ -65,31 +71,33 @@ const teacherCredentials = {
 };
 
 const courseTuple = {
-  id: 1,
+  id: "1",
   name: "Software Engineering II",
   main_prof: teacherTuple.id,
+  year: 1,
+  semester: 1,
 };
 
 const lectureTuple = {
   id: 1,
-  name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
   end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
+  room: 1,
 };
 
 const futureLectureTuple = {
   id: 1,
-  name: "Lecture 1",
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment().add(2, "days").format("YYYY-MM-DD HH:mm:ss"),
   end: moment().add(2, "days").add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
+  room: 1,
 };
 
 const limitedCapacityLectureTuple = {
@@ -128,13 +136,15 @@ const limitedCapacityLectureBookingTuple = {
 const expectedPreviousBooking = [
   {
     id: lectureTuple.id,
-    name: lectureTuple.name,
     course: courseTuple.name,
     lecturer_name: teacherTuple.name,
     lecturer_surname: teacherTuple.surname,
     start: lectureTuple.start,
     end: lectureTuple.end,
-    capacity: lectureTuple.capacity,
+    room: lectureTuple.room,
+    year: courseTuple.year,
+    semester: courseTuple.semester,
+    capacity: 25,
     booked_at: lectureBookingTuple.booked_at,
     status: lectureTuple.status,
   },
@@ -143,12 +153,15 @@ const expectedPreviousBooking = [
 const expectedBookableLectures = [
   {
     id: futureLectureTuple.id,
-    name: futureLectureTuple.name,
     course: courseTuple.name,
     lecturer_name: teacherTuple.name,
     lecturer_surname: teacherTuple.surname,
     start: futureLectureTuple.start,
     end: futureLectureTuple.end,
+    status: futureLectureTuple.status,
+    room: futureLectureTuple.room,
+    year: courseTuple.year,
+    semester: courseTuple.semester,
     capacity: futureLectureTuple.capacity,
     booked_students: 0,
     candidate: false,
@@ -413,7 +426,7 @@ describe("List of students booked for a lecture", async () => {
     );
     expect(res.status).to.equal(200);
   });
-  it("should return one student booked", async () => {
+  it("should return the student booked", async () => {
     const res = await authenticatedUser.get(
       `/api/lectures/${lectureBookingTuple.lecture_id}/students`
     );
@@ -466,7 +479,6 @@ describe("list of lectures scheduled for a course", async () => {
     expect(res.body).to.have.deep.members([
       {
         id: lectureTuple.id,
-        name: lectureTuple.name,
         course: lectureTuple.course,
         lecturer_id: teacherTuple.id,
         lecturer_name: teacherTuple.name,
@@ -475,6 +487,7 @@ describe("list of lectures scheduled for a course", async () => {
         end: lectureTuple.end,
         capacity: lectureTuple.capacity,
         status: lectureTuple.status,
+        room: lectureTuple.room,
       },
     ]);
   });
@@ -528,7 +541,7 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
   it("student booked should receive an email", async () => {
     const email = await newEmailPromise;
     expect(email.subject).to.match(/Lecture cancel information/);
-    expect(email.body).to.match(/is canceled by the teacher/);
+    expect(email.body).to.match(/was cancelled by the teacher/);
   });
   after(async () => {
     await knex("user").del();
@@ -544,6 +557,7 @@ describe("Cancel a booked lecture ", async function () {
   this.timeout(5000);
   const authenticatedUser = request.agent(app);
   beforeEach(async () => {
+    await knex("course_available_student").del();
     await knex("user").del();
     await knex("lecture_booking").del();
     await knex("course").del();

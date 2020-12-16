@@ -4,24 +4,33 @@ import ConfirmDialog from "./ConfirmDialog";
 import moment from "moment";
 import Button from "react-bootstrap/Button";
 
-// ({lecture: {title, start, end, extendedProps: {status, id}}, handleConvert})
+// ({lecture: {title, start, end, extendedProps: {status, id, room}}, handleConvert})
 const LectureItem = ({ lecture, handleConvert, handleBooking }) => {
   return (
     <ListGroup.Item>
-      <div className="d-flex w-100 justify-content-between">
+      <div className="d-flex w-100 justify-content-around">
         <div className="container">
           <div className="row">
-            <div className="col-lg-3">
-              <label>{lecture.title}</label>
+            <div className="col-sm-2 d-flex justify-content-center">
+              <label className="justify-content-center">
+                {"Room " + lecture.extendedProps.room}
+              </label>
             </div>
-            <div className="col-lg-2">
-              <label>{lecture.start.toDateString()}</label>
+            <div className="col-sm-3 d-flex justify-content-center">
+              <label className="justify-content-center">
+                {lecture.extendedProps.date}
+              </label>
             </div>
-            <div className="col-lg-3">
-              <label>{lecture.end.toDateString()}</label>
+            <div className="col-sm-3 d-flex justify-content-center">
+              <label className="justify-content-center">
+                {lecture.extendedProps.time}
+              </label>
             </div>
-            <div className="col-lg-2">
-              <label style={{ textTransform: "capitalize" }}>
+            <div className="col-sm-2 d-flex justify-content-center">
+              <label
+                className="justify-content-center"
+                style={{ textTransform: "capitalize" }}
+              >
                 {lecture.extendedProps.status === "distance"
                   ? "Remote"
                   : lecture.extendedProps.status}{" "}
@@ -40,8 +49,9 @@ const LectureItem = ({ lecture, handleConvert, handleBooking }) => {
               </label>
             </div>
             {moment(lecture.start).isAfter(moment().add(1, "hour")) && (
-              <div className="col-lg-2">
+              <div className="col-lg-2 d-flex justify-content-center">
                 <Button
+                  className="align-self-center"
                   variant="primary"
                   onClick={(event) => handleBooking(lecture)}
                 >

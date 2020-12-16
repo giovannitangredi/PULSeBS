@@ -11,13 +11,15 @@ exports.getBookingLectures = async (req, res) => {
   knex
     .select(
       { id: "lecture.id" },
-      { name: "lecture.name" },
       { course: "course.name" },
       { lecturer_name: "user.name" },
       { lecturer_surname: "user.surname" },
       { start: "start" },
       { end: "end" },
       { status: "lecture.status" },
+      { room: "lecture.room" },
+      { year: "course.year" },
+      { semester: "course.semester" },
       { capacity: "capacity" },
       knex.raw(`IFNULL(bookedStudent,0) as booked_students`)
     )
@@ -74,12 +76,14 @@ exports.getExistentBooking = async (req, res) => {
   knex
     .select(
       { id: "lecture.id" },
-      { name: "lecture.name" },
       { course: "course.name" },
       { lecturer_name: "user.name" },
       { lecturer_surname: "user.surname" },
       { start: "start" },
       { end: "end" },
+      { room: "lecture.room" },
+      { year: "course.year" },
+      { semester: "course.semester" },
       { capacity: "capacity" },
       { booked_at: "booked_at" },
       { status: "status" }
@@ -89,6 +93,7 @@ exports.getExistentBooking = async (req, res) => {
     .join("user", "lecture.lecturer", "user.id")
     .join("course", "lecture.course", "course.id")
     .where("lecture_booking.student_id", studentId)
+    .orderBy("start", "asc")
     .then((queryResults) => {
       res.json(queryResults);
     })
@@ -107,14 +112,14 @@ exports.newBooking = async (req, res) => {
   const lectureId = req.params.lectureId;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select("name", "start", "status", "capacity")
+    .select({ start: "start" }, { status: "status" })
     .from("lecture")
     .where("id", lectureId) // needs to check whether user can book.
     .then(async ([lectureQueryResults]) => {
       const lecture = lectureQueryResults;
 
       if (lecture.status !== "presence") {
-        throw `Lecture '${lecture.name}' is a remote one, can't be bookable.`;
+        throw `Lecture of the course ${lecture.courseName} is a remote one, can't be bookable`;
       }
       const alreadyBooked =
         (
@@ -174,7 +179,6 @@ exports.newBooking = async (req, res) => {
             // Get the lecture information
             const lectureQuery = knex
               .select(
-                { name: "lecture.name" },
                 { courseName: "course.name" },
                 { start: "start" }
               )
@@ -190,7 +194,7 @@ exports.newBooking = async (req, res) => {
 
                 const emailSubject = "Booking confirmation";
                 const emailBody = `Dear ${user.name} ${user.surname},<br/> \
-            You have successfully booked a seat for the lesson ${lecture.name} of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
+            You have successfully booked a seat for the lesson of the course ${lecture.courseName} scheduled for ${lecture.start}<br/><br/>\
             Thanks,<br/>The PULSeBS Team`;
 
                 emailController.sendMail(user.email, emailSubject, emailBody);
@@ -259,7 +263,6 @@ exports.getScheduledLectures = async (req, res) => {
   knex
     .select(
       { id: "l.id" },
-      { name: "l.name" },
       { course: "l.course" },
       { start: "l.start" },
       { end: "l.end" },
@@ -267,7 +270,8 @@ exports.getScheduledLectures = async (req, res) => {
       { lecturer_id: "u.id" },
       { lecturer_name: "u.name" },
       { lecturer_surname: "u.surname" },
-      { status: "l.status" }
+      { status: "l.status" },
+      { room: "l.room" }
     )
     .from({ l: "lecture" })
     .join({ u: "user" }, "l.lecturer", "=", "u.id")
@@ -308,7 +312,6 @@ exports.getBookedStudents = async (req, res) => {
 };
 
 // Turn a presence lecture into a distance one
-
 exports.convertDistanceLecture = async (req, res) => {
   const lectureId = req.params.lectureid;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -317,7 +320,6 @@ exports.convertDistanceLecture = async (req, res) => {
     .format("YYYY-MM-DD HH:mm:ss");
   knex
     .select(
-      { name: "name" },
       { start: "start" },
       { status: "status" },
       { lecturer: "lecturer" }
@@ -339,7 +341,7 @@ exports.convertDistanceLecture = async (req, res) => {
           })
           .then(() => {
             res.status(204).json({
-              message: `Presence lecture '${lecture.name}' turned into a distance one`,
+              message: `Presence lecture turned into a distance one`,
             });
           })
           .catch((err) => {
@@ -353,11 +355,11 @@ exports.convertDistanceLecture = async (req, res) => {
         });
       } else if (lecture.status === "distance") {
         res.status(304).json({
-          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Already a distance one!`,
+          message: `Presence lecture can't be turned into a distance one: Already a distance one!`,
         });
       } else {
         res.status(304).json({
-          message: `Presence lecture '${lecture.name}' can't be turned into a distance one: Lecture starting in 30 minutes!`,
+          message: `Presence lecture can't be turned into a distance one: Lecture starting in 30 minutes!`,
         });
       }
     })
@@ -367,6 +369,7 @@ exports.convertDistanceLecture = async (req, res) => {
       });
     });
 };
+
 exports.deleteLecture = async (req, res) => {
   const lectureId = req.params.lectureId;
   try {
@@ -402,9 +405,6 @@ exports.deleteLecture = async (req, res) => {
       .status(400)
       .json({ message: `There was an error cancelling the lecture: ${err}` });
   }
-
-  let string =
-    "select lecture from lectures where lesson starts in more than 1 hour, which this teacher owns and teaches.";
 };
 
 sendEmailsForCancelledLecture = async (lectureId) => {
@@ -414,7 +414,6 @@ sendEmailsForCancelledLecture = async (lectureId) => {
       { name: "user.name" },
       { surname: "user.surname" },
       { email: "user.email" },
-      { lectureName: "lecture.name" },
       { lectureCourseName: "course.name" },
       { lectureStart: "lecture.start" }
     )
@@ -428,11 +427,10 @@ sendEmailsForCancelledLecture = async (lectureId) => {
   const emailBody = (
     name,
     surname,
-    lectureName,
     lectureCourseName,
     lectureStart
   ) => `Dear ${name} ${surname},<br/> \
-    Your booked lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} is canceled by the teacher,\
+  The lecture from the ${lectureCourseName} course you booked, that was scheduled for ${lectureStart}, was cancelled by the teacher,\
     <br/>The PULSeBS Team`;
 
   const queue = result.map((item) =>
@@ -442,7 +440,6 @@ sendEmailsForCancelledLecture = async (lectureId) => {
       emailBody(
         item.name,
         item.surname,
-        item.lectureName,
         item.lectureCourseName,
         item.lectureStart
       )

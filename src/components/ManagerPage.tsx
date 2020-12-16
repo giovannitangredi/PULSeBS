@@ -20,7 +20,7 @@ interface LectureStats {
   bookings: number;
   cancellations: number;
   course: string;
-  courseId: number;
+  courseId: string;
   date: Date;
   lecture: string;
 }
@@ -63,14 +63,14 @@ class MonthDate {
 }
 
 interface CourseWeekStats {
-  courseId: number;
+  courseId: string;
   name: string;
   weekDate: WeekDate;
   avgBookings: number;
 }
 
 interface CourseMonthStats {
-  courseId: number;
+  courseId: string;
   name: string;
   monthDate: MonthDate;
   avgBookings: number;
@@ -186,8 +186,8 @@ export const ManagerPage = (props: any) => {
   const [courseMonthStats, setCourseMonthStats] = useState<CourseMonthStats[]>(
     []
   );
-  const [courses, setCourses] = useState<Map<number, string>>(new Map());
-  const [byCourseSelect, setByCourseSelect] = useState<number>();
+  const [courses, setCourses] = useState<Map<string, string>>(new Map());
+  const [byCourseSelect, setByCourseSelect] = useState<string>();
   const [byWeekSelect, setByWeekSelect] = useState<[Date, Date]>([
     new Date(),
     new Date(),
@@ -219,7 +219,7 @@ export const ManagerPage = (props: any) => {
       .then((res) => {
         let lectureStats: LectureStats[] = res.data;
         setCourses(
-          new Map<number, string>(
+          new Map<string, string>(
             lectureStats.map((lecture) => [lecture.courseId, lecture.course])
           )
         );
@@ -233,7 +233,7 @@ export const ManagerPage = (props: any) => {
       });
   };
 
-  const getCourseSumStats = (courseId: number) => {
+  const getCourseSumStats = (courseId: string) => {
     //get the sum of booking, cancellations, attendance for all lecturs of a specific course
     axios
       .get(`/courses/${courseId}/stats`)
@@ -249,7 +249,7 @@ export const ManagerPage = (props: any) => {
       });
   };
 
-  const getCourseLectureStats = (courseId: number) => {
+  const getCourseLectureStats = (courseId: string) => {
     //get a list of all lectures of a specific course with booking, cancellations, attendance stats
     axios
       .get(`/courses/${courseId}/lecturesStats`)
@@ -265,7 +265,7 @@ export const ManagerPage = (props: any) => {
   };
 
   const getCourseLecturesWeekRange = (
-    courseId: number,
+    courseId: string,
     startDate: Date,
     endDate: Date
   ) => {
@@ -285,7 +285,7 @@ export const ManagerPage = (props: any) => {
         setCourseWeekStats(
           res.data.map(
             (c: {
-              course_id: number;
+              course_id: string;
               course_name: string;
               week: string;
               booking: number;
@@ -310,7 +310,7 @@ export const ManagerPage = (props: any) => {
   };
 
   const getCourseLecturesMonthRange = (
-    courseId: number,
+    courseId: string,
     startDate: Date,
     endDate: Date
   ) => {
@@ -330,7 +330,7 @@ export const ManagerPage = (props: any) => {
         setCourseMonthStats(
           res.data.map(
             (c: {
-              course_id: number;
+              course_id: string;
               course_name: string;
               month: string;
               booking: number;
@@ -355,7 +355,7 @@ export const ManagerPage = (props: any) => {
   };
   const handleByCourseSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value) {
-      const courseId: number = parseInt(event.target.value);
+      const courseId: string = event.target.value;
       setByCourseSelect(courseId);
       getCourseSumStats(courseId);
       getCourseLectureStats(courseId);
@@ -379,7 +379,7 @@ export const ManagerPage = (props: any) => {
                 <thead>
                   <tr>
                     <th>Course ({courses?.size})</th>
-                    <th>Lecture ({lectureStats.length})</th>
+                    {/*<th>Lecture ({lectureStats.length})</th>*/}
                     <th>Date</th>
                     <th>Bookings ({systemStats?.bookings})</th>
                     <th>Cancellations ({systemStats?.cancellations})</th>
@@ -390,7 +390,7 @@ export const ManagerPage = (props: any) => {
                   {lectureStats.map((lecture: LectureStats, index: number) => (
                     <tr key={index}>
                       <td>{lecture.course}</td>
-                      <td>{lecture.lecture}</td>
+                      {/*<td>{lecture.lecture}</td>*/}
                       <td>{lecture.date}</td>
                       <td>{lecture.bookings}</td>
                       <td>{lecture.cancellations}</td>
@@ -435,7 +435,7 @@ export const ManagerPage = (props: any) => {
                 <Table striped bordered hover>
                   <thead>
                     <tr>
-                      <th>Lecture ({courseLectureStats.length})</th>
+                     {/*<th>Lecture ({courseLectureStats.length})</th>*/}
                       <th>Date</th>
                       <th>Bookings ({courseSumStats?.bookings})</th>
                       <th>Cancellations ({courseSumStats?.cancellations})</th>
@@ -446,7 +446,7 @@ export const ManagerPage = (props: any) => {
                     {courseLectureStats.map(
                       (lecture: CourseLectureStats, index: number) => (
                         <tr key={index}>
-                          <td>{lecture.lecture}</td>
+                           {/*<td>{lecture.lecture}</td>*/}
                           <td>{lecture.date}</td>
                           <td>{lecture.bookings}</td>
                           <td>{lecture.cancellations}</td>
@@ -478,7 +478,7 @@ export const ManagerPage = (props: any) => {
                         event: React.ChangeEvent<HTMLInputElement>
                       ) => {
                         if (event.target.value) {
-                          const courseId: number = parseInt(event.target.value);
+                          const courseId: string =event.target.value;
                           setByCourseSelect(courseId);
                           getCourseLecturesWeekRange(
                             courseId,
@@ -570,7 +570,7 @@ export const ManagerPage = (props: any) => {
                         event: React.ChangeEvent<HTMLInputElement>
                       ) => {
                         if (event.target.value) {
-                          const courseId: number = parseInt(event.target.value);
+                          const courseId: string = event.target.value;
                           setByCourseSelect(courseId);
                           getCourseLecturesMonthRange(
                             courseId,

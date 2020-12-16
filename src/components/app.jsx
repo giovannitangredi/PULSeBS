@@ -3,13 +3,14 @@ import React, { useEffect, useState } from "react";
 import { ReservationPage } from "./ReservationPage";
 import StudentList from "./StudentList";
 import { ManagerPage } from "./ManagerPage";
+import { SupportOfficerPage } from "./SupportOfficerPage";
 import { NavBar } from "./NavBar";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
-  useLocation,
+  // useLocation,
 } from "react-router-dom";
 import axios from "axios";
 import { CourseDetail } from "./TeacherStatistics";
@@ -20,6 +21,10 @@ import "./../styles/styles.css";
 export const App = () => {
   /* https://cloford.com/resources/colours/500col.htm */
   const colors = [
+    "#FFCD24",
+    "#6CAB99",
+    "#B3C7DC",
+    "#8F51B5",
     "#FFB6C1",
     "#FFAEB9",
     "#EEA2AD",
@@ -306,7 +311,7 @@ export const App = () => {
   ];
   const [authUser, setAuthUser] = useState({});
   const [loading, setLoading] = useState(false);
-  const location = useLocation();
+  // const location = useLocation();
   const getUser = () => {
     axios
       .get("/user/")
@@ -365,6 +370,10 @@ export const App = () => {
           <Route path="/manager">
             {redirectToIfLoggedIn()}
             <ManagerPage />
+          </Route>
+          <Route path="/supportOfficer">
+            {redirectToIfLoggedIn()}
+            <SupportOfficerPage />
           </Route>
           <Route path="/">{redirectToIfLoggedIn()}</Route>
         </Switch>

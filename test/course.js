@@ -19,17 +19,24 @@ const userTuple = {
   password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
   email: "s274930@studenti.polito.it",
   role: "student",
+  city: "Poggio Ferro",
+  birthday: "1996-11-04",
+  ssn: "MK97060783",
 };
 
 const course1Tuple = {
-  id: 1,
+  id: "1",
   name: "Software Engineering I",
-  main_prof: 1,
+  main_prof: "1",
+  year: 1,
+  semester: 1,
 };
 const course2Tuple = {
-  id: 2,
+  id: "2",
   name: "Software Engineering II",
-  main_prof: 2,
+  main_prof: "2",
+  year: 1,
+  semester: 1,
 };
 
 const userResponseData = { ...userTuple };

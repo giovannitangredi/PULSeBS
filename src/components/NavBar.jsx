@@ -10,6 +10,7 @@ export const NavBar = (props) => {
     ],
     student: [{ title: "Home", path: "/student" }],
     manager: [{ title: "Home", path: "/manager" }],
+    supportOfficer: [{ title: "Home", path: "/supportOfficer" }],
   };
 
   const handleLogout = (ev) => {
@@ -28,7 +29,7 @@ export const NavBar = (props) => {
   return (
     <Navbar>
       <Navbar.Brand>
-        Welcome, {props.user.name + " " + props.user.surname}
+        {`${props.user.name} ${props.user.surname}`} <u>{props.user.id}</u>
       </Navbar.Brand>
       <Nav>
         {props.user &&

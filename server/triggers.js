@@ -1,8 +1,8 @@
 exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON lecture_booking
     BEGIN
         DELETE FROM _Variables;
-        INSERT INTO _Variables(name, int_value, date_value, string_value) 
-            SELECT 'lecture', id, DATE(start), name 
+        INSERT INTO _Variables(name, int_value, date_value) 
+            SELECT 'lecture', id, DATE(start)
             FROM lecture 
             WHERE id = NEW.lecture_id;
             
@@ -20,8 +20,8 @@ exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON 
             WHERE date = (SELECT date_value FROM _Variables WHERE name = 'lecture')
             );
         
-        INSERT INTO stats_lecture(lecture_id, lecture_name, course_id, course_name) 
-            SELECT l.int_value, l.string_value , c.int_value, c.string_value
+        INSERT INTO stats_lecture(lecture_id, course_id, course_name) 
+            SELECT l.int_value , c.int_value, c.string_value
             FROM _Variables l, _Variables c 
             WHERE l.name = 'lecture' AND c.name = 'course' 
             AND NOT EXISTS (
@@ -54,8 +54,8 @@ exports.cancellation_trigger = `CREATE TRIGGER IF NOT EXISTS cancellation AFTER 
     WHEN NOT EXISTS (SELECT name FROM _Trigger WHERE name = 'cancellation_trigger')
     BEGIN
         DELETE FROM _Variables;
-        INSERT INTO _Variables(name, int_value, date_value, string_value) 
-            SELECT 'lecture', id, DATE(start), name 
+        INSERT INTO _Variables(name, int_value, date_value) 
+            SELECT 'lecture', id, DATE(start)
             FROM lecture 
             WHERE id = OLD.lecture_id;
         INSERT INTO _Variables(name, int_value) VALUES ('tid', (SELECT tid FROM stats_time WHERE date = (SELECT date_value FROM _Variables WHERE name = 'lecture')));
