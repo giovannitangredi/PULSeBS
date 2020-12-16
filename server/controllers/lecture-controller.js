@@ -230,20 +230,21 @@ exports.cancelBooking = async (req, res) => {
         .where("lecture_id", lectureId)
         .orderBy("booked_at", "asc")
         .limit(1);
-      if (!waiting) return;
-      const { lecture_id, student_id, booked_at } = waiting;
+      if (waiting) {
+        const { lecture_id, student_id, booked_at } = waiting;
 
-      await knex("lecture_booking").insert({
-        lecture_id,
-        student_id,
-        booked_at,
-      });
-      await knex("waiting_list")
-        .where("lecture_id", lecture_id)
-        .andWhere("student_id", student_id)
-        .del();
+        await knex("lecture_booking").insert({
+          lecture_id,
+          student_id,
+          booked_at,
+        });
+        await knex("waiting_list")
+          .where("lecture_id", lecture_id)
+          .andWhere("student_id", student_id)
+          .del();
 
-      sendCandidateToReserveChangeEmail(lecture_id, student_id);
+        sendCandidateToReserveChangeEmail(lecture_id, student_id);
+      }
       res.json({ message: "Booking cancelled." });
     })
     .catch((err) => {
@@ -474,6 +475,7 @@ sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
       .andWhere("user.id", studentId)
       .limit(1);
 
+    console.log(result);
     if (!result) throw "Lecture does not exist.";
 
     const emailSubject = "You are moved from candidate list to Reserved List";

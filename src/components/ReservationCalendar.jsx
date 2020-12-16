@@ -2,17 +2,12 @@
 import React from "react";
 import WeeklyCalendar from "./WeeklyCalendar";
 import Card from "react-bootstrap/Card";
+import moment from "moment";
 
+const greenColor = "#36D745";
+const blueColor = "dodgerblue";
+const redColor = "#F73D3D";
 class ReservationCalendar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      greenColor: "#36D745", // 3788d8 is blue and 37ecd8 is green
-      blueColor: "dodgerblue",
-      redColor: "#F73D3D",
-    };
-  }
-
   /* returns prepared information for calendar */
   formatEvents = () => {
     console.log(this.props);
@@ -26,17 +21,15 @@ class ReservationCalendar extends React.Component {
             color = "#ffc107";
           }
         } else {
-          color =
-            obj.status === "distance"
-              ? this.state.redColor
-              : this.state.blueColor;
+          color = obj.status === "distance" ? redColor : blueColor;
         }
-        return { ...obj, color };
+        return { ...obj, color, booked: false };
       })
       .concat(
         this.props.bookedLectures.map((obj) => ({
           ...obj,
-          color: `${this.state.greenColor}`,
+          booked: true,
+          color: greenColor,
         }))
       )
       .map((lecture) => {
@@ -46,12 +39,14 @@ class ReservationCalendar extends React.Component {
           start,
           capacity,
           booked_students,
+          booked,
           id,
           course,
           lecturer_name,
           lecturer_surname,
           color,
           status,
+          candidate,
         } = lecture;
         let startTime = new Date(start);
         let endTime = new Date(end);
@@ -72,6 +67,9 @@ class ReservationCalendar extends React.Component {
             color,
             name,
             status,
+            candidate,
+            booked,
+            start: startTime,
           },
         };
       });
@@ -114,14 +112,27 @@ class ReservationCalendar extends React.Component {
   }
   /* if bookable try to book it */
   handleEventClick = ({ event }) => {
-    const { color } = event._def.extendedProps;
+    const {
+      id,
+      status,
+      candidate,
+      booked,
+      start,
+      booked_students,
+      capacity,
+    } = event._def.extendedProps;
     const confirmText =
-      color === this.state.blueColor
+      status === "presence" &&
+      !booked &&
+      !candidate &&
+      (booked_students < capacity
         ? "Do you want to book this lecture?"
-        : color === "#ffc107" && "Do you want to candidate this lecture?";
-    confirmText &&
+        : "Do you want to be added to the booking waiting list of this lecture?");
+
+    moment(start, "YYYY-MM-DD hh:mm:ss").isAfter(moment()) &&
+      confirmText &&
       window.confirm(confirmText) &&
-      this.props.bookLecture(event._def.extendedProps.id);
+      this.props.bookLecture(id);
   };
 
   render() {
@@ -150,7 +161,7 @@ class ReservationCalendar extends React.Component {
                       width="30"
                       height="30"
                       style={{
-                        fill: `${this.state.greenColor}`,
+                        fill: greenColor,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
@@ -164,7 +175,7 @@ class ReservationCalendar extends React.Component {
                       width="30"
                       height="30"
                       style={{
-                        fill: `${this.state.blueColor}`,
+                        fill: blueColor,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
@@ -178,7 +189,7 @@ class ReservationCalendar extends React.Component {
                       width="30"
                       height="30"
                       style={{
-                        fill: `${this.state.redColor}`,
+                        fill: redColor,
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
@@ -198,7 +209,7 @@ class ReservationCalendar extends React.Component {
                       }}
                     />
                     <text fontSize="14" fontFamily="Verdana" x="645" y="22">
-                      On The Waiting List
+                      Waiting List
                     </text>
                     <rect
                       x="755"

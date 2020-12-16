@@ -96,7 +96,7 @@ export const ReservationPage = (props: any) => {
     <Container>
       <h1>Book a Lecture</h1>
       {lectures2weeks.length === 0 && (
-        <h4>Tere are no bookable lectures in the next two weeks.</h4>
+        <h4>There are no bookable lectures in the next two weeks.</h4>
       )}
       {lectures2weeks.length !== 0 && (
         <BookingLectureList
