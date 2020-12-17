@@ -22,8 +22,9 @@ User inside the system :
 
 - s274930@studenti.polito.it student
 - mario.rossi@polito.it teacher
-- s280113@studenti.polito.it student
+- s280113@studenti.polito.it supportOfficer
 - behnam.lotfi@polito.it manager
+- 1297320697@qq.com student
 
 the password for all accounts is password
 
