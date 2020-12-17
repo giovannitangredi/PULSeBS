@@ -276,7 +276,7 @@ const generateLectures = (semesterId, lecture) => {
       let courseProf = course[0];
       const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
       const regex =
-        "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
+        "^([0-1]?[0-9]|2[0-3]):[0-5][0-9](-|:)([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
       if (lecture.time.match(regex) === null || !days.includes(lecture.day)) {
         resolve();
         return;
@@ -311,8 +311,11 @@ const createLecture = (lecture, courseProf, date) => {
     capacity: lecture.capacity,
     status: "presence",
     room: lecture.room
-  };  
-  let times = lecture.time.split("-");
+  };
+    const regex =
+    /^(?<time1>([0-1]?[0-9]|2[0-3]):[0-5][0-9])(-|:)(?<time2>([0-1]?[0-9]|2[0-3]):[0-5][0-9])$/;
+    let match = regex.exec(lecture.time);
+  let times = [match.groups.time1,match.groups.time2];
   let [hour, minute] = times[0].split(":");
   date.set({ hour, minute });
   row.start = date.format("YYYY-MM-DD HH:mm:ss");

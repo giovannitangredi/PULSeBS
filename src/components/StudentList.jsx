@@ -136,16 +136,20 @@ class StudentList extends React.Component {
             width:"23px"
           }}/>
           <p style={{ textAlign: "center" }} className="my-auto  flex-fill ">
-            Room {eventInfo.event.extendedProps.room} <br></br>
-            {eventInfo.event.extendedProps.status === "presence" && (
+            {eventInfo.event.extendedProps.status === "presence" ? (
               <>
+              Room {eventInfo.event.extendedProps.room} <br></br>
                 Seats: {eventInfo.event.extendedProps.capacity}
                 <br></br>
+                Lecture in Precence
               </>
-            )}
-            {eventInfo.event.extendedProps.status === "presence"
-              ? "Lecture in presence"
-              : "Remote lecture"}
+            ) : 
+            <>
+                Virtual Classroom <br></br>
+                Remote lecture
+                </>
+            }
+           
           </p>
           </div>
         </div>
@@ -428,11 +432,11 @@ class StudentList extends React.Component {
                       {!this.state.selectedLecture
                         ? "No lecture is selected"
                         : !this.state.selectedLecture.extendedProps
-                        ? "no students booked for this lecture"
+                        ? "No students booked for this lecture"
                         : this.state.selectedLecture.extendedProps.status ===
                           "distance"
                         ? "Remote lecture selected: no students list available"
-                        : "no students booked for this lecture"}
+                        : "No students booked for this lecture"}
                     </h4>
                   )}
                 </div>
