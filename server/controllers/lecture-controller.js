@@ -476,11 +476,10 @@ const sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
     const emailBody = (
       name,
       surname,
-      lectureName,
       lectureCourseName,
       lectureStart
     ) => `Dear ${name} ${surname},<br/> \
-  Your request state for lecture ${lectureName} of the course ${lectureCourseName} scheduled for ${lectureStart} has changed from candidate to reserve. Now you can participate in this lecture,\
+  Your request state for lecture from the ${lectureCourseName} course scheduled for ${lectureStart} has changed from candidate to reserve. Now you can participate in this lecture,\
   <br/>The PULSeBS Team`;
 
     await emailController.sendMail(
@@ -489,7 +488,6 @@ const sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
       emailBody(
         result.name,
         result.surname,
-        result.lectureName,
         result.lectureCourseName,
         result.lectureStart
       )
