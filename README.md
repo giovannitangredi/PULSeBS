@@ -2,6 +2,11 @@
 
 Pandemic University Lecture Seat Booking System SE2 Project
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=giovannitangredi_PULSeBS&metric=alert_status)](https://sonarcloud.io/dashboard?id=giovannitangredi_PULSeBS)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=giovannitangredi_PULSeBS&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=giovannitangredi_PULSeBS)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=giovannitangredi_PULSeBS&metric=security_rating)](https://sonarcloud.io/dashboard?id=giovannitangredi_PULSeBS)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=giovannitangredi_PULSeBS&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=giovannitangredi_PULSeBS)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=giovannitangredi_PULSeBS&metric=coverage)](https://sonarcloud.io/dashboard?id=giovannitangredi_PULSeBS)
 ## Docker configuration
 
 To run the app you must do the following :
