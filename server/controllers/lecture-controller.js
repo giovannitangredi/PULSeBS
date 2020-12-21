@@ -292,7 +292,8 @@ exports.getBookedStudents = async (req, res) => {
       { id: "user.id" },
       { name: "user.name" },
       { surname: "user.surname" },
-      { email: "user.email" }
+      { email: "user.email" },
+      { status: "lecture_booking.status" }
     )
     .from("lecture_booking")
     .join("user", "lecture_booking.student_id", "=", "user.id")
@@ -303,7 +304,7 @@ exports.getBookedStudents = async (req, res) => {
       res.json(queryResults);
     })
     .catch((err) => {
-      res.json({
+      res.status(400).json({
         message: `There was an error retrieving the students list`,
       });
     });

@@ -123,6 +123,8 @@ initTable(
     table.foreign("student_id").references("user.id");
 
     table.datetime("booked_at").notNullable();
+    
+    table.string("status");
   },
   triggers.booking_trigger,
   triggers.cancellation_trigger
