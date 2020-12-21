@@ -406,6 +406,106 @@ exports.deleteLecture = async (req, res) => {
   }
 };
 
+// Record the attendances of a lecture  
+exports.recordAttendances = async (req, res) => {
+  const userId = req.user.id;
+  const lectureId = req.params.lectureid;
+  const presentStudents = req.body;
+  let queries;
+
+  try {
+    if(!presentStudents.length) {
+      throw {
+        msg: `Invalid body: a not-empty array containing the student ids is expected`,
+        status: 422,
+      };
+    }
+    const [lecture] = await knex
+      .select(
+        { id: "l.id" },
+        { start: "l.start" },
+        { lecturer: "l.lecturer" },
+        { status: "l.status" }
+      )
+      .from({ l: "lecture" })
+      .where("l.id", lectureId);
+
+    if(!lecture) {
+      throw {
+        msg: `The lecture doesn't exist`,
+        status: 404,
+      };
+    } else if(lecture.lecturer != userId) {
+      throw {
+        msg: `Only the teacher of this course can record attendances`,
+        status: 401,
+      };
+    } else if(lecture.status != "presence") {
+      throw {
+        msg: `Cannot record attendances of remote lecture`,
+        status: 400,
+      };
+    } else if( !moment().isSame(moment(lecture.start, "YYYY-MM-DD HH:mm:ss"), "day") ) {
+      throw {
+        msg: `Attendances can only be recorded on the same day of the lecture`,
+        status: 400,
+      };
+    }
+
+    await knex.transaction(trx => {
+      // set the status to "present" for all the students in presentStudents...
+      queries = 
+        presentStudents.map( 
+          studentId => 
+            knex("lecture_booking")
+              .where("lecture_id", lectureId)
+              .andWhere("student_id", studentId)
+              .update({status: "present"})
+              .transacting(trx)
+        );
+      
+      // ... and set the status to "absent" for all the other students booked at lectureId, not in presentStudents 
+      // and whose status hasn't yet been set 
+      queries.push(
+        knex("lecture_booking")
+          .where("lecture_id", lectureId)
+          .whereNull("status")
+          .update({status: "absent"})
+          .transacting(trx)
+      );
+
+      Promise.all(queries)
+        .then((result) => {
+          if(result.slice(0, -1).includes(0)) {
+            trx.rollback({
+              msg: `There was an error recording the attendances: Wrong ids in the list`,
+              status: 400,
+            });
+          } else {
+            trx.commit();
+          }
+        })
+        .catch((err) => { 
+          console.error(err);
+          trx.rollback({
+            msg: `There was an error recording the attendances`,
+            status: 500,
+          }); 
+        });
+    });
+
+    res.status(204).send();
+
+  } catch (err) {
+    console.log(err);
+    res
+      .status(err.status)
+      .json({
+        message: err.msg,
+      });
+  }
+};
+
 const sendEmailsForCancelledLecture = async (lectureId) => {
   const result = await knex
     .select(
