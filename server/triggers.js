@@ -44,7 +44,7 @@ exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON 
             );
         
         UPDATE stats_usage 
-        SET booking = booking + 1, attendance = attendance + 1  
+        SET booking = booking + 1  
             WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
             AND tid = (SELECT int_value FROM _Variables WHERE name = 'tid');
     
@@ -61,7 +61,7 @@ exports.cancellation_trigger = `CREATE TRIGGER IF NOT EXISTS cancellation AFTER 
         INSERT INTO _Variables(name, int_value) VALUES ('tid', (SELECT tid FROM stats_time WHERE date = (SELECT date_value FROM _Variables WHERE name = 'lecture')));
         INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.lecture_id));
         UPDATE stats_usage 
-            SET cancellations = cancellations + 1, attendance = attendance - 1  
+            SET cancellations = cancellations + 1 
             WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
             AND tid = (SELECT int_value FROM _Variables WHERE name = 'tid');
     END;`;
