@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ReservationPage } from "./ReservationPage";
 import StudentList from "./StudentList";
 import { ManagerPage } from "./ManagerPage";
+import { ContactTracingPage } from "./ContactTracingPage";
 import { SupportOfficerPage } from "./SupportOfficerPage";
 import { NavBar } from "./NavBar";
 import {
@@ -367,9 +368,13 @@ export const App = () => {
             {redirectToIfLoggedIn()}
             <CourseDetail user={authUser} userid={authUser.id} />
           </Route>
-          <Route path="/manager">
+          <Route exact path="/manager">
             {redirectToIfLoggedIn()}
-            <ManagerPage />
+            <ManagerPage user={authUser} userid={authUser.id} />
+          </Route>
+          <Route exact path="/manager/contactTracing">
+            {redirectToIfLoggedIn()}
+            <ContactTracingPage user={authUser} userid={authUser.id} />
           </Route>
           <Route path="/supportOfficer">
             {redirectToIfLoggedIn()}
