@@ -445,9 +445,12 @@ exports.recordAttendances = async (req, res) => {
         msg: `Cannot record attendances of remote lecture`,
         status: 400,
       };
-    } else if( !moment().isSame(moment(lecture.start, "YYYY-MM-DD HH:mm:ss"), "day") ) {
+    } else if( !(
+      moment().isSame(moment(lecture.start, "YYYY-MM-DD HH:mm:ss"), "day") 
+      && moment().isSameOrAfter(moment(lecture.start, "YYYY-MM-DD HH:mm:ss"))
+    )) {
       throw {
-        msg: `Attendances can only be recorded on the same day of the lecture`,
+        msg: `Attendances can only be recorded on the same day of the lecture after its start time`,
         status: 400,
       };
     }
@@ -487,7 +490,6 @@ exports.recordAttendances = async (req, res) => {
 
       Promise.all(queries)
         .then((result) => {
-          console.log(result);
           if(result.includes(0)) {
             trx.rollback({
               msg: `There was an error recording the attendances: Wrong ids in the list`,

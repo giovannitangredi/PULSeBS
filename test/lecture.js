@@ -765,7 +765,7 @@ describe("Story 18 - As a teacher I want to record the students present at my le
 
     it("Should return 400 (today lecture but after now)", async () => {
       const res = await authenticatedUser
-        .put(`/api/lectures/${lectureTuple.id}/attendances`)
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
         .send([studentTuple1.id]);
       expect(res.status).to.equal(400);
     });
