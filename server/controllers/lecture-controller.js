@@ -410,7 +410,8 @@ exports.deleteLecture = async (req, res) => {
 exports.recordAttendances = async (req, res) => {
   const userId = req.user.id;
   const lectureId = req.params.lectureid;
-  const presentStudents = req.body;
+  const presentStudents = req.body.studentlist;
+  console.log(presentStudents);
   let queries;
 
   try {
