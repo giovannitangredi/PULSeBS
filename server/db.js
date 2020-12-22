@@ -17,7 +17,7 @@ const knex = require("knex")({
   useNullAsDefault: true,
 });
 
-const initTable = (name, attribute_declaration_cb, ...triggers) => {
+const initTable = (name, attribute_declaration_cb, ...triggersList) => {
   knex.schema
     // Make sure the table doesn't exists
     // before trying to create a new one
@@ -36,7 +36,7 @@ const initTable = (name, attribute_declaration_cb, ...triggers) => {
       }
     })
     .then(() => {
-      for (let t of triggers) {
+      for (let t of triggersList) {
         knex
           .raw(t)
           .then(() => {
@@ -127,7 +127,8 @@ initTable(
     table.string("status");
   },
   triggers.booking_trigger,
-  triggers.cancellation_trigger
+  triggers.cancellation_trigger,
+  triggers.attendance_trigger
 );
 
 initTable("waiting_list", (table) => {

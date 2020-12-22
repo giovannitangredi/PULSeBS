@@ -119,3 +119,15 @@ exports.deleteLecture_trigger = `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFO
         DELETE FROM _Trigger
         WHERE name = 'cancellation_trigger';
     END;`;
+
+exports.attendance_trigger = `CREATE TRIGGER IF NOT EXISTS attendance AFTER UPDATE OF status ON lecture_booking
+    WHEN NEW.status = 'present' AND OLD.status <> 'present'
+    BEGIN
+    DELETE FROM _Variables;
+    
+    INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.id));
+
+    UPDATE stats_usage 
+        SET attendance = attendance + 1 
+        WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid');
+END;`;
