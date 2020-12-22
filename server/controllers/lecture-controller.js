@@ -76,14 +76,14 @@ exports.getExistentBooking = async (req, res) => {
       { course: "course.name" },
       { lecturer_name: "user.name" },
       { lecturer_surname: "user.surname" },
-      { start: "start" },
-      { end: "end" },
+      { start: "lecture.start" },
+      { end: "lecture.end" },
       { room: "lecture.room" },
       { year: "course.year" },
       { semester: "course.semester" },
-      { capacity: "capacity" },
-      { booked_at: "booked_at" },
-      { status: "status" }
+      { capacity: "lecture.capacity" },
+      { booked_at: "lecture_booking.booked_at" },
+      { status: "lecture.status" }
     )
     .from("lecture")
     .join("lecture_booking", "lecture.id", "=", "lecture_booking.lecture_id")
@@ -299,7 +299,7 @@ exports.getBookedStudents = async (req, res) => {
     .join("user", "lecture_booking.student_id", "=", "user.id")
     .join("lecture", "lecture.id", "lecture_booking.lecture_id")
     .where("lecture_booking.lecture_id", lectureId)
-    .andWhere("status", "presence") //show only presence lecture
+    .andWhere("lecture.status", "presence") //show only presence lecture
     .then((queryResults) => {
       res.json(queryResults);
     })
