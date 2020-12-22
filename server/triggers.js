@@ -125,7 +125,7 @@ exports.attendance_trigger = `CREATE TRIGGER IF NOT EXISTS attendance AFTER UPDA
     BEGIN
     DELETE FROM _Variables;
     
-    INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.id));
+    INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.lecture_id));
 
     UPDATE stats_usage 
         SET attendance = attendance + 1 

@@ -90,8 +90,20 @@ const lectureTuple = {
   room: 1,
 };
 
+const oldLectureTuple = {
+  id: 4,
+  course: courseTuple.id,
+  lecturer: teacherTuple.id,
+  start: moment().subtract(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  capacity: 25,
+  status: "presence",
+  room: 1,
+};
+
+
 const futureLectureTuple = {
-  id: 1,
+  id: 3,
   course: courseTuple.id,
   lecturer: teacherTuple.id,
   start: moment().add(2, "days").format("YYYY-MM-DD HH:mm:ss"),
@@ -125,6 +137,35 @@ const courseStudent2Tuple = {
 const lectureBookingTuple = {
   lecture_id: lectureTuple.id,
   student_id: studentTuple1.id,
+  booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+};
+
+const lectureBookingTuple2 = {
+  lecture_id: lectureTuple.id,
+  student_id: studentTuple2.id,
+  booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+};
+const oldLectureBookingTuple = {
+  lecture_id: oldLectureTuple.id,
+  student_id: studentTuple1.id,
+  booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+};
+
+const oldLectureBookingTuple2 = {
+  lecture_id: oldLectureTuple.id,
+  student_id: studentTuple2.id,
+  booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+};
+
+const futureLectureBookingTuple = {
+  lecture_id: futureLectureTuple.id,
+  student_id: studentTuple1.id,
+  booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+};
+
+const futureLectureBookingTuple2 = {
+  lecture_id: futureLectureTuple.id,
+  student_id: studentTuple2.id,
   booked_at: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
 };
 
@@ -438,6 +479,7 @@ describe("List of students booked for a lecture", async () => {
         name: studentTuple1.name,
         surname: studentTuple1.surname,
         email: testEmailAddress,
+        status: null,
       },
     ]);
   });
@@ -516,7 +558,7 @@ describe("Teacher cancel a lecture 1 hour before  ", async function () {
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(futureLectureTuple);
     await knex("course_available_student").insert(courseStudent1Tuple);
-    await knex("lecture_booking").insert(lectureBookingTuple);
+    await knex("lecture_booking").insert(futureLectureBookingTuple);//
 
     await authenticatedUser
       .post("/api/auth/login")
@@ -651,4 +693,167 @@ describe("Presence Lecture into distance one ", async function () {
     await knex("lecture_booking").del();
     await knex("course").del();
   });
+});
+
+
+// Record the attendances of a lecture
+describe("Story 18 - As a teacher I want to record the students present at my lecture among those booked so that I can keep track of actual attendance", async function () {
+  const authenticatedUser = request.agent(app);
+  this.timeout(5000);
+  before(async () => {
+    await knex("user").del();
+    await knex("course").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("waiting_list").del();
+    await knex("course_available_student").del();
+    await knex("user").insert(studentTuple1);
+    await knex("user").insert(studentTuple2);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(lectureTuple); //Today lecture (1 hour after now)
+    await knex("lecture").insert(oldLectureTuple); //Today lecture (1 hour before now)
+    await knex("lecture").insert(futureLectureTuple);
+    await knex("course_available_student").insert(courseStudent1Tuple);
+    await knex("course_available_student").insert(courseStudent2Tuple);
+    await knex("lecture_booking").insert(lectureBookingTuple);
+    await knex("lecture_booking").insert(lectureBookingTuple2);
+    await knex("lecture_booking").insert(futureLectureBookingTuple);
+    await knex("lecture_booking").insert(futureLectureBookingTuple2);
+    await knex("lecture_booking").insert(oldLectureBookingTuple);
+    await knex("lecture_booking").insert(oldLectureBookingTuple2);
+  });
+  describe("Record attendences when not logged as a teacher", async () => {
+    before(async () => {  //login as a wrong user
+      await authenticatedUser
+        .post("/api/auth/login")
+        .send(student1Credentials)
+        .expect(200);
+    });
+    it("Should return 401 (Unauthorized error)", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${lectureTuple.id}/attendances`)
+        .send([studentTuple1.id]);
+      expect(res.status).to.equal(401);
+    });
+    it("lecture_booking table should still have status null for the student 1", async () => {
+      const res = await knex.select("status").from("lecture_booking")
+        .where("student_id", lectureBookingTuple.student_id)
+        .andWhere("lecture_id", lectureBookingTuple.lecture_id);
+      expect(res).to.have.deep.members([{ status: null }]);
+    });
+  });
+
+  describe("Test insert attendences", async () => {
+    before(async () => {  //login as a teacher
+      await authenticatedUser
+        .post("/api/auth/login")
+        .send(teacherCredentials)
+        .expect(200);
+    });
+    it("Should return 204", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
+        .send([studentTuple1.id]);
+      expect(res.status).to.equal(204);
+    });
+    it("Should return Student 1 present Student 2 absent", async () => {
+      const res = await knex.select("status").from("lecture_booking")
+        .andWhere("lecture_id", oldLectureBookingTuple.lecture_id);
+      expect(res).to.have.deep.members([{ status: "present" }, { status: "absent" }]);
+    });
+
+    it("Should return 400 (today lecture but after now)", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${lectureTuple.id}/attendances`)
+        .send([studentTuple1.id]);
+      expect(res.status).to.equal(400);
+    });
+
+    it("Should return 204", async () => {//Try again with the same values
+      const res = await authenticatedUser
+        .put(`/api/lectures/${lectureTuple.id}/attendances`)
+        .send([studentTuple1.id]);
+      expect(res.status).to.equal(204);
+    });
+    it("Should return Student 1 present Student 2 absent", async () => {
+      const res = await knex.select("status").from("lecture_booking")
+        .andWhere("lecture_id", lectureBookingTuple.lecture_id);
+      expect(res).to.have.deep.members([{ status: "present" }, { status: "absent" }]);
+    });
+
+    it("Should return 204, Student 1 present Student 2 absent", async () => {//try changing status of previous student absent
+      const res = await authenticatedUser
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
+        .send([studentTuple2.id]);
+      expect(res.status).to.equal(204);
+    });
+    it("Should return all students for the lecture 1 present", async () => {
+      const res = await knex.select("status").from("lecture_booking")
+        .andWhere("lecture_id", oldLectureBookingTuple.lecture_id);
+      expect(res).to.have.deep.members([{ status: "present" }, { status: "present" }]);
+    });
+    // e se li rimodifico in assenti entrambi?
+  });
+
+  describe("Test errors", async () => {
+    before(async () => {  //login as a teacher         
+      await authenticatedUser
+        .post("/api/auth/login")
+        .send(teacherCredentials)
+        .expect(200);
+    });
+    it("Should return 422 (Invalid body)", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
+      expect(res.status).to.equal(422);
+    });
+    it("Should return 404 (Lecture doesn't exist)", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/16/attendances`)
+        .send([studentTuple1.id]);
+      expect(res.status).to.equal(404);
+    });
+    it("Should return 400 (Wrong body)", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
+        .send([studentTuple1.name])
+      expect(res.status).to.equal(400);
+    });
+  });
+  describe("Test Remote lecture", async () => {
+    before(async () => {
+      await knex("lecture").update("status", "remote").where("id", oldLectureTuple.id);
+    })
+    it("Should return 400", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
+        .send([studentTuple1.id]);
+      expect(res.status).to.equal(400);
+    });
+  })
+
+  describe("Test Wrong day", async () => {
+    it("Should return 400 (Wrong day)", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${futureLectureTuple.id}/attendances`)
+        .send([studentTuple1.id]);
+      expect(res.status).to.equal(400);
+    });
+    it("lecture_booking table should still have status null for the futureLecture", async () => {
+      const res = await knex.select("status").from("lecture_booking")
+        .where("student_id", futureLectureBookingTuple.student_id)
+        .andWhere("lecture_id", futureLectureBookingTuple.lecture_id);
+      expect(res).to.have.deep.members([{ status: null }]);
+    });
+  })
+
+  after(async () => {
+    await knex("user").del();
+    await knex("course").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("waiting_list").del();
+    await knex("course_available_student").del();
+  })
 });
