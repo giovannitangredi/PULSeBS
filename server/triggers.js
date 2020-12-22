@@ -121,7 +121,8 @@ exports.deleteLecture_trigger = `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFO
     END;`;
 
 exports.attendance_trigger = `CREATE TRIGGER IF NOT EXISTS attendance AFTER UPDATE OF status ON lecture_booking
-    WHEN NEW.status = 'present' AND OLD.status <> 'present'
+    WHEN (NEW.status = 'present' AND OLD.status IS NOT 'present' )
+        OR (NEW.status = 'absent' AND OLD.status IS NOT 'absent')
     BEGIN
     DELETE FROM _Variables;
     
@@ -129,5 +130,12 @@ exports.attendance_trigger = `CREATE TRIGGER IF NOT EXISTS attendance AFTER UPDA
 
     UPDATE stats_usage 
         SET attendance = attendance + 1 
-        WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid');
+        WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
+        AND NEW.status = 'present';
+
+    UPDATE stats_usage 
+        SET attendance = attendance -1
+        WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
+        AND NEW.status = 'absent';
 END;`;
+

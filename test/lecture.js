@@ -744,56 +744,65 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     });
   });
 
-  describe("Test insert attendences", async () => {
+  describe("Record attendences", async () => {
     before(async () => {  //login as a teacher
       await authenticatedUser
         .post("/api/auth/login")
         .send(teacherCredentials)
         .expect(200);
     });
-    it("Should return 204", async () => {
+    it("Should return 204 after considering a valid lecture and Student 1 present", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
         .send([studentTuple1.id]);
       expect(res.status).to.equal(204);
     });
-    it("Should return Student 1 present Student 2 absent", async () => {
+    it("Should return Student 1 present, Student 2 absent", async () => {
       const res = await knex.select("status").from("lecture_booking")
         .andWhere("lecture_id", oldLectureBookingTuple.lecture_id);
       expect(res).to.have.deep.members([{ status: "present" }, { status: "absent" }]);
     });
 
-    it("Should return 400 (today lecture but after now)", async () => {
+    it("Should return 400 (today's lesson but after now)", async () => {
       const res = await authenticatedUser
-        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
+        .put(`/api/lectures/${lectureTuple.id}/attendances`)
         .send([studentTuple1.id]);
       expect(res.status).to.equal(400);
     });
 
-    it("Should return 204", async () => {//Try again with the same values
+    it("Should return 204 and no changed status after trying passing the same values as before", async () => {
       const res = await authenticatedUser
-        .put(`/api/lectures/${lectureTuple.id}/attendances`)
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
         .send([studentTuple1.id]);
       expect(res.status).to.equal(204);
     });
-    it("Should return Student 1 present Student 2 absent", async () => {
+    it("Should return Student 1 present Student 2 absent (after sending the same array)", async () => {
       const res = await knex.select("status").from("lecture_booking")
-        .andWhere("lecture_id", lectureBookingTuple.lecture_id);
+        .andWhere("lecture_id", oldLectureBookingTuple.lecture_id);
       expect(res).to.have.deep.members([{ status: "present" }, { status: "absent" }]);
     });
 
-    it("Should return 204, Student 1 present Student 2 absent", async () => {//try changing status of previous student absent
+    it("Should return 204 after passing two student with status present", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
-        .send([studentTuple2.id]);
+        .send([studentTuple1.id, studentTuple2.id]);
       expect(res.status).to.equal(204);
     });
-    it("Should return all students for the lecture 1 present", async () => {
+    it("Should return all students for the lecture present", async () => {
       const res = await knex.select("status").from("lecture_booking")
         .andWhere("lecture_id", oldLectureBookingTuple.lecture_id);
       expect(res).to.have.deep.members([{ status: "present" }, { status: "present" }]);
     });
-    // e se li rimodifico in assenti entrambi?
+    it("Should return all students absent after passing an empty array (students previous status present)", async () => {
+      const res = await authenticatedUser
+        .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
+        .send([]);
+      expect(res.status).to.equal(204);
+      expect(
+        (await knex.select("status").from("lecture_booking")
+      .andWhere("lecture_id", oldLectureBookingTuple.lecture_id)))
+      .to.have.deep.members([{ status: "absent" }, { status: "absent" }]);
+    });
   });
 
   describe("Test errors", async () => {
