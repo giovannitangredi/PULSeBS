@@ -213,7 +213,7 @@ export const ManagerPage = (props: any) => {
   ]);
 
   // pagination
-  
+
   const pageSize = 9;
   const [currentPage, setCurrentPage] = useState({
     lectureStats: 1,
@@ -222,9 +222,9 @@ export const ManagerPage = (props: any) => {
     courseMonthStats: 1,
   });
 
-  const paginate = (array: any[], pageNumber: number) => { 
+  const paginate = (array: any[], pageNumber: number) => {
     return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
-  }
+  };
 
   const handlePrev = (statsType: string) => {
     if (currentPage[statsType] > 1) {
@@ -232,7 +232,7 @@ export const ManagerPage = (props: any) => {
       newPage[statsType] -= 1;
       setCurrentPage(newPage);
     }
-  }
+  };
 
   const handleNext = (statsType: string, listLength: number) => {
     if (currentPage[statsType] < Math.ceil(listLength / pageSize)) {
@@ -240,71 +240,100 @@ export const ManagerPage = (props: any) => {
       newPage[statsType] += 1;
       setCurrentPage(newPage);
     }
-  }
+  };
 
   const resetPageFor = (statsType: string) => {
     let newPage = { ...currentPage };
     newPage[statsType] = 1;
     setCurrentPage(newPage);
-  }
+  };
 
-  const generateDataFrom = (rawData: any[], values: string[], dateAttribute: string) => {
-    const p= (
-      values
-      .map(
-        (series) => {
-          return {
-            label: series,
-            data: rawData
-              .map(
-              (lecture): {primary: string, secondary: Number} => {
-                console.log(lecture, dateAttribute, new String(lecture[dateAttribute]));
-                return { primary: lecture[dateAttribute].toString(), secondary: new Number(lecture[series])};
-              })
-              .sort((v1: {primary: string, secondary: Number}, v2: {primary: string, secondary: Number}) => v1.primary.localeCompare(v2.primary))
-          };
-        }
-      )
-    );
+  const generateDataFrom = (
+    rawData: any[],
+    values: string[],
+    dateAttribute: string
+  ) => {
+    const p = values.map((series) => {
+      return {
+        label: series,
+        data: rawData
+          .map((lecture): { primary: string; secondary: Number } => {
+            return {
+              primary: lecture[dateAttribute].toString(),
+              secondary: new Number(lecture[series]),
+            };
+          })
+          .sort(
+            (
+              v1: { primary: string; secondary: Number },
+              v2: { primary: string; secondary: Number }
+            ) => v1.primary.localeCompare(v2.primary)
+          ),
+      };
+    });
     return p;
-  }
+  };
+
+  // chart
 
   const systemChartData = useMemo(() => {
     const lectureStatsGroupByDate = {};
     lectureStats.forEach((value: LectureStats) => {
-      if(!lectureStatsGroupByDate[value.date]) {
-        lectureStatsGroupByDate[value.date] = {date:value.date, bookings: 0, cancellations: 0, attendances: 0};
+      if (!lectureStatsGroupByDate[value.date]) {
+        lectureStatsGroupByDate[value.date] = {
+          date: value.date,
+          bookings: 0,
+          cancellations: 0,
+          attendances: 0,
+        };
       }
       lectureStatsGroupByDate[value.date].bookings += value.bookings;
       lectureStatsGroupByDate[value.date].cancellations += value.cancellations;
       lectureStatsGroupByDate[value.date].attendances += value.attendances;
-    })
-    return generateDataFrom(Object.values(lectureStatsGroupByDate), ["bookings", "attendances", "cancellations"], "date")
-  }, 
-    [lectureStats]
-  );
+    });
+    return generateDataFrom(
+      Object.values(lectureStatsGroupByDate),
+      ["bookings", "attendances", "cancellations"],
+      "date"
+    );
+  }, [lectureStats]);
 
-  const byCourseChartData = useMemo(() => 
-    generateDataFrom(courseLectureStats, ["bookings", "attendances", "cancellations"], "date"), 
+  const byCourseChartData = useMemo(
+    () =>
+      generateDataFrom(
+        courseLectureStats,
+        ["bookings", "attendances", "cancellations"],
+        "date"
+      ),
     [courseLectureStats]
   );
-  const byWeekChartData = useMemo(() => 
-    generateDataFrom(courseWeekStats, ["avgBookings", "avgAttendances", "avgCancellations"], "weekDate"), 
+  const byWeekChartData = useMemo(
+    () =>
+      generateDataFrom(
+        courseWeekStats,
+        ["avgBookings", "avgAttendances", "avgCancellations"],
+        "weekDate"
+      ),
     [courseWeekStats]
   );
-  const byMonthChartData = useMemo(() => 
-    generateDataFrom(courseMonthStats, ["avgBookings", "avgAttendances", "avgCancellations"], "monthDate"), 
+  const byMonthChartData = useMemo(
+    () =>
+      generateDataFrom(
+        courseMonthStats,
+        ["avgBookings", "avgAttendances", "avgCancellations"],
+        "monthDate"
+      ),
     [courseMonthStats]
   );
 
   const axes = React.useMemo(
     () => [
-      { primary: true, type: 'ordinal', position: 'bottom',},
-      { type: 'linear', position: 'left', stacked: false,},
+      { primary: true, type: "ordinal", position: "bottom" },
+      { type: "linear", position: "left", stacked: false },
     ],
     []
   );
-  const series = React.useMemo(() => ({ type:'line' }), []);
+  const series = React.useMemo(() => ({ type: "line" }), []);
 
   const getSystemStats = () => {
     //get the sum of booking, cancellations, attendance for all lectures
@@ -496,9 +525,13 @@ export const ManagerPage = (props: any) => {
         <Tab eventKey="general" title="All Lectures">
           {lectureStats.length > 0 ? (
             <Row>
-              
-              <Container style={{width: "100%", height: "300px"}}>
-                <Chart series={series} data={systemChartData} axes={axes} tooltip />
+              <Container style={{ width: "100%", height: "300px" }}>
+                <Chart
+                  series={series}
+                  data={systemChartData}
+                  axes={axes}
+                  tooltip
+                />
               </Container>
 
               <Table striped bordered hover className="p-5">
@@ -513,25 +546,34 @@ export const ManagerPage = (props: any) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginate(lectureStats, currentPage["lectureStats"]).map((lecture: LectureStats, index: number) => (
-                    <tr key={index}>
-                      <td>{lecture.course}</td>
-                      {/*<td>{lecture.lecture}</td>*/}
-                      <td>{lecture.date}</td>
-                      <td>{lecture.bookings}</td>
-                      <td>{lecture.cancellations}</td>
-                      <td>{lecture.attendances}</td>
-                    </tr>
-                  ))}
+                  {paginate(lectureStats, currentPage["lectureStats"]).map(
+                    (lecture: LectureStats, index: number) => (
+                      <tr key={index}>
+                        <td>{lecture.course}</td>
+                        {/*<td>{lecture.lecture}</td>*/}
+                        <td>{lecture.date}</td>
+                        <td>{lecture.bookings}</td>
+                        <td>{lecture.cancellations}</td>
+                        <td>{lecture.attendances}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </Table>
-              
-              <Pagination className="mb-0" >
-                <Pagination.Prev onClick={() => handlePrev("lectureStats")} />
-                <Pagination.Item disabled >{currentPage["lectureStats"] + " of "+ Math.ceil(lectureStats.length / pageSize)}</Pagination.Item>
-                <Pagination.Next onClick={() => handleNext("lectureStats", lectureStats.length)} />
-              </Pagination>
 
+              <Pagination className="mb-0">
+                <Pagination.Prev onClick={() => handlePrev("lectureStats")} />
+                <Pagination.Item disabled>
+                  {currentPage["lectureStats"] +
+                    " of " +
+                    Math.ceil(lectureStats.length / pageSize)}
+                </Pagination.Item>
+                <Pagination.Next
+                  onClick={() =>
+                    handleNext("lectureStats", lectureStats.length)
+                  }
+                />
+              </Pagination>
             </Row>
           ) : (
             <Row>
@@ -565,15 +607,19 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseLectureStats.length > 0 ? (
               <Row>
-                
-                <Container style={{width: "100%", height: "300px"}}>
-                  <Chart series={series} data={byCourseChartData} axes={axes} tooltip />
+                <Container style={{ width: "100%", height: "300px" }}>
+                  <Chart
+                    series={series}
+                    data={byCourseChartData}
+                    axes={axes}
+                    tooltip
+                  />
                 </Container>
 
                 <Table striped bordered hover>
                   <thead>
                     <tr>
-                     {/*<th>Lecture ({courseLectureStats.length})</th>*/}
+                      {/*<th>Lecture ({courseLectureStats.length})</th>*/}
                       <th>Date</th>
                       <th>Bookings ({courseSumStats?.bookings})</th>
                       <th>Cancellations ({courseSumStats?.cancellations})</th>
@@ -581,25 +627,38 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginate(courseLectureStats, currentPage["courseLectureStats"]).map(
-                      (lecture: CourseLectureStats, index: number) => (
-                        <tr key={index}>
-                           {/*<td>{lecture.lecture}</td>*/}
-                          <td>{lecture.date}</td>
-                          <td>{lecture.bookings}</td>
-                          <td>{lecture.cancellations}</td>
-                          <td>{lecture.attendances}</td>
-                        </tr>
-                      )
-                    )}
+                    {paginate(
+                      courseLectureStats,
+                      currentPage["courseLectureStats"]
+                    ).map((lecture: CourseLectureStats, index: number) => (
+                      <tr key={index}>
+                        {/*<td>{lecture.lecture}</td>*/}
+                        <td>{lecture.date}</td>
+                        <td>{lecture.bookings}</td>
+                        <td>{lecture.cancellations}</td>
+                        <td>{lecture.attendances}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </Table>
-                <Pagination className="mb-0" >
-                  <Pagination.Prev onClick={() => handlePrev("courseLectureStats")} />
-                  <Pagination.Item disabled >{currentPage["courseLectureStats"] + " of "+ Math.ceil(courseLectureStats.length / pageSize)}</Pagination.Item>
-                  <Pagination.Next onClick={() => handleNext("courseLectureStats", courseLectureStats.length)} />
+                <Pagination className="mb-0">
+                  <Pagination.Prev
+                    onClick={() => handlePrev("courseLectureStats")}
+                  />
+                  <Pagination.Item disabled>
+                    {currentPage["courseLectureStats"] +
+                      " of " +
+                      Math.ceil(courseLectureStats.length / pageSize)}
+                  </Pagination.Item>
+                  <Pagination.Next
+                    onClick={() =>
+                      handleNext(
+                        "courseLectureStats",
+                        courseLectureStats.length
+                      )
+                    }
+                  />
                 </Pagination>
-
               </Row>
             ) : (
               <Row>
@@ -622,7 +681,7 @@ export const ManagerPage = (props: any) => {
                         event: React.ChangeEvent<HTMLInputElement>
                       ) => {
                         if (event.target.value) {
-                          const courseId: string =event.target.value;
+                          const courseId: string = event.target.value;
                           setByCourseSelect(courseId);
                           getCourseLecturesWeekRange(
                             courseId,
@@ -672,9 +731,13 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseWeekStats.length > 0 ? (
               <Row>
-                
-                <Container style={{ width: '100%', height: '300px', }}>
-                  <Chart series={series} data={byWeekChartData} axes={axes} tooltip />
+                <Container style={{ width: "100%", height: "300px" }}>
+                  <Chart
+                    series={series}
+                    data={byWeekChartData}
+                    axes={axes}
+                    tooltip
+                  />
                 </Container>
 
                 <Table striped bordered hover>
@@ -688,26 +751,36 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginate(courseWeekStats, currentPage["courseWeekStats"]).map(
-                      (course: CourseWeekStats, index: number) => (
-                        <tr key={index}>
-                          <td>{course.name}</td>
-                          <td>{course.weekDate.format()}</td>
-                          <td>{course.avgBookings}</td>
-                          <td>{course.avgCancellations}</td>
-                          <td>{course.avgAttendances}</td>
-                        </tr>
-                      )
-                    )}
+                    {paginate(
+                      courseWeekStats,
+                      currentPage["courseWeekStats"]
+                    ).map((course: CourseWeekStats, index: number) => (
+                      <tr key={index}>
+                        <td>{course.name}</td>
+                        <td>{course.weekDate.format()}</td>
+                        <td>{course.avgBookings}</td>
+                        <td>{course.avgCancellations}</td>
+                        <td>{course.avgAttendances}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </Table>
-                
-                <Pagination className="mb-0" >
-                  <Pagination.Prev onClick={() => handlePrev("courseWeekStats")} />
-                  <Pagination.Item disabled >{currentPage["courseWeekStats"] + " of "+ Math.ceil(courseWeekStats.length / pageSize)}</Pagination.Item>
-                  <Pagination.Next onClick={() => handleNext("courseWeekStats", courseWeekStats.length)} />
-                </Pagination>
 
+                <Pagination className="mb-0">
+                  <Pagination.Prev
+                    onClick={() => handlePrev("courseWeekStats")}
+                  />
+                  <Pagination.Item disabled>
+                    {currentPage["courseWeekStats"] +
+                      " of " +
+                      Math.ceil(courseWeekStats.length / pageSize)}
+                  </Pagination.Item>
+                  <Pagination.Next
+                    onClick={() =>
+                      handleNext("courseWeekStats", courseWeekStats.length)
+                    }
+                  />
+                </Pagination>
               </Row>
             ) : (
               <Row>
@@ -780,9 +853,13 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseMonthStats.length > 0 ? (
               <Row>
-                
-                <Container style={{ width: '100%', height: '300px', }}>
-                  <Chart series={series} data={byMonthChartData} axes={axes} tooltip />
+                <Container style={{ width: "100%", height: "300px" }}>
+                  <Chart
+                    series={series}
+                    data={byMonthChartData}
+                    axes={axes}
+                    tooltip
+                  />
                 </Container>
 
                 <Table striped bordered hover>
@@ -796,24 +873,35 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginate(courseMonthStats, currentPage["courseMonthStats"]).map(
-                      (course: CourseMonthStats, index: number) => (
-                        <tr key={index}>
-                          <td>{course.name}</td>
-                          <td>{course.monthDate.format()}</td>
-                          <td>{course.avgBookings}</td>
-                          <td>{course.avgCancellations}</td>
-                          <td>{course.avgAttendances}</td>
-                        </tr>
-                      )
-                    )}
+                    {paginate(
+                      courseMonthStats,
+                      currentPage["courseMonthStats"]
+                    ).map((course: CourseMonthStats, index: number) => (
+                      <tr key={index}>
+                        <td>{course.name}</td>
+                        <td>{course.monthDate.format()}</td>
+                        <td>{course.avgBookings}</td>
+                        <td>{course.avgCancellations}</td>
+                        <td>{course.avgAttendances}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </Table>
-                
-                <Pagination className="mb-0" >
-                  <Pagination.Prev onClick={() => handlePrev("courseMonthStats")} />
-                  <Pagination.Item disabled >{currentPage["courseMonthStats"] + " of "+ Math.ceil(courseMonthStats.length / pageSize)}</Pagination.Item>
-                  <Pagination.Next onClick={() => handleNext("courseMonthStats", courseMonthStats.length)} />
+
+                <Pagination className="mb-0">
+                  <Pagination.Prev
+                    onClick={() => handlePrev("courseMonthStats")}
+                  />
+                  <Pagination.Item disabled>
+                    {currentPage["courseMonthStats"] +
+                      " of " +
+                      Math.ceil(courseMonthStats.length / pageSize)}
+                  </Pagination.Item>
+                  <Pagination.Next
+                    onClick={() =>
+                      handleNext("courseMonthStats", courseMonthStats.length)
+                    }
+                  />
                 </Pagination>
               </Row>
             ) : (
