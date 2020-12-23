@@ -263,13 +263,10 @@ export const ContactTracingPage = (props) => {
         {!generated && (
         <>
         <Col className="col-lg-5 d-flex justify-content-center ">
-          <Image className="mx-auto" src="/imgs/contact_tracing.png" roundedCircle style={{
-            height: "500px",
-            width: "500px"
-          }} />
+          <Image className="mx-auto" src="/imgs/contact_tracing.png" rounded />
         </Col>
         <Col className="col-lg-3 my-auto">
-        <p className="font-italic ml-3" style={{fontSize: "22px", lineHeight: "180%"}}>
+        <p className="font-italic" style={{fontSize: "22px", lineHeight: "180%"}}>
         Contact tracing is a system that selects students and professors 
         who may have come into contact with the positive person in the past 14 days.  
         The calculation is made considering the co-presence in the lecture.
