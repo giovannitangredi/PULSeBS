@@ -48,7 +48,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { week: "st.week" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -74,7 +76,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { month: "st.month" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -100,7 +104,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { week: "st.week" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -126,7 +132,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { month: "st.month" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -154,7 +162,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { date: "st.date" },
-          knex.raw("(su.booking - su.cancellations) as booking")
+          knex.raw("(su.booking - su.cancellations) as booking"),
+          knex.raw("su.cancellations as cancellations"),
+          knex.raw("su.attendance as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
