@@ -209,7 +209,7 @@ exports.getSystemStats = async (req, res) => {
   knex("stats_usage")
     .sum({
       cancellations: "cancellations",
-      bookings: "booking",
+      bookings: knex.raw("(booking-cancellations)"),
       attendances: "attendance",
     })
     .then((queryResults) => {
@@ -246,7 +246,7 @@ exports.getAllLecturesStats = async (req, res) => {
       { courseId: "sl.course_id" },
       { cancellations: "su.cancellations" },
       { attendances: "su.attendance" },
-      { bookings: "su.booking" },
+      { bookings: knex.raw("(su.booking-su.cancellations)") },
       { date: "st.date" }
     )
     .from({ su: "stats_usage" })
@@ -284,7 +284,7 @@ exports.getCourseTotalStats = async (req, res) => {
   knex("stats_usage")
     .sum({
       cancellations: "cancellations",
-      bookings: "booking",
+      bookings: knex.raw("(booking-cancellations)"),
       attendances: "attendance",
     })
     .join({ sl: "stats_lecture" }, "stats_usage.lid", "=", "sl.lid")
@@ -323,7 +323,7 @@ exports.getCourseLecturesStats = async (req, res) => {
       { course: "sl.course_name" },
       { cancellations: "su.cancellations" },
       { attendances: "su.attendance" },
-      { bookings: "su.booking" },
+      { bookings: knex.raw("(su.booking-su.cancellations)") },
       { date: "st.date" }
     )
     .from({ su: "stats_usage" })
