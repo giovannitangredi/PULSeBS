@@ -67,6 +67,8 @@ interface CourseWeekStats {
   name: string;
   weekDate: WeekDate;
   avgBookings: number;
+  avgCancellations: number;
+  avgAttendances: number;
 }
 
 interface CourseMonthStats {
@@ -74,6 +76,8 @@ interface CourseMonthStats {
   name: string;
   monthDate: MonthDate;
   avgBookings: number;
+  avgCancellations: number;
+  avgAttendances: number;
 }
 /*
 interface LectureStats {
@@ -289,6 +293,8 @@ export const ManagerPage = (props: any) => {
               course_name: string;
               week: string;
               booking: number;
+              cancellations: number;
+              attendances: number;
             }) => ({
               courseId: c.course_id,
               name: c.course_name,
@@ -297,6 +303,8 @@ export const ManagerPage = (props: any) => {
                 parseInt(c.week.split("-")[0])
               ),
               avgBookings: c.booking,
+              avgCancellations: c.cancellations,
+              avgAttendances: c.attendances,
             })
           )
         );
@@ -334,6 +342,8 @@ export const ManagerPage = (props: any) => {
               course_name: string;
               month: string;
               booking: number;
+              cancellations: number;
+              attendances: number;
             }) => ({
               courseId: c.course_id,
               name: c.course_name,
@@ -342,6 +352,8 @@ export const ManagerPage = (props: any) => {
                 moment(c.month, "YYYY-MM").year()
               ),
               avgBookings: c.booking,
+              avgCancellations: c.cancellations,
+              avgAttendances: c.attendances,
             })
           )
         );
@@ -534,6 +546,8 @@ export const ManagerPage = (props: any) => {
                       <th>Course ({courseWeekStats.length})</th>
                       <th>Date (YEAR-WEEK)</th>
                       <th>Average Bookings</th>
+                      <th>Average Cancellations</th>
+                      <th>Average Attendances</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -543,6 +557,8 @@ export const ManagerPage = (props: any) => {
                           <td>{course.name}</td>
                           <td>{course.weekDate.format()}</td>
                           <td>{course.avgBookings}</td>
+                          <td>{course.avgCancellations}</td>
+                          <td>{course.avgAttendances}</td>
                         </tr>
                       )
                     )}
@@ -626,6 +642,8 @@ export const ManagerPage = (props: any) => {
                       <th>Course ({courseMonthStats.length})</th>
                       <th>Date (YEAR-MONTH)</th>
                       <th>Average Bookings</th>
+                      <th>Average Cancellations</th>
+                      <th>Average Attendances</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -635,6 +653,8 @@ export const ManagerPage = (props: any) => {
                           <td>{course.name}</td>
                           <td>{course.monthDate.format()}</td>
                           <td>{course.avgBookings}</td>
+                          <td>{course.avgCancellations}</td>
+                          <td>{course.avgAttendances}</td>
                         </tr>
                       )
                     )}
