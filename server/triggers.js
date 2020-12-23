@@ -44,7 +44,7 @@ exports.booking_trigger = `CREATE TRIGGER IF NOT EXISTS booking AFTER INSERT ON 
             );
         
         UPDATE stats_usage 
-        SET booking = booking + 1, attendance = attendance + 1  
+        SET booking = booking + 1  
             WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
             AND tid = (SELECT int_value FROM _Variables WHERE name = 'tid');
     
@@ -61,7 +61,7 @@ exports.cancellation_trigger = `CREATE TRIGGER IF NOT EXISTS cancellation AFTER 
         INSERT INTO _Variables(name, int_value) VALUES ('tid', (SELECT tid FROM stats_time WHERE date = (SELECT date_value FROM _Variables WHERE name = 'lecture')));
         INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.lecture_id));
         UPDATE stats_usage 
-            SET cancellations = cancellations + 1, attendance = attendance - 1  
+            SET cancellations = cancellations + 1 
             WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
             AND tid = (SELECT int_value FROM _Variables WHERE name = 'tid');
     END;`;
@@ -119,3 +119,23 @@ exports.deleteLecture_trigger = `CREATE TRIGGER IF NOT EXISTS deleteLecture BEFO
         DELETE FROM _Trigger
         WHERE name = 'cancellation_trigger';
     END;`;
+
+exports.attendance_trigger = `CREATE TRIGGER IF NOT EXISTS attendance AFTER UPDATE OF status ON lecture_booking
+    WHEN (NEW.status = 'present' AND OLD.status IS NOT 'present' )
+        OR (NEW.status = 'absent' AND OLD.status IS NOT 'absent')
+    BEGIN
+    DELETE FROM _Variables;
+    
+    INSERT INTO _Variables(name, int_value) VALUES ('lid', (SELECT lid FROM stats_lecture WHERE lecture_id = OLD.lecture_id));
+
+    UPDATE stats_usage 
+        SET attendance = attendance + 1 
+        WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
+        AND NEW.status = 'present';
+
+    UPDATE stats_usage 
+        SET attendance = attendance -1
+        WHERE lid = (SELECT int_value FROM _Variables WHERE name = 'lid')
+        AND NEW.status = 'absent';
+END;`;
+

@@ -285,8 +285,11 @@ describe("Usage test", async function () {
 describe("Return the system stats ", async () => {
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
+  
   before(async () => {
     await knex("user").del();
+    await knex("stats_lecture").del();
+    await knex("stats_time").del();
     await knex("stats_usage").del();
     await knex("user").insert(managerTuple);
     await knex("user").insert(teacherTuple);
@@ -311,7 +314,25 @@ describe("Return the system stats ", async () => {
     expect(res.body.length).to.equal(1);
     expect(res.body[0].cancellations).to.equal(0);
     expect(res.body[0].bookings).to.equal(1);
+    expect(res.body[0].attendances).to.equal(0);
+  });
+  it("should return the updated value of attendences (1) after changing the status null -> present", async () => {
+    await knex("lecture_booking").update("status","present").where("lecture_id",lectureBookingTuple.lecture_id).andWhere("student_id",lectureBookingTuple.student_id);
+    const res = await authenticatedUser.get(`/api/stats/system`);
+    expect(res).to.have.property("body");
+    expect(res.body.length).to.equal(1);
+    expect(res.body[0].cancellations).to.equal(0);
+    expect(res.body[0].bookings).to.equal(1);
     expect(res.body[0].attendances).to.equal(1);
+  });
+  it("should return the updated value of attendences (0) after changing the status present -> absent", async () => {
+    await knex("lecture_booking").update("status","absent").where("lecture_id",lectureBookingTuple.lecture_id).andWhere("student_id",lectureBookingTuple.student_id);
+    const res = await authenticatedUser.get(`/api/stats/system`);
+    expect(res).to.have.property("body");
+    expect(res.body.length).to.equal(1);
+    expect(res.body[0].cancellations).to.equal(0);
+    expect(res.body[0].bookings).to.equal(1);
+    expect(res.body[0].attendances).to.equal(0);
   });
   after(async () => {
     await knex("stats_usage").del();
@@ -323,8 +344,9 @@ describe("Return the system stats ", async () => {
 });
 
 //Get all the lecture stats
-describe("Return all the lecture stats ", async () => {
+describe("Return all the lecture stats ", async function () {
   //now let's login the user before we run any tests
+  this.timeout(5000);
   const authenticatedUser = request.agent(app);
   before(async () => {
     await knex("user").del();
@@ -353,7 +375,7 @@ describe("Return all the lecture stats ", async () => {
         course: courseTuple.name,
         courseId: courseTuple.id,
         cancellations: 0,
-        attendances: 1,
+        attendances: 0,
         bookings: 1,
         date: moment(lectureTuple.start).format("YYYY-MM-DD"),
       },
@@ -448,7 +470,7 @@ describe("Return course  lecture stats ", async () => {
       {
         course: courseTuple.name,
         cancellations: 0,
-        attendances: 1,
+        attendances: 0,
         bookings: 1,
         date: moment(lectureTuple.start).format("YYYY-MM-DD"),
       },
