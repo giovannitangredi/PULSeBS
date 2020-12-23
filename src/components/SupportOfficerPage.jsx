@@ -7,10 +7,40 @@ import {
   Tab,
   ListGroup,
   Button,
+  Table,
   Spinner,
   Container,
 } from "react-bootstrap";
 import { Check, X } from "react-bootstrap-icons";
+
+const CSViewer = ({header, data, ...props}) => {
+  return (
+    <Table {...props}>
+      <thead>
+        <tr>
+          {
+            header.map((item) => 
+              <th key={item}>{item}</th>
+            )
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          data.map((row) => 
+            <tr key={row}>
+              {
+                row.map((col) => 
+                  <td key={col}>{col}</td>
+                )
+              }
+            </tr>
+          )
+        }
+      </tbody>
+    </Table>
+  );
+};
 
 const DataSetupView = (props) => {
   const [files, setFiles] = useState({});
@@ -97,6 +127,16 @@ const DataSetupView = (props) => {
     }
   };
 
+  const readCSV = (file, limit) => {
+    const headerLength = 1 + Math.ceil(Math.random() * 5);
+      return {
+        header: new Array(headerLength).fill(0).map((_, index) => `Col-${index}`),
+        data: new Array(limit).fill(0).map((_, rowIndex) =>
+          new Array(headerLength).fill(0).map((_, colIndex) => `data-${rowIndex}-${colIndex}`)
+        ),
+      };
+  };
+
   return (
     <Container className="d-flex flex-column pt-0 align-items-center rounded border border-primary col-10 bg-white">
       <div className="col-sm-8 my-4">
@@ -108,36 +148,47 @@ const DataSetupView = (props) => {
         onSubmit={handleOnSubmit}
       >
         {sendingOrder.map((item) => (
-          <Form.Row
-            key={item}
-            className="d-flex flex-row justify-content-center"
-          >
-            <Form.Group className="col-sm-10">
-              <Form.File custom>
-                <Form.File.Input
-                  id={item}
-                  accept=".csv"
-                  onChange={handleOnChange}
-                />
-                <Form.File.Label>
-                  {files[item] ? (
-                    <span className="font-weight-bold">{files[item].name}</span>
-                  ) : (
-                    `Upload file for ${item}`
-                  )}
-                </Form.File.Label>
-              </Form.File>
-            </Form.Group>
-            <Form.Group>
-              {uploadStatus[item] === "uploading" && (
-                <Spinner animation="border" />
-              )}
-              {uploadStatus[item] === "completed" && (
-                <Check size={48} color="green" />
-              )}
-              {uploadStatus[item] === "failed" && <X size={48} color="red" />}
-            </Form.Group>
-          </Form.Row>
+          <div key={item}>
+            <Form.Row
+              key={item}
+              className="d-flex flex-row justify-content-center"
+            >
+              <Form.Group className="col-sm-10">
+                <Form.File custom>
+                  <Form.File.Input
+                    id={item}
+                    accept=".csv"
+                    onChange={handleOnChange}
+                  />
+                  <Form.File.Label>
+                    {files[item] ? (
+                      <span className="font-weight-bold">{files[item].name}</span>
+                    ) : (
+                      `Upload file for ${item}`
+                    )}
+                  </Form.File.Label>
+                </Form.File>
+              </Form.Group>
+              <Form.Group>
+                {uploadStatus[item] === "uploading" && (
+                  <Spinner animation="border" />
+                )}
+                {uploadStatus[item] === "completed" && (
+                  <Check size={48} color="green" />
+                )}
+                {uploadStatus[item] === "failed" && <X size={48} color="red" />}
+              </Form.Group>
+            </Form.Row>
+            {
+              files[item] && 
+                <Form.Row
+                  key={`${item}-preview`}
+                  className="d-flex flex-row justify-content-center"
+                >
+                  <CSViewer {...readCSV(files[item], 2)} size="sm" bordered className="col-sm-10 text-center"/>
+                </Form.Row>
+            }
+          </div>
         ))}
         <Form.Row className="d-flex flex-row justify-content-center">
           <Button type="submit" disabled={submitDisabled}>
@@ -180,7 +231,7 @@ const ScheduleView = (props) => {
       .then((semesters) => {
         setSemester("");
         setAvailableSemesters(
-          semesters.data.filter((s) => s.inserted_lectures != 1)
+          semesters.data.filter((s) => s.inserted_lectures !== 1)
         );
       })
       .catch((error) => {
