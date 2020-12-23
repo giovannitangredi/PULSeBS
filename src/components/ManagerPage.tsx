@@ -212,6 +212,42 @@ export const ManagerPage = (props: any) => {
     new Date(),
   ]);
 
+  // pagination
+  
+  const pageSize = 9;
+  const [currentPage, setCurrentPage] = useState({
+    lectureStats: 1,
+    courseLectureStats: 1,
+    courseWeekStats: 1,
+    courseMonthStats: 1,
+  });
+
+  const paginate = (array: any[], pageNumber: number) => { 
+    return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+  }
+
+  const handlePrev = (statsType: string) => {
+    if (currentPage[statsType] > 1) {
+      let newPage = { ...currentPage };
+      newPage[statsType] -= 1;
+      setCurrentPage(newPage);
+    }
+  }
+
+  const handleNext = (statsType: string, listLength: number) => {
+    if (currentPage[statsType] < Math.ceil(listLength / pageSize)) {
+      let newPage = { ...currentPage };
+      newPage[statsType] += 1;
+      setCurrentPage(newPage);
+    }
+  }
+
+  const resetPageFor = (statsType: string) => {
+    let newPage = { ...currentPage };
+    newPage[statsType] = 1;
+    setCurrentPage(newPage);
+  }
+
   const generateDataFrom = (rawData: any[], values: string[], dateAttribute: string) => {
     const p= (
       values
@@ -299,6 +335,7 @@ export const ManagerPage = (props: any) => {
 
         setLectureStats(lectureStats);
         setLoading(false);
+        resetPageFor("lectureStats");
       })
       .catch((err) => {
         console.log(err);
@@ -330,6 +367,7 @@ export const ManagerPage = (props: any) => {
         let courseLectureStats = res.data;
         setCourseLectureStats(courseLectureStats);
         setLoading(false);
+        resetPageFor("courseLectureStats");
       })
       .catch((err) => {
         console.log(err);
@@ -378,6 +416,7 @@ export const ManagerPage = (props: any) => {
           )
         );
         setLoading(false);
+        resetPageFor("courseWeekStats");
         // weeklyBooked
       })
       .catch((err) => {
@@ -427,6 +466,7 @@ export const ManagerPage = (props: any) => {
           )
         );
         setLoading(false);
+        resetPageFor("courseMonthStats");
         // weeklyBooked
       })
       .catch((err) => {
@@ -473,7 +513,7 @@ export const ManagerPage = (props: any) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {lectureStats.map((lecture: LectureStats, index: number) => (
+                  {paginate(lectureStats, currentPage["lectureStats"]).map((lecture: LectureStats, index: number) => (
                     <tr key={index}>
                       <td>{lecture.course}</td>
                       {/*<td>{lecture.lecture}</td>*/}
@@ -485,6 +525,13 @@ export const ManagerPage = (props: any) => {
                   ))}
                 </tbody>
               </Table>
+              
+              <Pagination className="mb-0" >
+                <Pagination.Prev onClick={() => handlePrev("lectureStats")} />
+                <Pagination.Item disabled >{currentPage["lectureStats"] + " of "+ Math.ceil(lectureStats.length / pageSize)}</Pagination.Item>
+                <Pagination.Next onClick={() => handleNext("lectureStats", lectureStats.length)} />
+              </Pagination>
+
             </Row>
           ) : (
             <Row>
@@ -534,7 +581,7 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {courseLectureStats.map(
+                    {paginate(courseLectureStats, currentPage["courseLectureStats"]).map(
                       (lecture: CourseLectureStats, index: number) => (
                         <tr key={index}>
                            {/*<td>{lecture.lecture}</td>*/}
@@ -547,6 +594,12 @@ export const ManagerPage = (props: any) => {
                     )}
                   </tbody>
                 </Table>
+                <Pagination className="mb-0" >
+                  <Pagination.Prev onClick={() => handlePrev("courseLectureStats")} />
+                  <Pagination.Item disabled >{currentPage["courseLectureStats"] + " of "+ Math.ceil(courseLectureStats.length / pageSize)}</Pagination.Item>
+                  <Pagination.Next onClick={() => handleNext("courseLectureStats", courseLectureStats.length)} />
+                </Pagination>
+
               </Row>
             ) : (
               <Row>
@@ -635,7 +688,7 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {courseWeekStats.map(
+                    {paginate(courseWeekStats, currentPage["courseWeekStats"]).map(
                       (course: CourseWeekStats, index: number) => (
                         <tr key={index}>
                           <td>{course.name}</td>
@@ -648,6 +701,13 @@ export const ManagerPage = (props: any) => {
                     )}
                   </tbody>
                 </Table>
+                
+                <Pagination className="mb-0" >
+                  <Pagination.Prev onClick={() => handlePrev("courseWeekStats")} />
+                  <Pagination.Item disabled >{currentPage["courseWeekStats"] + " of "+ Math.ceil(courseWeekStats.length / pageSize)}</Pagination.Item>
+                  <Pagination.Next onClick={() => handleNext("courseWeekStats", courseWeekStats.length)} />
+                </Pagination>
+
               </Row>
             ) : (
               <Row>
@@ -736,7 +796,7 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {courseMonthStats.map(
+                    {paginate(courseMonthStats, currentPage["courseMonthStats"]).map(
                       (course: CourseMonthStats, index: number) => (
                         <tr key={index}>
                           <td>{course.name}</td>
@@ -749,6 +809,12 @@ export const ManagerPage = (props: any) => {
                     )}
                   </tbody>
                 </Table>
+                
+                <Pagination className="mb-0" >
+                  <Pagination.Prev onClick={() => handlePrev("courseMonthStats")} />
+                  <Pagination.Item disabled >{currentPage["courseMonthStats"] + " of "+ Math.ceil(courseMonthStats.length / pageSize)}</Pagination.Item>
+                  <Pagination.Next onClick={() => handleNext("courseMonthStats", courseMonthStats.length)} />
+                </Pagination>
               </Row>
             ) : (
               <Row>
