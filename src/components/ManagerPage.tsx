@@ -3,11 +3,14 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { BookedLectureList } from "./BookedLectureList";
 import Container from "react-bootstrap/Container";
 import axios from "axios";
-import { Col, Form, Row, Tab, Table, Tabs } from "react-bootstrap";
+import { Col, Form, Row, Tab, Table, Pagination, Tabs } from "react-bootstrap";
 import { CourseDetail } from "./TeacherStatistics";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
+
+import { Chart } from "react-charts";
+import { useMemo } from "react";
 
 interface GeneralStats {
   attendances: number;
@@ -45,6 +48,10 @@ class WeekDate {
   format() {
     return `${this.year}-${this.week}`;
   }
+
+  toString() {
+    return `${this.year}-${this.week}`;
+  }
 }
 
 class MonthDate {
@@ -59,6 +66,10 @@ class MonthDate {
     return this.month > 9
       ? `${this.year}-${this.month}`
       : `${this.year}-0${this.month}`;
+  }
+
+  toString() {
+    return `${this.year}-${this.month}`;
   }
 }
 
@@ -200,6 +211,64 @@ export const ManagerPage = (props: any) => {
     new Date(),
     new Date(),
   ]);
+
+  const generateDataFrom = (rawData: any[], values: string[], dateAttribute: string) => {
+    const p= (
+      values
+      .map(
+        (series) => {
+          return {
+            label: series,
+            data: rawData
+              .map(
+              (lecture): {primary: string, secondary: Number} => {
+                console.log(lecture, dateAttribute, new String(lecture[dateAttribute]));
+                return { primary: lecture[dateAttribute].toString(), secondary: new Number(lecture[series])};
+              })
+              .sort((v1: {primary: string, secondary: Number}, v2: {primary: string, secondary: Number}) => v1.primary.localeCompare(v2.primary))
+          };
+        }
+      )
+    );
+    return p;
+  }
+
+  const systemChartData = useMemo(() => {
+    const lectureStatsGroupByDate = {};
+    lectureStats.forEach((value: LectureStats) => {
+      if(!lectureStatsGroupByDate[value.date]) {
+        lectureStatsGroupByDate[value.date] = {date:value.date, bookings: 0, cancellations: 0, attendances: 0};
+      }
+      lectureStatsGroupByDate[value.date].bookings += value.bookings;
+      lectureStatsGroupByDate[value.date].cancellations += value.cancellations;
+      lectureStatsGroupByDate[value.date].attendances += value.attendances;
+    })
+    return generateDataFrom(Object.values(lectureStatsGroupByDate), ["bookings", "attendances", "cancellations"], "date")
+  }, 
+    [lectureStats]
+  );
+
+  const byCourseChartData = useMemo(() => 
+    generateDataFrom(courseLectureStats, ["bookings", "attendances", "cancellations"], "date"), 
+    [courseLectureStats]
+  );
+  const byWeekChartData = useMemo(() => 
+    generateDataFrom(courseWeekStats, ["avgBookings", "avgAttendances", "avgCancellations"], "weekDate"), 
+    [courseWeekStats]
+  );
+  const byMonthChartData = useMemo(() => 
+    generateDataFrom(courseMonthStats, ["avgBookings", "avgAttendances", "avgCancellations"], "monthDate"), 
+    [courseMonthStats]
+  );
+
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'ordinal', position: 'bottom',},
+      { type: 'linear', position: 'left', stacked: false,},
+    ],
+    []
+  );
+  const series = React.useMemo(() => ({ type:'line' }), []);
 
   const getSystemStats = () => {
     //get the sum of booking, cancellations, attendance for all lectures
@@ -387,6 +456,11 @@ export const ManagerPage = (props: any) => {
         <Tab eventKey="general" title="All Lectures">
           {lectureStats.length > 0 ? (
             <Row>
+              
+              <Container style={{width: "100%", height: "300px"}}>
+                <Chart series={series} data={systemChartData} axes={axes} tooltip />
+              </Container>
+
               <Table striped bordered hover className="p-5">
                 <thead>
                   <tr>
@@ -444,6 +518,11 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseLectureStats.length > 0 ? (
               <Row>
+                
+                <Container style={{width: "100%", height: "300px"}}>
+                  <Chart series={series} data={byCourseChartData} axes={axes} tooltip />
+                </Container>
+
                 <Table striped bordered hover>
                   <thead>
                     <tr>
@@ -540,6 +619,11 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseWeekStats.length > 0 ? (
               <Row>
+                
+                <Container style={{ width: '100%', height: '300px', }}>
+                  <Chart series={series} data={byWeekChartData} axes={axes} tooltip />
+                </Container>
+
                 <Table striped bordered hover>
                   <thead>
                     <tr>
@@ -636,6 +720,11 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseMonthStats.length > 0 ? (
               <Row>
+                
+                <Container style={{ width: '100%', height: '300px', }}>
+                  <Chart series={series} data={byMonthChartData} axes={axes} tooltip />
+                </Container>
+
                 <Table striped bordered hover>
                   <thead>
                     <tr>
