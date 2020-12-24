@@ -16,50 +16,13 @@ import {
 import { InfoCircle } from "react-bootstrap-icons";
 import moment from "moment";
 
-const Fakestudent = {
-  id: "900000", name: "Ambra", surname: "Ferri", email: "s900000@students.polito.it",
-  city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060783",
-}
-
-const FakeReport = [
-  { id: "900001", name: "Pierfrancesco", surname: "Ermenegardassa", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "900002", name: "Mariaddolorata", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "900003", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "000004", name: "Giovanni", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "000005", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "000006", name: "Giovanni", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "7", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "8", name: "Giovanniasdfghj", surname: "Ferriasdf", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "9", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "10", name: "10", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "11", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "12", name: "Giovanni", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "13", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "14", name: "Giovanni", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "15", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "16", name: "Giacomo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "17", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "18", name: "Luca", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "19", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "20", name: "20", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "21", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "22", name: "Giovanni", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "23", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "24", name: "Giovanni", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "25", name: "Matteo", surname: "Ferri", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97560783", },
-  { id: "26", name: "Matteooooooooo", surname: "Ferriddddddddddd", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", },
-  { id: "27", name: "Matteooooooooo", surname: "Ferriddddddddddd", email: "s900000@students.polito.it", city: "Poggio Ferro", birthday: "1991-11-04", ssn: "MK97060683", }]
-
 const FullReportView = (props) => {
-  const page_size = 9;
+  const page_size = 10;
+  const totPages = Math.ceil(props.report.length / page_size);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totPages, setTotPages] = useState(Math.ceil(props.report.length / page_size)); //con i dispari si incastra OCCHIO
   const [reportPage, setReportPage] = useState([]);
 
-
-
-  const paginate = (array, page_number) => { 
-    // human-readable page numbers usually start with 1, so we reduce 1 in the first argument
+  const paginate = (array, page_number) => {  //function to return subset (page for pagination) of the entire array of report
     return array.slice((page_number - 1) * page_size, page_number * page_size);
   }
 
@@ -67,27 +30,32 @@ const FullReportView = (props) => {
     let current = currentPage - 1;
     if ((current) > 0) {
       setCurrentPage(current);
-      setReportPage(paginate(props.report,current));
+      setReportPage(paginate(props.report, current));
     }
-
   }
 
   const handleNext = () => {
     let current = currentPage + 1;
     if ((current) <= totPages) {
       setCurrentPage(current);
-      setReportPage(paginate(props.report,current));
+      setReportPage(paginate(props.report, current));
     }
   }
 
   useEffect(() => {
-    setReportPage(paginate(props.report,1));
+    setReportPage(paginate(props.report, 1));
   }, []);
 
   return (
     <Container>
-      <ListGroup>
-        <ListGroup.Item style={{ backgroundColor: "transparent" }} className="d-flex justify-content-between border-0 ">
+      {props.report.length === 0 && (
+        <Alert className="mt-5 d-flex justify-content-center" variant="primary">
+          {"No one was co-present for the past 14 days"}
+        </Alert>
+      )}
+      {props.report.length != 0 && (<>
+        <ListGroup>
+          <ListGroup.Item style={{ backgroundColor: "transparent" }} className="d-flex justify-content-between border-0 ">
             <div className="col-lg-2 d-flex justify-content-center">
               <b>Id</b>
             </div>
@@ -99,22 +67,20 @@ const FullReportView = (props) => {
             </div>
             <div className="col-lg-3 d-flex justify-content-center">
               <b>SSN</b>
-            </div>      
+            </div>
             <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">This is the number of time they have had the same lecture.</Tooltip>}>
-              <div className="col-lg-1 d-flex align-items-center justify-content-center">  
+              <div className="col-lg-1 d-flex align-items-center justify-content-center">
                 <b className=" d-flex align-items-center justify-content-center">{"Interactions "}
-                  <InfoCircle className="mx-1"/>
-                  </b> 
+                  <InfoCircle className="mx-1" />
+                </b>
               </div>
-            </OverlayTrigger>   
-              
-        </ListGroup.Item>
-      </ListGroup>
-      <ListGroup className="border rounded border-primary ">
-
-        {reportPage.map((student) => (
-          <ListGroup.Item className="py-2 d-flex  justify-content-between" key={student.id}>           
-              <div className="col-lg-2 d-flex  align-items-center justify-content-center"> 
+            </OverlayTrigger>
+          </ListGroup.Item>
+        </ListGroup>
+        <ListGroup className="border rounded border-primary ">
+          {reportPage.map((student) => (
+            <ListGroup.Item className="py-2 d-flex  justify-content-between" key={student.id}>
+              <div className="col-lg-2 d-flex  align-items-center justify-content-center">
                 {student.id}
               </div>
               <div className="col-lg-3 text-center align-items-center ">
@@ -127,16 +93,17 @@ const FullReportView = (props) => {
                 {student.ssn}
               </div>
               {<div className="col-lg-1  d-flex align-items-center  justify-content-center">
-                {"15"}
+                {student.risk}
               </div>}
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
-      <Pagination className="mb-0" >
-        <Pagination.Prev onClick={() => handlePrev()} />
-        <Pagination.Item disabled >{currentPage + " of "+ totPages}</Pagination.Item>
-        <Pagination.Next onClick={() => handleNext()} />
-      </Pagination>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+        <Pagination className="mb-0" >
+          <Pagination.Prev onClick={() => handlePrev()} />
+          <Pagination.Item disabled >{currentPage + " of " + totPages}</Pagination.Item>
+          <Pagination.Next onClick={() => handleNext()} />
+        </Pagination>
+      </>)}
     </Container>
   );
 };
@@ -146,32 +113,48 @@ export const ContactTracingPage = (props) => {
   const [student, setStudent] = useState({});
   const [generated, setGenerated] = useState(false);
   const [report, setReport] = useState([]);
-  const [show, setShow] = useState(false);
+  const [error, setError] = useState(false);
+  const [message, setMessage] = useState("");
 
   const onChangeSsn = (event) => {
     setSsn(event.target.value);
   }
+
   const handleSearch = (event) => {
     event.stopPropagation();
     event.preventDefault();
-    /*axios.get(`/something/something2`, { ssn: ssn })
-    .then((res) => {
+    console.log("event.response", event.response)
+    axios.get(`/tracing/${ssn}/search`)
+      .then((res) => {
         setStudent(...res.data);
-        setReport();
+        setError(false);
+        setReport([]);
         setGenerated(false);
-    })*/
-    setStudent(Fakestudent);
-    setReport(FakeReport);
+      })
+      .catch((err) => {
+        setMessage("Wrong SSN");
+        setError(true);
+        handleReset();
+      });
   }
+
   const handleGenerate = () => {
-    setGenerated(true);
-    setShow(true);
+    axios.get(`/tracing/${student.id}/report`)
+      .then((res) => {
+        setReport(res.data);
+        setGenerated(true);
+      })
+      .catch((err) => {
+        setMessage("There was an error during the tracing");
+        handleReset();
+        setError(true);
+      })
   }
+
   const handleReset = () => {
     setGenerated(false);
-    setShow(false);
     setStudent();
-    setReport();
+    setReport([]);
     setSsn("");
   }
 
@@ -179,8 +162,8 @@ export const ContactTracingPage = (props) => {
     event.stopPropagation();
     event.preventDefault();
     //generateFile();
-    setShow(false);
   }
+
   return (
     <Container className="col-lg-11">
       <h3 className="pt-3">Contact Tracing Report System</h3>
@@ -200,7 +183,7 @@ export const ContactTracingPage = (props) => {
             </Col>
           </Form.Row>
         </Form>
-        {generated && (
+        {generated && report.length !== 0 && (
           <>
             <Col className="col-lg-6 d-flex align-items-center justify-content-end">
               <Alert className="py-2 my-2" variant="warning">
@@ -217,6 +200,11 @@ export const ContactTracingPage = (props) => {
       </Row>
       <Row>
         <Col className="col-lg-4 my-6  pt-5">
+          {error && (
+            <Alert className="d-flex justify-content-center mr-5" variant="warning">
+              {message}
+            </Alert>
+          )}
           {student && student.id && (
             <Container className="border rounded border-primary justify-content-center my-6 bg-white py-3">
               <Row>
@@ -261,18 +249,18 @@ export const ContactTracingPage = (props) => {
           </>
         )}
         {!generated && (
-        <>
-        <Col className="col-lg-5 d-flex justify-content-center ">
-          <Image className="mx-auto" src="/imgs/contact_tracing.png" rounded />
-        </Col>
-        <Col className="col-lg-3 my-auto">
-        <p className="font-italic" style={{fontSize: "22px", lineHeight: "180%"}}>
-        Contact tracing is a system that selects students and professors 
-        who may have come into contact with the positive person in the past 14 days.  
-        The calculation is made considering the co-presence in the lecture.
+          <>
+            <Col className="col-lg-5 d-flex justify-content-center ">
+              <Image className="mx-auto" src="/imgs/contact_tracing.png" rounded />
+            </Col>
+            <Col className="col-lg-3 my-auto">
+              <p className="font-italic" style={{ fontSize: "22px", lineHeight: "180%" }}>
+                Contact tracing is a system that selects students and professors
+                who may have come into contact with the positive person in the past 14 days.
+                The calculation is made considering the co-presence in the lecture.
         </p>
-        </Col>
-        </>
+            </Col>
+          </>
         )}
       </Row>
     </Container>
