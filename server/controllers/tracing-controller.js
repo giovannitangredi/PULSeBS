@@ -102,13 +102,15 @@ exports.getContactTracingReport = async (req,res)=>{
           .andWhere("status","present")
       })
     .andWhere("l.end",">",threshold)
-    .andWhere("l.end","<",today)  
+    .andWhere("l.end","<",today) 
+    .andWhere("lb.status","present") 
     .groupBy("u.id");
 
     //await Promises
     Promise.all([teachers,students])
     .then(([teachersQueries,studentsQueries]) =>{
-        const result = [...teachersQueries,...studentsQueries];
+        let result = [...teachersQueries,...studentsQueries];
+        result = result.filter((el)=> el.id != studentId)
         res.json(result);
     })
     .catch(err=>{
