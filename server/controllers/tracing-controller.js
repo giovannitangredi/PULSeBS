@@ -15,7 +15,7 @@ const checkManager = async (userId)=>{
 }
 // Find a student by the given SSN
 exports.searchBySsn = async (req,res)=>{
-    const ssn = req.body.ssn;
+    const ssn = req.params.ssn;
     const user = req.user && req.user.id;
     if(!(await checkManager(user)))
     {
@@ -93,7 +93,7 @@ exports.getContactTracingReport = async (req,res)=>{
     )
     .from({ lb :"lecture_booking"})
     .join({l : "lecture"},"lb.lecture_id","=","l.id")
-    .join({u : "user"},"u.id","=","l.student_id")
+    .join({u : "user"},"u.id","=","lb.student_id")
     .whereIn("lb.lecture_id",function () {
         //Select the list of lecture that the positive student has attended
         this.select("lecture_id")
@@ -112,6 +112,7 @@ exports.getContactTracingReport = async (req,res)=>{
         res.json(result);
     })
     .catch(err=>{
+        console.log(err)
         res.status(502).json({msg : `An error happed while generating the contac tracing report : ${err}`});
     });
 }
