@@ -12,14 +12,18 @@ import {
   Container,
 } from "react-bootstrap";
 import { Check, X } from "react-bootstrap-icons";
+import Papa from "papaparse";
 
-const CSViewer = ({header, data, ...props}) => {
+const CSViewer = ({ header, data, length, ...props }) => {
+  console.log(header, data, length)
+
+
   return (
     <Table {...props}>
       <thead>
         <tr>
           {
-            header.map((item) => 
+            header.map((item) =>
               <th key={item}>{item}</th>
             )
           }
@@ -27,10 +31,10 @@ const CSViewer = ({header, data, ...props}) => {
       </thead>
       <tbody>
         {
-          data.map((row) => 
+          data.map((row) =>
             <tr key={row}>
               {
-                row.map((col) => 
+                row.map((col) =>
                   <td key={col}>{col}</td>
                 )
               }
@@ -38,6 +42,7 @@ const CSViewer = ({header, data, ...props}) => {
           )
         }
       </tbody>
+      <thead><tr><th colSpan = {header.length}>{`3 of ${length} rows` }</th></tr></thead>
     </Table>
   );
 };
@@ -48,6 +53,8 @@ const DataSetupView = (props) => {
   const [resetDisabled, setResetDisabled] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [uploadStatus, setUploadStatus] = useState({});
+  const [previews, setPreviews] = useState({});
+
 
   const sendingOrder = ["students", "teachers", "courses", "enrollments"];
 
@@ -71,6 +78,7 @@ const DataSetupView = (props) => {
       setSubmitDisabled(false);
       // fix the problem with chrome that doesn't trigger onChange event when the same file is selected
       fileBrowser.value = "";
+      readCSV(fileSelected, fileBrowser.id, 4);
     }
   };
 
@@ -127,14 +135,15 @@ const DataSetupView = (props) => {
     }
   };
 
-  const readCSV = (file, limit) => {
-    const headerLength = 1 + Math.ceil(Math.random() * 5);
-      return {
-        header: new Array(headerLength).fill(0).map((_, index) => `Col-${index}`),
-        data: new Array(limit).fill(0).map((_, rowIndex) =>
-          new Array(headerLength).fill(0).map((_, colIndex) => `data-${rowIndex}-${colIndex}`)
-        ),
-      };
+  const readCSV = async (file, type, limit) => {
+    console.log(file, type);
+    let newPreviews = {};
+    Papa.parse(file, {
+      complete: function (results) {
+        newPreviews[type] = { header: results.data[0], data: results.data.slice(1, limit), length: results.data.length - 1 };
+        setPreviews(newPreviews);
+      }
+    })
   };
 
   return (
@@ -153,8 +162,10 @@ const DataSetupView = (props) => {
               key={item}
               className="d-flex flex-row justify-content-center"
             >
-              <Form.Group className="col-sm-10">
-                <Form.File custom>
+              <Form.Group as= {Row} className="col-sm-10">
+                <Form.Label column sm = "2">{item}:</Form.Label>
+                <Col>
+                <Form.File custom >
                   <Form.File.Input
                     id={item}
                     accept=".csv"
@@ -164,10 +175,11 @@ const DataSetupView = (props) => {
                     {files[item] ? (
                       <span className="font-weight-bold">{files[item].name}</span>
                     ) : (
-                      `Upload file for ${item}`
-                    )}
+                        `Upload file for ${item}`
+                      )}
                   </Form.File.Label>
                 </Form.File>
+                </Col>
               </Form.Group>
               <Form.Group>
                 {uploadStatus[item] === "uploading" && (
@@ -180,13 +192,13 @@ const DataSetupView = (props) => {
               </Form.Group>
             </Form.Row>
             {
-              files[item] && 
-                <Form.Row
-                  key={`${item}-preview`}
-                  className="d-flex flex-row justify-content-center"
-                >
-                  <CSViewer {...readCSV(files[item], 2)} size="sm" bordered className="col-sm-10 text-center"/>
-                </Form.Row>
+              files[item] && previews[item] &&
+              <Form.Row
+                key={`${item}-preview`}
+                className="d-flex flex-row justify-content-center"
+              >
+                <CSViewer {...previews[item]} size="sm" bordered className="col-sm-10 text-center" />
+              </Form.Row>
             }
           </div>
         ))}
@@ -307,8 +319,8 @@ const ScheduleView = (props) => {
                 {scheduleFile ? (
                   <span className="font-weight-bold">{scheduleFile.name}</span>
                 ) : (
-                  "Upload schedule file"
-                )}
+                    "Upload schedule file"
+                  )}
               </Form.File.Label>
             </Form.File>
           </Form.Group>
