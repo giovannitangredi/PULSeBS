@@ -15,7 +15,10 @@ import {
 } from "react-bootstrap";
 import { InfoCircle } from "react-bootstrap-icons";
 import moment from "moment";
+import jsPDF from 'jspdf'
+import P5 from 'p5'; 
 
+const p5 = new P5(); 
 const FullReportView = (props) => {
   const page_size = 10;
   const totPages = Math.ceil(props.report.length / page_size);
@@ -157,11 +160,36 @@ export const ContactTracingPage = (props) => {
     setReport([]);
     setSsn("");
   }
-
+  
+  const generatePDFFile=()=>{
+    const gap = 10;
+    let y = 60;
+    
+    var doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text(`Contact tracing report for ${student.id} ${student.surname} ${student.name}`,20,15);
+    doc.setFontSize(16);
+    doc.text(`List of the concats in the previous 14 days with the following schema:`,5, 40);
+    doc.text('ID Name Surname Email SSN Birthday City',5,50);
+    doc.setFontSize(10);
+    report.forEach(row =>{
+      doc.text(`${row.id} ${row.name} ${row.surname} ${row.email} ${row.ssn} ${row.birthday} ${row.city}`,5,y);
+      y += gap;
+    });
+    doc.save(`${student.id}_Contact_Tracing_Report_${moment().format('YYYY-MM-DD')}`);
+  }
+  const generateCSVFile=()=>{
+    let csv =["ID, Name, Surname, Email, SSN, Birthday, City"];
+    report.forEach(row =>{
+      csv.push(`${row.id}, ${row.name}, ${row.surname}, ${row.email}, ${row.ssn}, ${row.birthday}, ${row.city}`);
+    });
+    p5.saveStrings(csv,`${student.id}_Contact_Tracing_Report_${moment().format('YYYY-MM-DD')}`, "csv");
+  }
   const handleDownload = (event) => {
     event.stopPropagation();
     event.preventDefault();
-    //generateFile();
+    generateCSVFile();
+    generatePDFFile();
   }
 
   return (
