@@ -282,7 +282,8 @@ describe("Usage test", async function () {
   });
 });
 
-describe("Return the system stats ", async () => {
+describe("Return the system stats ", async function () {
+  this.timeout(5000);
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
   
