@@ -166,7 +166,8 @@ export const ContactTracingPage = (props) => {
     let y = 60;
     
     var doc = new jsPDF();
-    doc.setFontSize(20);
+    const height = doc.internal.pageSize.getHeight()-10;
+    doc.setFontSize(18);
     doc.text(`Contact tracing report for ${student.id} ${student.surname} ${student.name}`,20,15);
     doc.setFontSize(16);
     doc.text(`List of the concats in the previous 14 days with the following schema:`,5, 40);
@@ -175,6 +176,11 @@ export const ContactTracingPage = (props) => {
     report.forEach(row =>{
       doc.text(`${row.id} ${row.name} ${row.surname} ${row.email} ${row.ssn} ${row.birthday} ${row.city}`,5,y);
       y += gap;
+      if(y>=height)
+      {
+        doc.addPage();
+        y= 20;
+      }
     });
     doc.save(`${student.id}_Contact_Tracing_Report_${moment().format('YYYY-MM-DD')}`);
   }
