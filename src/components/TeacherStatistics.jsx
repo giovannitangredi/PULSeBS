@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { Table, Button, ListGroup } from "react-bootstrap";
 import axios from "axios";
+//import ReactEcharts from 'echarts-for-react';
 import { DatePickerComponent } from "./DatePickerComponent";
 
 export const CourseDetail = (props) => {
@@ -98,10 +99,8 @@ export const CourseDetail = (props) => {
         GetFromServer(
           `/courses/${id}/bookings?fromMonth=${startDate
             .getFullYear()
-            .toString()}-${
-            startDate.getMonth() + (1).toString()
-          }&toMonth=${endDate.getFullYear().toString()}-${
-            endDate.getMonth() + 1
+            .toString()}-${startDate.getMonth() + (1).toString()
+          }&toMonth=${endDate.getFullYear().toString()}-${endDate.getMonth() + 1
           }`
         )
       );
@@ -127,7 +126,6 @@ export const CourseDetail = (props) => {
       .then((values) => {
         values.forEach((reservation) => {
           reservation.forEach((reservation2) => {
-            console.log(reservation2);
             reservations.push(reservation2);
           });
         });
@@ -258,6 +256,32 @@ export const CourseDetail = (props) => {
     }
     return dateArr;
   };
+
+  // const getOption = () => {
+  //   return {
+  //     legend: {},
+  //     tooltip: {},
+  //     dataset: {
+  //       source: [
+  //         ['product', '2015', '2016', '2017'],
+  //         ['Matcha Latte', 43.3, 85.8, 93.7],
+  //         ['Milk Tea', 83.1, 73.4, 55.1],
+  //         ['Cheese Cocoa', 86.4, 65.2, 82.5],
+  //         ['Walnut Brownie', 72.4, 53.9, 39.1]
+  //       ]
+  //     },
+  //     xAxis: { type: 'category' },
+  //     yAxis: {},
+  //     // Declare several bar series, each will be mapped
+  //     // to a column of dataset.source by default.
+  //     series: [
+  //       { type: 'bar' },
+  //       { type: 'bar' },
+  //       { type: 'bar' }
+  //     ]
+  //   }
+  }
+
   return (
     <>
       <div className="container col-sm-9">
@@ -297,6 +321,7 @@ export const CourseDetail = (props) => {
                     <th>Course Name</th>
                     <th>Week</th>
                     <th>Bookings avarage</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -309,6 +334,7 @@ export const CourseDetail = (props) => {
                             <td>{item.course_name}</td>
                             <td>{item.week ? item.week : "-"}</td>
                             <td>{item.booking}</td>
+                            <td>{item.attendances}</td>
                           </tr>
                         </React.Fragment>
                       );
@@ -337,6 +363,7 @@ export const CourseDetail = (props) => {
                     <th>Course Name</th>
                     <th>Month</th>
                     <th>Bookings avarage</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -349,6 +376,7 @@ export const CourseDetail = (props) => {
                             <td>{item.course_name}</td>
                             <td>{item.month ? item.month : "-"}</td>
                             <td>{item.booking}</td>
+                            <td>{item.attendances}</td>
                           </tr>
                         </React.Fragment>
                       );
@@ -377,6 +405,7 @@ export const CourseDetail = (props) => {
                     <th>Course Name</th>
                     <th>Lecture Date</th>
                     <th>Bookings</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -389,6 +418,7 @@ export const CourseDetail = (props) => {
                             <td>{item.course_name}</td>
                             <td>{item.date}</td>
                             <td>{item.booking}</td>
+                            <td>{item.attendances}</td>
                           </tr>
                         </React.Fragment>
                       );
@@ -396,18 +426,19 @@ export const CourseDetail = (props) => {
                   {!reserved || reserved.length > 0 ? (
                     ""
                   ) : (
-                    <tr>
-                      <td colspan="4">
-                        <div className="w-100 d-flex justify-content-center">
-                          <h5>No Record to show</h5>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+                      <tr>
+                        <td colspan="4">
+                          <div className="w-100 d-flex justify-content-center">
+                            <h5>No Record to show</h5>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                 </tbody>
               </Table>
             </div>
           </div>
+          {/* <ReactEcharts option={getOption()} /> */}
         </div>
       </div>
     </>
