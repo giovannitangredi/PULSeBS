@@ -109,7 +109,12 @@ exports.newBooking = async (req, res) => {
   const lectureId = req.params.lectureId;
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select({ start: "start" }, { status: "status" }, {capacity: "capacity"}, { courseName: "course.name" })
+    .select(
+      { start: "start" },
+      { status: "status" },
+      { capacity: "capacity" },
+      { courseName: "course.name" }
+    )
     .from("lecture")
     .join("course", "lecture.course", "=", "course.id")
     .where("lecture.id", lectureId) // needs to check whether user can book.
@@ -176,10 +181,7 @@ exports.newBooking = async (req, res) => {
 
             // Get the lecture information
             const lectureQuery = knex
-              .select(
-                { courseName: "course.name" },
-                { start: "start" }
-              )
+              .select({ courseName: "course.name" }, { start: "start" })
               .from("lecture")
               .join("course", "lecture.course", "=", "course.id")
               .where("lecture.id", req.params.lectureId);
@@ -317,11 +319,7 @@ exports.convertDistanceLecture = async (req, res) => {
     .add(30, "minutes")
     .format("YYYY-MM-DD HH:mm:ss");
   knex
-    .select(
-      { start: "start" },
-      { status: "status" },
-      { lecturer: "lecturer" }
-    )
+    .select({ start: "start" }, { status: "status" }, { lecturer: "lecturer" })
     .from("lecture")
     .where("id", lectureId)
     .then(([lectureQueryResults]) => {
@@ -495,4 +493,183 @@ const sendCandidateToReserveChangeEmail = async (lectureId, studentId) => {
   } catch (err) {
     console.log(`There was an error cancelling the lecture: ${err}`);
   }
+};
+
+// Retrieves all lectures all the lectures that will be held in the future (startTime > currentTime).
+exports.getFutureLectures = async (req, res) => {
+  const user = req.user && req.user.id;
+  knex
+    .select({ id: "id", role: "role" })
+    .from("user")
+    .where("id", user)
+    .then(async (result) => {
+      if (result[0].role != "supportOfficer") {
+        res.status(401).json({
+          message:
+            "Unauthorized access, only support officers can access this data.",
+        });
+      }
+      const lectures = await knex("lecture")
+        .select({
+          id: "lecture.id",
+          prof: "user.surname",
+          course: "course.name",
+          start: "lecture.start",
+          end: "lecture.end",
+          year: "course.year",
+        })
+        .join("course", "course.id", "=", "lecture.course")
+        .join("user", "user.id", "=", "lecture.lecturer")
+        .where("lecture.start", ">=", moment().format("YYYY-MM-DD HH:mm:ss"));
+
+      res.json(lectures);
+    })
+    .catch((err) => {
+      res.status(501).json({
+        message: `There was an error retrieving the system stats: ${err}`,
+      });
+    });
+};
+
+// Retrieves the professors that will teach lectures in the future.
+exports.getFutureTeachers = async (req, res) => {
+  const user = req.user && req.user.id;
+  knex
+    .select({ id: "id", role: "role" })
+    .from("user")
+    .where("id", user)
+    .then(async (result) => {
+      if (result[0].role != "supportOfficer") {
+        res.status(401).json({
+          message:
+            "Unauthorized access, only support officers can access this data.",
+        });
+      }
+      const profs = await knex("user")
+        .distinct({ id: "user.id", name: "user.name", surname: "user.surname" })
+        .join("lecture", "user.id", "=", "lecture.lecturer")
+        .where("user.role", "teacher")
+        .andWhere("lecture.start", ">", moment().format("YYYY-MM-DD HH:mm:ss"));
+            res.json(profs);
+    })
+    .catch((err) => {
+      res.status(501).json({
+        message: `There was an error retrieving the data about the teachers: ${err}`,
+      });
+    });
+};
+
+// Retrieves courses that will have lectures in the future.
+exports.getFutureCourses = async (req, res) => {
+  const userId = req.user && req.user.id;
+  knex
+    .select({ id: "id", role: "role" })
+    .from("user")
+    .where("id", userId)
+    .then(async (result) => {
+      if (result[0].role != "supportOfficer") {
+        res.status(401).json({
+          message:
+            "Unauthorized access, only support officers can access this data.",
+        });
+      }
+      const courses = await knex("course")
+        .select({
+          id: "course.id",
+          name: "course.name",
+          prof: "user.surname",
+          year: "course.year",
+          semester: "course.semester",
+        })
+        .distinct("course.id")
+        .join("user", "user.id", "=", "course.main_prof")
+        .join("lecture", "lecture.course", "=", "course.id")
+        .where("lecture.start", ">", moment().format("YYYY-MM-DD HH:mm:ss"));
+      res.json(courses);
+    })
+    .catch((err) => {
+      res.status(501).json({
+        message: `There was an error retrieving data about the courses: ${err}`,
+      });
+    });
+};
+
+// Updates bookability (turns a lecture either unbookable or bookable)
+// in batch (all, by set of years, semesters, professors, courses, lectures).
+exports.updateBookability = async (req, res) => {
+  const userId = req.user && req.user.id;
+  knex
+    .select({ id: "id", role: "role" })
+    .from("user")
+    .where("id", userId)
+    .then(async (result) => {
+      if (result[0].role != "supportOfficer") {
+        res.status(401).json({
+          message:
+            "Unauthorized access, only support officers can access this data.",
+        });
+      }
+      const { bookable, granularity, batchItems } = req.body;
+      let updateResult;
+      if (batchItems.length === 0 && granularity !== "all") {
+        res.status(421).json({
+          message: "No op, data given didn't modify the database.",
+        });
+      } else {
+        const newStatus = bookable ? "presence" : "distance";
+        switch (granularity) {
+          case "all":
+            updateResult = await knex("lecture")
+              .where("start", ">", moment().format("YYYY-MM-DD HH:mm:ss"))
+              .update({ status: newStatus })
+              .debug();
+            break;
+          case "by year":
+            updateResult = await knex("lecture")
+              .update({ status: newStatus })
+              .where("start", ">", moment().format("YYYY-MM-DD HH:mm:ss"))
+              .whereIn("course", function () {
+                this.select("id").from("course").whereIn("year", batchItems);
+              });
+            break;
+          case "by semester":
+            updateResult = await knex("lecture")
+              .update({ status: newStatus })
+              .where("start", ">", moment().format("YYYY-MM-DD HH:mm:ss"))
+              .whereIn("course", function () {
+                this.select("id")
+                  .from("course")
+                  .whereIn("semester", batchItems);
+              });
+            break;
+          case "by professor":
+            updateResult = await knex("lecture")
+              .whereIn("lecture.lecturer", batchItems)
+              .where("start", ">", moment().format("YYYY-MM-DD HH:mm:ss"))
+              .update({ status: newStatus })
+              .debug();
+            break;
+          case "by course":
+            updateResult = await knex("lecture")
+              .whereIn("lecture.course", batchItems)
+              .where("start", ">", moment().format("YYYY-MM-DD HH:mm:ss"))
+              .update({ status: newStatus })
+              .debug();
+            break;
+          case "by lecture":
+            updateResult = await knex("lecture")
+              .whereIn("lecture.id", batchItems)
+              .where("start", ">", moment().format("YYYY-MM-DD HH:mm:ss"))
+              .update({ status: newStatus })
+              .debug();
+            break;
+        }
+        if (updateResult) res.status(202).send();
+      }
+    })
+    .catch((err) => {
+      res.status(501).json({
+        message: `There was an error updating the bookability of the selected lectures: ${err}`,
+      });
+    });
 };
