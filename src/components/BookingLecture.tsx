@@ -11,6 +11,9 @@ export const BookingLecture = (props: any) => {
       border: "ridge",
       borderWidth: "0 0.1em 0.1em 0.1em",
     },
+    last : {
+      border: "none",
+    },
   };
 
   const actionButton =
@@ -56,7 +59,7 @@ export const BookingLecture = (props: any) => {
           "Online"
         )}
       </td>
-      <td style={styles.col}> {actionButton}</td>
+      <td style={styles.last}> {actionButton}</td>
     </tr>
   );
 };
