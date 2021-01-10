@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { Table, Button, ListGroup } from "react-bootstrap";
 import axios from "axios";
-//import ReactEcharts from 'echarts-for-react';
+import { StaticCharts } from './StaticCharts';
 import { DatePickerComponent } from "./DatePickerComponent";
 
 export const CourseDetail = (props) => {
@@ -50,7 +50,7 @@ export const CourseDetail = (props) => {
         } else {
           newFilter = newFilter.filter((x) => x != filter);
           setcourseFilter(newFilter);
-           setcourseFilter(newFilter);
+          setcourseFilter(newFilter);
         }
       }
     }
@@ -62,8 +62,8 @@ export const CourseDetail = (props) => {
     listofweeks.forEach((week) => {
       weekdays.push(
         week.startDate.getFullYear().toString() +
-          "-" +
-          week.startDate.getWeek().toString()
+        "-" +
+        week.startDate.getWeek().toString()
       );
     });
     // setWeeksBetween(weekdays);
@@ -86,10 +86,10 @@ export const CourseDetail = (props) => {
           `/courses/${id}/bookings?fromWeek=${startDate
             .getFullYear()
             .toString()}-${startDate
-            .getWeek()
-            .toString()}&toWeek=${endDate
-            .getFullYear()
-            .toString()}-${endDate.getWeek().toString()}`
+              .getWeek()
+              .toString()}&toWeek=${endDate
+                .getFullYear()
+                .toString()}-${endDate.getWeek().toString()}`
         )
       );
     });
@@ -257,31 +257,6 @@ export const CourseDetail = (props) => {
     return dateArr;
   };
 
-  // const getOption = () => {
-  //   return {
-  //     legend: {},
-  //     tooltip: {},
-  //     dataset: {
-  //       source: [
-  //         ['product', '2015', '2016', '2017'],
-  //         ['Matcha Latte', 43.3, 85.8, 93.7],
-  //         ['Milk Tea', 83.1, 73.4, 55.1],
-  //         ['Cheese Cocoa', 86.4, 65.2, 82.5],
-  //         ['Walnut Brownie', 72.4, 53.9, 39.1]
-  //       ]
-  //     },
-  //     xAxis: { type: 'category' },
-  //     yAxis: {},
-  //     // Declare several bar series, each will be mapped
-  //     // to a column of dataset.source by default.
-  //     series: [
-  //       { type: 'bar' },
-  //       { type: 'bar' },
-  //       { type: 'bar' }
-  //     ]
-  //   }
-  }
-
   return (
     <>
       <div className="container col-sm-9">
@@ -438,9 +413,9 @@ export const CourseDetail = (props) => {
               </Table>
             </div>
           </div>
-          {/* <ReactEcharts option={getOption()} /> */}
+          <StaticCharts data={{ bookedLectures, monthLectures }} course_list={myCourses}></StaticCharts>
         </div>
       </div>
     </>
   );
-};
+}
