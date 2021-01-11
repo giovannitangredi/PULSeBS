@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import echarts from 'echarts';
+import * as echarts from 'echarts';
 import { Button, ButtonGroup } from 'react-bootstrap';
 
 const option = {
