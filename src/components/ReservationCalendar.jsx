@@ -10,16 +10,13 @@ const redColor = "#F73D3D";
 const graycolor = "#6c757d";
 const yellowcolor = "#ffc107";
 
-
 const lectureTypes = {
   bookable: "./imgs/presence.png",
   candidate: "./imgs/candidate.png",
   full: "./imgs/full.png",
-  distance:"./imgs/online.png",
-  presence:"./imgs/presence.png"
+  distance: "./imgs/online.png",
+  presence: "./imgs/presence.png",
 };
-
-
 
 class ReservationCalendar extends React.Component {
   /* returns prepared information for calendar */
@@ -27,25 +24,28 @@ class ReservationCalendar extends React.Component {
     console.log(this.props);
     return this.props.lectures
       .map((obj) => {
-        let lectureState="";
+        let lectureState = "";
         let color = blueColor;
         if (obj.capacity === obj.booked_students) {
           if (obj.candidate) {
-            lectureState=lectureTypes.candidate;
+            lectureState = lectureTypes.candidate;
           } else {
-            lectureState=lectureTypes.full;
+            lectureState = lectureTypes.full;
           }
         } else {
-          lectureState= obj.status === "distance" ? lectureTypes.distance:lectureTypes.bookable ;
+          lectureState =
+            obj.status === "distance"
+              ? lectureTypes.distance
+              : lectureTypes.bookable;
         }
-        return { ...obj, color, booked: false ,lectureState};
+        return { ...obj, color, booked: false, lectureState };
       })
       .concat(
         this.props.bookedLectures.map((obj) => ({
           ...obj,
           booked: true,
           color: greenColor,
-          lectureState:lectureTypes.presence
+          lectureState: lectureTypes.presence,
         }))
       )
       .map((lecture) => {
@@ -110,23 +110,37 @@ class ReservationCalendar extends React.Component {
           }}
         >
           <div className="my-2 text-center">
-          <img className=" flex-fill align-self-center" src= {eventInfo.event.extendedProps.lectureState }
-               style={{
-            height: "40px",
-          }}/>
-          <p className="my-2 text-center">
-            {eventInfo.event.extendedProps.course}
-            <br></br>
-            {eventInfo.event.extendedProps.lecturer_name}{" "}
-            {eventInfo.event.extendedProps.lecturer_surname}
-            {eventInfo.event.extendedProps.status == "presence" && (
-              <>
-                <br />
-                Room {eventInfo.event.extendedProps.room} Seats:{" "}
-                {eventInfo.event.extendedProps.capacity}
-              </>
-            )}
-          </p>
+            <img
+              className=" flex-fill align-self-center"
+              src={eventInfo.event.extendedProps.lectureState}
+              style={{
+                height: "40px",
+              }}
+            />
+            <p className="my-2 text-center">
+              {eventInfo.event.extendedProps.course}
+              <br></br>
+              {eventInfo.event.extendedProps.lecturer_name}{" "}
+              {eventInfo.event.extendedProps.lecturer_surname}
+              {eventInfo.event.extendedProps.status == "presence" && (
+                <>
+                  <br />
+                  Room {eventInfo.event.extendedProps.room} Seats:{" "}
+                  {eventInfo.event.extendedProps.booked_students +
+                    "/" +
+                    eventInfo.event.extendedProps.capacity}
+                </>
+              )}
+              {eventInfo.event.extendedProps.status != "presence" && (
+                <>
+                  <br />
+                  Capacity:{" "}
+                  {eventInfo.event.extendedProps.booked_students +
+                    "/" +
+                    eventInfo.event.extendedProps.capacity}
+                </>
+              )}
+            </p>
           </div>
         </div>
       );
@@ -174,7 +188,7 @@ class ReservationCalendar extends React.Component {
                 <h4>Lectures</h4>{" "}
                 <div>
                   <svg width="850" height="45">
-                  <rect
+                    <rect
                       x="25"
                       y="0"
                       width="400"
@@ -185,7 +199,7 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                  <rect
+                    <rect
                       x="400"
                       y="0"
                       width="500"
@@ -224,7 +238,7 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                     <text fontSize="14" fontFamily="Verdana" x="405" y="26">
+                    <text fontSize="14" fontFamily="Verdana" x="405" y="26">
                       Presence
                     </text>
                     <rect
@@ -238,17 +252,18 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    <image href={lectureTypes.presence}
-                    x="470"
-                    y="7"
-                    width="30"
-                    height="30"
-                    style={{
-                      fill:graycolor,
-                      strokeWidth: 1,
-                      stroke: "rgb(0,0,0)",
-                    }}
-                  />
+                    <image
+                      href={lectureTypes.presence}
+                      x="470"
+                      y="7"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: graycolor,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
                     <text fontSize="14" fontFamily="Verdana" x="520" y="26">
                       Remote
                     </text>
@@ -263,17 +278,18 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    <image href={lectureTypes.distance}
-                    x="580"
-                    y="7"
-                    width="30"
-                    height="30"
-                    style={{
-                      fill:graycolor,
-                      strokeWidth: 1,
-                      stroke: "rgb(0,0,0)",
-                    }}
-                  />
+                    <image
+                      href={lectureTypes.distance}
+                      x="580"
+                      y="7"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: graycolor,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
                     <text fontSize="14" fontFamily="Verdana" x="625" y="26">
                       Full
                     </text>
@@ -287,19 +303,21 @@ class ReservationCalendar extends React.Component {
                         strokeWidth: 1,
                         stroke: "rgb(0,0,0)",
                       }}
-                    /> <image href="./imgs/full.svg"
-                    x="645"
-                    y="7"
-                    width="68"
-                    height="68"
-                    style={{
-                      fill:graycolor,
-                      strokeWidth: 1,
-                      stroke: "rgb(0,0,0)",
-                    }}
-                  />
+                    />{" "}
+                    <image
+                      href="./imgs/full.svg"
+                      x="645"
+                      y="7"
+                      width="68"
+                      height="68"
+                      style={{
+                        fill: graycolor,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
                     <text fontSize="14" fontFamily="Verdana" x="693" y="26">
-                     In Waiting List
+                      In Waiting List
                     </text>
                     <rect
                       x="800"
@@ -312,19 +330,18 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                    <image href="./imgs/candidate.svg"
-                    x="800"
-                    y="7"
-                    width="30"
-                    height="30"
-                    style={{
-                      fill:graycolor,
-                      strokeWidth: 1,
-                      stroke: "rgb(0,0,0)",
-                    }}
-                  />
-                   
-                   
+                    <image
+                      href="./imgs/candidate.svg"
+                      x="800"
+                      y="7"
+                      width="30"
+                      height="30"
+                      style={{
+                        fill: graycolor,
+                        strokeWidth: 1,
+                        stroke: "rgb(0,0,0)",
+                      }}
+                    />
                   </svg>
                 </div>
               </div>
