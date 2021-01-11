@@ -33,8 +33,8 @@ export const StaticCharts = (props) => {
         const chart = echarts.init(element)
         const course_id = course === '' ? props.course_list.length && props.course_list[0].id : course
         const data = time === 'week' ?
-            bookedLectures.filter(item => item.course_id === Number(course_id)).map(item => [item.week, item.booking, item.attendances]) :
-            monthLectures.filter(item => item.course_id === Number(course_id)).map(item => [item.month, item.booking, item.attendances])
+            bookedLectures.filter(item => item.course_id === String(course_id)).map(item => [item.week, item.booking, item.attendances]) :
+            monthLectures.filter(item => item.course_id === String(course_id)).map(item => [item.month, item.booking, item.attendances])
         option.dataset.source = [
             ['product', 'booking', 'attendances'],
             ...data
