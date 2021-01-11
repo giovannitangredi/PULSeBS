@@ -227,8 +227,7 @@ describe("Usage test", async function () {
   });
 
   describe("Get the number of bookings for all lectures of the course scheduled for the month", async () => {
-    const year = moment(lectureTuple.start).year();
-    const month = moment(lectureTuple.start).month() + 1; //January is 0
+    const date = moment(lectureTuple.start).format("YYYY-MM"); 
     before(async () => {
       const res = await authenticatedUser
         .post("/api/auth/login")
@@ -244,7 +243,7 @@ describe("Usage test", async function () {
 
     it("Should return the total number of booking scheduled for the month (2 in Lecture 1, 1 in Lecture 2 -> 1.5) after three insert in lecture_booking", async () => {
       const res = await authenticatedUser
-        .get(`/api/courses/${courseTuple.id}/bookings?month=${year}-${month}`)
+        .get(`/api/courses/${courseTuple.id}/bookings?month=${date}`)
         .expect(200);
       expect(res.body.length).to.equal(1);
       expect(res.body[0].booking).to.equal(1.5);
@@ -261,7 +260,7 @@ describe("Usage test", async function () {
         .andWhere("student_id", userTuple.id)
         .del();
       const res = await authenticatedUser
-        .get(`/api/courses/${courseTuple.id}/bookings?month=${year}-${month}`)
+        .get(`/api/courses/${courseTuple.id}/bookings?month=${date}`)
         .expect(200);
       expect(res.body.length).to.equal(1);
       expect(res.body[0].booking).to.equal(1);
