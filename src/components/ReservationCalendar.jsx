@@ -26,17 +26,14 @@ class ReservationCalendar extends React.Component {
       .map((obj) => {
         let lectureState = "";
         let color = blueColor;
-        if (obj.capacity === obj.booked_students) {
+        if (obj.capacity === obj.booked_students && obj.status === "presence") {
           if (obj.candidate) {
             lectureState = lectureTypes.candidate;
           } else {
             lectureState = lectureTypes.full;
           }
         } else {
-          lectureState =
-            obj.status === "distance"
-              ? lectureTypes.distance
-              : lectureTypes.bookable;
+          lectureState = obj.status = lectureTypes.distance;
         }
         return { ...obj, color, booked: false, lectureState };
       })
@@ -45,7 +42,10 @@ class ReservationCalendar extends React.Component {
           ...obj,
           booked: true,
           color: greenColor,
-          lectureState: lectureTypes.presence,
+          lectureState:
+            obj.status === "presence"
+              ? lectureTypes.presence
+              : lectureTypes.distance,
         }))
       )
       .map((lecture) => {
@@ -125,19 +125,18 @@ class ReservationCalendar extends React.Component {
               {eventInfo.event.extendedProps.status == "presence" && (
                 <>
                   <br />
-                  Room {eventInfo.event.extendedProps.room} Seats:{" "}
-                  {eventInfo.event.extendedProps.booked_students +
-                    "/" +
-                    eventInfo.event.extendedProps.capacity}
+                  Room {eventInfo.event.extendedProps.room}
+                  {!eventInfo.event.extendedProps.booked &&
+                    " Seats:  " +
+                      eventInfo.event.extendedProps.booked_students +
+                      "/" +
+                      eventInfo.event.extendedProps.capacity}
                 </>
               )}
               {eventInfo.event.extendedProps.status != "presence" && (
                 <>
                   <br />
-                  Capacity:{" "}
-                  {eventInfo.event.extendedProps.booked_students +
-                    "/" +
-                    eventInfo.event.extendedProps.capacity}
+                  No Seats needed
                 </>
               )}
             </p>

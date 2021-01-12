@@ -17,7 +17,7 @@ export const BookingLectureList = (props) => {
           <th style={styles.head}>Room</th>
           <th style={styles.head}>Date</th>
           <th style={styles.head}>Time</th>
-          <th style={styles.head}>Capacity</th>
+          <th style={styles.head}>Seats</th>
           <th style={styles.head}></th>
         </tr>
       </thead>

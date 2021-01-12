@@ -48,14 +48,13 @@ export const BookingLecture = (props: any) => {
           .concat("-" + moment(props.lecture.end).format("HH:mm"))}
       </td>
       <td style={styles.col}>
-        { //props.lecture.status === "presence" ? (
+        { props.lecture.status === "presence" ? (
           <>
             {props.lecture.booked_students}/{props.lecture.capacity}
           </>
-      //  ) : (
-      //    "Online"
-      //  )
-        }
+        ) : (
+        "Online"
+       )}
       </td>
       <td style={styles.col}> {actionButton}</td>
     </tr>
