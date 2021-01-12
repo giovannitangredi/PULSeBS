@@ -9,7 +9,10 @@ export const NavBar = (props) => {
       { title: "Statistics", path: "/teacher/statistics" },
     ],
     student: [{ title: "Home", path: "/student" }],
-    manager: [{ title: "Home", path: "/manager" }],
+    manager: [
+      { title: "Home", path: "/manager" },
+      { title: "Contact Tracing", path: "/manager/contactTracing" },
+    ],
     supportOfficer: [{ title: "Home", path: "/supportOfficer" }],
   };
 

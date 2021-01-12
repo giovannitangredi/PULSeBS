@@ -48,7 +48,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { week: "st.week" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -74,7 +76,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { month: "st.month" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -100,7 +104,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { week: "st.week" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -126,7 +132,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { month: "st.month" },
-          knex.raw("avg(su.booking - su.cancellations) as booking")
+          knex.raw("avg(su.booking - su.cancellations) as booking"),
+          knex.raw("avg(su.cancellations) as cancellations"),
+          knex.raw("avg(su.attendance) as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -154,7 +162,9 @@ exports.getBookingStats = async (req, res) => {
           { course_id: "sl.course_id" },
           { course_name: "sl.course_name" },
           { date: "st.date" },
-          knex.raw("(su.booking - su.cancellations) as booking")
+          knex.raw("(su.booking - su.cancellations) as booking"),
+          knex.raw("su.cancellations as cancellations"),
+          knex.raw("su.attendance as attendances")
         )
         .from({ su: "stats_usage" })
         .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
@@ -187,7 +197,7 @@ exports.getSystemStats = async (req, res) => {
       if (result[0].role != "manager") {
         //console.log(result.role);
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data.",
         });
       }
     })
@@ -199,7 +209,7 @@ exports.getSystemStats = async (req, res) => {
   knex("stats_usage")
     .sum({
       cancellations: "cancellations",
-      bookings: "booking",
+      bookings: knex.raw("(booking-cancellations)"),
       attendances: "attendance",
     })
     .then((queryResults) => {
@@ -221,7 +231,7 @@ exports.getAllLecturesStats = async (req, res) => {
     .then((result) => {
       if (result[0].role != "manager")
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data.",
         });
     })
     .catch((err) => {
@@ -236,7 +246,7 @@ exports.getAllLecturesStats = async (req, res) => {
       { courseId: "sl.course_id" },
       { cancellations: "su.cancellations" },
       { attendances: "su.attendance" },
-      { bookings: "su.booking" },
+      { bookings: knex.raw("(su.booking-su.cancellations)") },
       { date: "st.date" }
     )
     .from({ su: "stats_usage" })
@@ -262,7 +272,7 @@ exports.getCourseTotalStats = async (req, res) => {
     .then((result) => {
       if (result[0].role != "manager")
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data",
         });
     })
     .catch((err) => {
@@ -274,7 +284,7 @@ exports.getCourseTotalStats = async (req, res) => {
   knex("stats_usage")
     .sum({
       cancellations: "cancellations",
-      bookings: "booking",
+      bookings: knex.raw("(booking-cancellations)"),
       attendances: "attendance",
     })
     .join({ sl: "stats_lecture" }, "stats_usage.lid", "=", "sl.lid")
@@ -298,7 +308,7 @@ exports.getCourseLecturesStats = async (req, res) => {
     .then((result) => {
       if (result[0].role != "manager")
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data.",
         });
     })
     .catch((err) => {
@@ -313,7 +323,7 @@ exports.getCourseLecturesStats = async (req, res) => {
       { course: "sl.course_name" },
       { cancellations: "su.cancellations" },
       { attendances: "su.attendance" },
-      { bookings: "su.booking" },
+      { bookings: knex.raw("(su.booking-su.cancellations)") },
       { date: "st.date" }
     )
     .from({ su: "stats_usage" })
