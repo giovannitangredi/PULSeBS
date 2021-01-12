@@ -224,7 +224,6 @@ class StudentList extends React.Component {
 
   // handle group selection events
   handleCheckboxSelections = (event) => {
-    let checkboxes = document.getElementsByClassName("st_chckbx");
     debugger;
     let newarray= this.state.students.map(object => ({ ...object }));
     switch (event.target.id) {
