@@ -18,7 +18,7 @@ export const BookingLecture = (props: any) => {
 
   const actionButton =
     props.lecture.status !== "distance" &&
-    props.lecture.booked_students < props.lecture.capacity ? (
+    (props.lecture.booked_students < props.lecture.capacity ? (
       <Button variant="primary" onClick={(event) => handleBooking(event)}>
         Book a Seat
       </Button>
@@ -30,7 +30,7 @@ export const BookingLecture = (props: any) => {
       <Button variant="warning" onClick={(event) => handleBooking(event)}>
         Enter the waiting list
       </Button>
-    );
+    ));
   return (
     <tr>
       <td style={styles.col}>{props.lecture.course}</td>
@@ -51,13 +51,13 @@ export const BookingLecture = (props: any) => {
           .concat("-" + moment(props.lecture.end).format("HH:mm"))}
       </td>
       <td style={styles.col}>
-        {props.lecture.status === "presence" ? (
+        { props.lecture.status === "presence" ? (
           <>
             {props.lecture.booked_students}/{props.lecture.capacity}
           </>
         ) : (
-          "Online"
-        )}
+        "Online"
+       )}
       </td>
       <td style={styles.last}> {actionButton}</td>
     </tr>
