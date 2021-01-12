@@ -3,6 +3,7 @@ const fs = require("fs");
 const csv = require("fast-csv");
 const moment = require("moment");
 const bcrypt = require("bcrypt");
+var Iconv  = require('iconv').Iconv;
 
 const clearFile = async (path) => {
   return new Promise(async (resolve, reject) => {
@@ -74,9 +75,11 @@ const readFile = async (userId, path, type, semesterId) => {
       return;
     }
     let rows = [];
+    var iconv = new Iconv('windows-1252', 'utf-8');
     //let check = false;
     const stream = fs
       .createReadStream(path)
+      .pipe(iconv)
       .pipe(
         csv.parse({
           headers: header => 
