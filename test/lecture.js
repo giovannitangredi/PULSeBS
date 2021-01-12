@@ -54,20 +54,39 @@ const teacherTuple = {
   ssn: "MR17121943",
 };
 
-//the data we need to pass to the login method
+const officerTuple = {
+  id: "3",
+  name: "Enrico",
+  surname: "Carraro",
+  password_hash: "$2b$10$A9KmnEEAF6fOvKqpUYbxk.1Ye6WLHUMFgN7XCSO/VF5z4sspJW1o.",
+  email: "s274930@studenti.polito.it",
+  role: "supportOfficer",
+  city: "Torino",
+  birthday: "1991-11-04",
+  ssn: "152",
+};
+
+//the data we need to pass to the login method student1
 const student1Credentials = {
   email: testEmailAddress,
   password: "password",
 };
 
-//the data we need to pass to the login method
+//the data we need to pass to the login method student2
 const student2Credentials = {
   email: studentTuple2.email,
   password: "password",
 };
 
+//the data we need to pass to the login teacher
 const teacherCredentials = {
   email: teacherTuple.email,
+  password: "password",
+};
+
+//the data we need to pass to the login supportofficer
+const officerCredentials = {
+  email: "s274930@studenti.polito.it",
   password: "password",
 };
 
@@ -100,6 +119,7 @@ const futureLectureTuple = {
   status: "presence",
   room: 1,
 };
+
 
 const limitedCapacityLectureTuple = {
   id: 2,
@@ -652,3 +672,434 @@ describe("Presence Lecture into distance one ", async function () {
     await knex("course").del();
   });
 });
+
+//Retrieves all lectures that will be held in the future
+describe("Future Lectures ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(officerTuple);
+    await knex("user").insert(teacherTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/lectures/future`);
+    expect(res.status).to.equal(200);
+  });
+  it("should return one future  lecture", async () => {
+    const res = await authenticatedUser.get(`/api/lectures/future`);
+    expect(res.body.length).to.equal(1);
+    expect(res.body).to.have.deep.members([
+      {
+        id: futureLectureTuple.id,
+        prof:teacherTuple.surname,
+        course: courseTuple.name,
+        start: futureLectureTuple.start,
+        end: futureLectureTuple.end,
+        year:courseTuple.year
+      },
+    ]);
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+
+//Retrieves the profressor that will teach the lectures in the future.
+describe("Future Profressor ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/lectures/future/teachers`);
+    expect(res.status).to.equal(200);
+  });
+  it("should return one future profressor", async () => {
+    const res = await authenticatedUser.get(`/api/lectures/future/teachers`);
+    expect(res.body.length).to.equal(1);
+    expect(res.body).to.have.deep.members([
+      {
+        id: teacherTuple.id,
+        name:teacherTuple.name,
+        surname:teacherTuple.surname,
+      },
+    ]);
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Retrieves the courses that will have lectures in the future.
+describe("Future Courses ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+  it("should return  with status 200", async () => {
+    const res = await authenticatedUser.get(`/api/lectures/future/courses`);
+    expect(res.status).to.equal(200);
+  });
+  it("should return one future course", async () => {
+    const res = await authenticatedUser.get(`/api/lectures/future/courses`);
+    expect(res.body.length).to.equal(1);
+    expect(res.body).to.have.deep.members([
+      {
+        id: courseTuple.id,
+        name:courseTuple.name,
+        prof:teacherTuple.surname,
+        year:courseTuple.year,
+        semester:courseTuple.semester
+      },
+    ]);
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Updates lecture bookable to unbookable 
+
+
+// Case :"All"
+describe("Booking Updates by all ", async function () {
+  this.timeout(10000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+  
+  let detailsAll={
+    bookable:false,
+    granularity:"all",
+    batchItems:['0']
+  }
+  
+  it("should return  with status 202", async () => {
+    const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsAll);
+    expect(res.body.message).to.not.be.null;
+    expect(res.status).to.equal(202);
+  });
+ 
+  it("it should change the status distance", async () => {
+    const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsAll);
+    const lectureChanged = await knex
+      .select("status")
+      .from("lecture")
+      .where("start",futureLectureTuple.start);
+       expect(lectureChanged).to.have.deep.members([
+       { status: "distance" },
+    ]);
+  });
+  
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+
+// Case :"Year"
+describe("Booking Updates by year ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+      expect(res.status).to.equal(200);
+  });
+  
+  let detailsyear={
+    bookable:false,
+    granularity:"by year",
+    batchItems : ['1']
+  }
+  it("should return  with status 202", async () => {
+    const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsyear);
+    expect(res.body.message).to.not.be.null;
+    expect(res.status).to.equal(202);
+  });
+  it(" it should change the status to distance", async () => {
+  const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsyear);
+  const lectureChanged = await knex
+  .select("lecture.status")
+  .from("lecture")
+  .join("course",'course.id','Lecture.course')
+  .where("lecture.start",futureLectureTuple.start)
+  .andWhere("lecture.course",courseTuple.id)
+  .andWhere("course.year", courseTuple.year);
+   expect(lectureChanged).to.have.deep.members([
+  { status: "distance" },
+  ]);
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Case "by profressor"
+describe("Booking Updates by lecturer ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+  
+  let detailsprof={
+    bookable:false,
+    granularity:"by professor",
+    batchItems : ['2']
+  }
+  it("should return  with status 202", async () => {
+    const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsprof);
+    expect(res.body.message).to.not.be.null;
+    expect(res.status).to.equal(202);
+  });
+  it("it should change the status to distance", async () => {
+  const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsprof);
+  const lectureChanged = await knex
+    .select("lecture.status")
+    .from("lecture")
+    .where("start",futureLectureTuple.start)
+    .andWhere("lecturer",teacherTuple.id);
+     expect(lectureChanged).to.have.deep.members([
+    { status: "distance" },
+  ]);
+});
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Case " By semester"
+describe("Booking Updates by semester ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+  
+  let detailssems={
+      bookable:false,
+      granularity:"by semester",
+      batchItems : ['1']
+  }
+  it("should return  with status 202", async () => {
+    const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailssems);
+    expect(res.body.message).to.not.be.null;
+    expect(res.status).to.equal(202);
+  });
+  it("it should change the status to distance", async () => {
+  const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailssems);
+  const lectureChanged = await knex
+      .select("lecture.status")
+      .from("lecture")
+      .join("course",'course.id','Lecture.course')
+      .where("lecture.start",futureLectureTuple.start)
+      .andWhere("lecture.course",courseTuple.id)
+      .andWhere("course.semester", courseTuple.semester);
+       expect(lectureChanged).to.have.deep.members([
+      { status: "distance" },
+    ]);
+});
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Case " By Course"
+describe("Booking Updates by Course ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+  
+  let detailscourse={
+    bookable:false,
+    granularity:"by course",
+    batchItems : ['1']
+  }
+  it("should return  with status 202", async () => {
+    const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailscourse);
+    expect(res.body.message).to.not.be.null;
+    expect(res.status).to.equal(202);
+  });
+  it("it should change the status to distance", async () => {
+  const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailscourse);
+  const lectureChanged = await knex
+    .select("lecture.status")
+    .from("lecture")
+    .where("start",futureLectureTuple.start)
+    .andWhere("course",courseTuple.id);
+     expect(lectureChanged).to.have.deep.members([
+    { status: "distance" },
+  ]);
+});
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+//Case " By  Lecture "
+describe("Booking Updates by lecture ", async function () {
+  this.timeout(5000);
+  //now let's login the user before we run any tests
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    await knex("user").insert(officerTuple);
+    await knex("course").insert(courseTuple);
+    await knex("lecture").insert(futureLectureTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(officerCredentials);
+    expect(res.status).to.equal(200);
+  });
+  
+  let detailslecture={
+    bookable:false,
+    granularity:"by lecture",
+    batchItems : ['1']
+  }
+  it("should return  with status 202", async () => {
+    const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailslecture);
+    expect(res.body.message).to.not.be.null;
+    expect(res.status).to.equal(202);
+  });
+  it("it should change the status to distance", async () => {
+  const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailslecture);
+  const lectureChanged = await knex
+    .select("lecture.status")
+    .from("lecture")
+    .where("start",futureLectureTuple.start)
+    .andWhere("id",futureLectureTuple.id);
+     expect(lectureChanged).to.have.deep.members([
+    { status: "distance" },
+  ]);    
+});
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+});
+
+
+
