@@ -33,7 +33,10 @@ class ReservationCalendar extends React.Component {
             lectureState = lectureTypes.full;
           }
         } else {
-          lectureState = obj.status = lectureTypes.distance;
+          lectureState =
+          obj.status === "distance"
+            ? lectureTypes.distance
+            : lectureTypes.bookable;
         }
         return { ...obj, color, booked: false, lectureState };
       })
