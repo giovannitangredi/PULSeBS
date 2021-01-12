@@ -7,10 +7,6 @@ const option = {
     tooltip: {},
     dataset: {
         source: [
-            ['product', '2015', '2016', '2017'],
-            ['Matcha Latte', 43.3, 85.8, 93.7],
-            ['Milk Tea', 83.1, 73.4, 55.1],
-            ['Cheese Cocoa', 86.4, 65.2, 82.5]
         ]
     },
     xAxis: { type: 'category' },
@@ -45,13 +41,13 @@ export const StaticCharts = (props) => {
 
     return <>
         <ButtonGroup>
-            <Button variant="secondary" onClick={() => setTime('week')}>Week</Button>
-            <Button variant="secondary" onClick={() => setTime('month')}>Month</Button>
+            <Button active={time === 'week'} variant="secondary" onClick={() => setTime('week')}>Week</Button>
+            <Button active={time === 'month'} variant="secondary" onClick={() => setTime('month')}>Month</Button>
         </ButtonGroup>
 
         <ButtonGroup>
             {
-                props.course_list.map(item => <Button key={item.id} variant="secondary" onClick={() => setCourse(item.id)}>{item.name}</Button>)
+                props.course_list.map(item => <Button key={item.id} active={course === item.id} variant="secondary" onClick={() => setCourse(item.id)}>{item.name}</Button>)
             }
         </ButtonGroup>
         <div id='instance' style={{ width: '100%', height: 400 }} />

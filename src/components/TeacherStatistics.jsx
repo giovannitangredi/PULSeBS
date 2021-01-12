@@ -413,7 +413,7 @@ export const CourseDetail = (props) => {
               </Table>
             </div>
           </div>
-          <StaticCharts data={{ bookedLectures, monthLectures }} course_list={myCourses}></StaticCharts>
+          <StaticCharts data={{ bookedLectures, monthLectures }} course_list={myCourses.filter(c => courseFilter.includes(c.id))}></StaticCharts>
         </div>
       </div>
     </>
