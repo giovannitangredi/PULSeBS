@@ -1,6 +1,7 @@
 //import React from 'react';
 import React from "react";
 import ListGroup from "react-bootstrap/ListGroup";
+import Button from "react-bootstrap/Button";
 import LectureItem from "./LectureItem";
 import CourseItem from "./CourseItem";
 import StudentItem from "./StudentItem";
@@ -27,6 +28,9 @@ class StudentList extends React.Component {
       alertText: "",
       alertType: "success",
       alertShow: false,
+      absent: "absence",
+      present: "presence",
+      presentStudentsToSend: "", // list of present students
     };
   }
 
@@ -74,6 +78,7 @@ class StudentList extends React.Component {
     });
   };
 
+  // prepare data for the calendar
   formatEvents() {
     return this.state.lectures.map((lecture) => {
       const {
@@ -112,10 +117,8 @@ class StudentList extends React.Component {
       };
     });
   }
-
+  // Calendar event elements to render
   renderEventContent(eventInfo) {
-    
-
     if (eventInfo)
       return (
         <div
@@ -128,35 +131,39 @@ class StudentList extends React.Component {
           }}
         >
           <div className="my-2 text-center">
-          <img className=" flex-fill align-self-center" src= {eventInfo.event.extendedProps.status === "presence"
-              ? "./imgs/presence.png"
-              : "./imgs/online.png"}
-               style={{
-            height: "23px",
-            width:"23px"
-          }}/>
-          <p style={{ textAlign: "center" }} className="my-auto  flex-fill ">
-            {eventInfo.event.extendedProps.status === "presence" ? (
-              <>
-              Room {eventInfo.event.extendedProps.room} <br></br>
-                Seats: {eventInfo.event.extendedProps.capacity}
-                <br></br>
-                Lecture in Precence
-              </>
-            ) : 
-            <>
-                Virtual Classroom <br></br>
-                Remote lecture
+            <img
+              className=" flex-fill align-self-center"
+              src={
+                eventInfo.event.extendedProps.status === "presence"
+                  ? "./imgs/presence.png"
+                  : "./imgs/online.png"
+              }
+              style={{
+                height: "23px",
+                width: "23px",
+              }}
+            />
+            <p style={{ textAlign: "center" }} className="my-auto  flex-fill ">
+              {eventInfo.event.extendedProps.status === "presence" ? (
+                <>
+                  Room {eventInfo.event.extendedProps.room} <br></br>
+                  Seats: {eventInfo.event.extendedProps.capacity}
+                  <br></br>
+                  Lecture in Precence
                 </>
-            }
-           
-          </p>
+              ) : (
+                <>
+                  Virtual Classroom <br></br>
+                  Remote lecture
+                </>
+              )}
+            </p>
           </div>
         </div>
       );
     else return null;
   }
-
+  // fires when event on calendar is clicked
   handleEventClick = ({ event }) => {
     this.scrolltoview("studentlistview");
     let lectureid = event._def.extendedProps.id;
@@ -166,7 +173,7 @@ class StudentList extends React.Component {
     });
     this.getStudentList(lectureid);
   };
-
+  // sends changes of lecture in presence and remote
   handleConvertLecture = (lectureId) => {
     const course = this.state.selectedCourse;
     course &&
@@ -188,18 +195,17 @@ class StudentList extends React.Component {
     });
   };
 
-  handleBooking = () => {
+  ShowNotification = () => {
     this.setState({ alertShow: true });
 
     setTimeout(() => {
       this.setState({ alertShow: false });
     }, 3000);
-    //this.scrolltoview("CoursesElement");
+    this.scrolltoview("CoursesElement");
   };
+  // Cancel lecture event to show notification
   cancelLectureHandle = (lecture) => {
-    this.handleBooking();
-
-    console.log(lecture.extendedProps.id);
+    this.ShowNotification();
     const course = this.state.selectedCourse;
     course &&
       course.id &&
@@ -216,10 +222,89 @@ class StudentList extends React.Component {
         });
   };
 
+  // handle group selection events
+  handleCheckboxSelections = (event) => {
+    let checkboxes = document.getElementsByClassName("st_chckbx");
+    debugger;
+    let newarray= this.state.students.map(object => ({ ...object }));
+    switch (event.target.id) {
+      case "select-st-all":
+       
+        newarray.map(e=>{
+         e.status=this.state.present
+      });
+      this.setState({students:newarray});
+        
+        break;
+      case "select-st-none":
+        
+        newarray.map(e=>{
+          e.status=this.state.absent
+       });
+       this.setState({students:newarray});
+        break;
+      case "select-st-inverse":
+        newarray.map(e=>{
+          e.status= (e.status==this.state.present)?this.state.absent:this.state.present;
+       });
+       this.setState({students:newarray});
+        break;
+    }
+    debugger;
+    let listofStudents =newarray
+      .filter((e) => e.status == this.state.present)
+      .map((e) => e.id);
+    this.setState({ presentStudentsToSend: listofStudents });
+
+  };
+
   componentDidMount() {
     this.setState({ selectedLecture: 1 });
     this.getCourseList();
   }
+
+  // using prepared list of students put the changes on the server
+  sendStudentPresentChanges = () => {
+    debugger;
+    let lectureid = this.state.selectedLecture.extendedProps.id;
+    let stbody = this.state.presentStudentsToSend;
+    axios
+      .put(`/lectures/${lectureid}/attendances`, { studentlist: stbody })
+      .then((response) => {
+        this.setState({ alertType: "success" });
+        this.setState({
+          alertText: "List of students are updated successfully",
+        });
+        this.ShowNotification();
+      })
+      .catch((error) => {
+        this.setState({ alertType: "danger" });
+        this.setState({ alertText: error.response.data.message.toString() });
+        this.ShowNotification();
+      });
+  };
+
+  // make a list of selected students and save it in a state property
+  oncheckboxchange = (studentid, isPresent) => {
+    var st = this.state.students.find((std) => {
+      return std.id === studentid;
+    });
+    st.status = isPresent ? this.state.present : this.state.absent;
+
+    this.state.students.splice(
+      this.state.students.findIndex((std) => {
+        return std.id === studentid;
+      }),
+      1,
+      st
+    );
+    let listofStudents =Array.from( this.state.students
+      .filter((e) => e.status == this.state.present)
+      .map((e) => e.id));
+    this.setState({ presentStudentsToSend: listofStudents });
+  };
+
+  
 
   render() {
     return (
@@ -387,10 +472,21 @@ class StudentList extends React.Component {
               style={{ width: "100%", margin: "1rem 0rem" }}
             >
               <Card.Header>
-                {" "}
-                <h4>
-                  <b>{this.state.studenttitle}</b> Students
-                </h4>{" "}
+                <div className="d-flex justify-content-between">
+                  <h4>
+                    <b>{this.state.studenttitle}</b> Students
+                  </h4>{" "}
+                  <Button
+                    id="select-st-all"
+                    onClick={(evt) => this.sendStudentPresentChanges(evt)}
+                    className="m-1"
+                    variant={
+                      this.state.students.length > 0 ? "success" : "secondary"
+                    }
+                  >
+                    ApplyChanges
+                  </Button>
+                </div>
               </Card.Header>
               <div className="row">
                 <div className="col">
@@ -403,21 +499,56 @@ class StudentList extends React.Component {
                               <div className="col-lg-2 d-flex justify-content-center">
                                 <label>Id</label>
                               </div>
-                              <div className="col-lg-3 d-flex justify-content-center">
+                              <div className="col-lg-2 d-flex justify-content-center">
                                 <label>Name</label>
                               </div>
                               <div className="col-lg-3 d-flex justify-content-center">
                                 <label>Surname</label>
                               </div>
-                              <div className="col-lg-4 d-flex justify-content-center">
+                              <div className="col-lg-3 d-flex justify-content-center">
                                 <label>Email</label>
+                              </div>
+                              <div className="col-lg-2 d-flex justify-content-center">
+                                <Button
+                                  id="select-st-all"
+                                  onClick={(evt) =>
+                                    this.handleCheckboxSelections(evt)
+                                  }
+                                  variant="link"
+                                >
+                                  All
+                                </Button>
+                                <Button
+                                  id="select-st-none"
+                                  onClick={(evt) =>
+                                    this.handleCheckboxSelections(evt)
+                                  }
+                                  variant="link"
+                                >
+                                  None
+                                </Button>
+                                <Button
+                                  id="select-st-inverse"
+                                  onClick={(evt) =>
+                                    this.handleCheckboxSelections(evt)
+                                  }
+                                  variant="link"
+                                >
+                                  Inverse
+                                </Button>
                               </div>
                             </div>
                           </div>
                         </div>
                       </ListGroup.Item>
                       {this.state.students.map((student) => (
-                        <StudentItem key={student.id} student={student} />
+                        <StudentItem
+                          key={student.id}
+                          student={student}
+                          oncheckboxchange={this.oncheckboxchange}
+                          absent={this.state.absent}
+                          present={this.state.present}
+                        />
                       ))}
                     </ListGroup>
                   ) : (
