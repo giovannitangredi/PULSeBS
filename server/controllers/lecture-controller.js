@@ -526,7 +526,7 @@ exports.getFutureLectures = async (req, res) => {
     })
     .catch((err) => {
       res.status(501).json({
-        message: `There was an error retrieving the system stats: ${err}`,
+        message: `There was an error retrieving the data about the lectures: ${err}`,
       });
     });
 };
