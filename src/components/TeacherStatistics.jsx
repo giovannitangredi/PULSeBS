@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { Table, Button, ListGroup } from "react-bootstrap";
 import axios from "axios";
+import { StaticCharts } from './StaticCharts';
 import { DatePickerComponent } from "./DatePickerComponent";
 
 export const CourseDetail = (props) => {
@@ -49,7 +50,7 @@ export const CourseDetail = (props) => {
         } else {
           newFilter = newFilter.filter((x) => x != filter);
           setcourseFilter(newFilter);
-           setcourseFilter(newFilter);
+          setcourseFilter(newFilter);
         }
       }
     }
@@ -61,8 +62,8 @@ export const CourseDetail = (props) => {
     listofweeks.forEach((week) => {
       weekdays.push(
         week.startDate.getFullYear().toString() +
-          "-" +
-          week.startDate.getWeek().toString()
+        "-" +
+        week.startDate.getWeek().toString()
       );
     });
     // setWeeksBetween(weekdays);
@@ -85,10 +86,10 @@ export const CourseDetail = (props) => {
           `/courses/${id}/bookings?fromWeek=${startDate
             .getFullYear()
             .toString()}-${startDate
-            .getWeek()
-            .toString()}&toWeek=${endDate
-            .getFullYear()
-            .toString()}-${endDate.getWeek().toString()}`
+              .getWeek()
+              .toString()}&toWeek=${endDate
+                .getFullYear()
+                .toString()}-${endDate.getWeek().toString()}`
         )
       );
     });
@@ -98,10 +99,8 @@ export const CourseDetail = (props) => {
         GetFromServer(
           `/courses/${id}/bookings?fromMonth=${startDate
             .getFullYear()
-            .toString()}-${
-            startDate.getMonth() + (1).toString()
-          }&toMonth=${endDate.getFullYear().toString()}-${
-            endDate.getMonth() + 1
+            .toString()}-${startDate.getMonth() + (1).toString()
+          }&toMonth=${endDate.getFullYear().toString()}-${endDate.getMonth() + 1
           }`
         )
       );
@@ -127,7 +126,6 @@ export const CourseDetail = (props) => {
       .then((values) => {
         values.forEach((reservation) => {
           reservation.forEach((reservation2) => {
-            console.log(reservation2);
             reservations.push(reservation2);
           });
         });
@@ -258,6 +256,7 @@ export const CourseDetail = (props) => {
     }
     return dateArr;
   };
+
   return (
     <>
       <div className="container col-sm-9">
@@ -297,6 +296,7 @@ export const CourseDetail = (props) => {
                     <th>Course Name</th>
                     <th>Week</th>
                     <th>Bookings avarage</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -309,6 +309,7 @@ export const CourseDetail = (props) => {
                             <td>{item.course_name}</td>
                             <td>{item.week ? item.week : "-"}</td>
                             <td>{item.booking}</td>
+                            <td>{item.attendances}</td>
                           </tr>
                         </React.Fragment>
                       );
@@ -337,6 +338,7 @@ export const CourseDetail = (props) => {
                     <th>Course Name</th>
                     <th>Month</th>
                     <th>Bookings avarage</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -349,6 +351,7 @@ export const CourseDetail = (props) => {
                             <td>{item.course_name}</td>
                             <td>{item.month ? item.month : "-"}</td>
                             <td>{item.booking}</td>
+                            <td>{item.attendances}</td>
                           </tr>
                         </React.Fragment>
                       );
@@ -377,6 +380,7 @@ export const CourseDetail = (props) => {
                     <th>Course Name</th>
                     <th>Lecture Date</th>
                     <th>Bookings</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -389,6 +393,7 @@ export const CourseDetail = (props) => {
                             <td>{item.course_name}</td>
                             <td>{item.date}</td>
                             <td>{item.booking}</td>
+                            <td>{item.attendances}</td>
                           </tr>
                         </React.Fragment>
                       );
@@ -396,20 +401,21 @@ export const CourseDetail = (props) => {
                   {!reserved || reserved.length > 0 ? (
                     ""
                   ) : (
-                    <tr>
-                      <td colspan="4">
-                        <div className="w-100 d-flex justify-content-center">
-                          <h5>No Record to show</h5>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+                      <tr>
+                        <td colspan="4">
+                          <div className="w-100 d-flex justify-content-center">
+                            <h5>No Record to show</h5>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                 </tbody>
               </Table>
             </div>
           </div>
+          <StaticCharts data={{ bookedLectures, monthLectures }} course_list={myCourses.filter(c => courseFilter.includes(c.id))}></StaticCharts>
         </div>
       </div>
     </>
   );
-};
+}
