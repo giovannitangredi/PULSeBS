@@ -3,11 +3,20 @@ import Button from "react-bootstrap/Button";
 import moment from "moment";
 
 export const BookedLecture = (props: any) => {
+  const greenColor = "#36D745";
   const styles = {
     col: {
       border: "ridge",
       borderWidth: "0 0.1em 0.1em 0.1em",
     },
+    last : {
+      border: "none",
+    },
+    button : {
+      backgroundColor : greenColor,
+      color : "black",
+      borderColor : greenColor
+    }
   };
   const handleCancel = (evt: any) => {
     if (evt) evt.preventDefault();
@@ -30,8 +39,8 @@ export const BookedLecture = (props: any) => {
           .format("HH:mm")
           .concat("-" + moment(props.lecture.end).format("HH:mm"))}
       </td>
-      <td style={styles.col}>
-        <Button variant="warning" onClick={(evt) => handleCancel(evt)}>
+      <td style={styles.last}>
+        <Button style = {styles.button} onClick={(evt) => handleCancel(evt)}>
           {" "}
           Unbook{" "}
         </Button>
