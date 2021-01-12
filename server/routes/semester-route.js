@@ -8,7 +8,7 @@ const semesterRoutes = require("./../controllers/semester-controller");
 const router = express.Router();
 
 router.get("/", semesterRoutes.getSemester);
-//router.post("/:", semesterRoutes.setSemester);
+router.get("/future", semesterRoutes.getFutureSemesters);
 
 // Export router
 module.exports = router;

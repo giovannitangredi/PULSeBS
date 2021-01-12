@@ -7,6 +7,9 @@ export const BookedLectureList = (props) => {
       border: "ridge",
       borderWidth: "0 0.1em 0.1em 0.1em",
     },
+    last : {
+      border: "none",
+    },
   };
   return (
     <Table striped bordered={true} hover>
@@ -17,7 +20,7 @@ export const BookedLectureList = (props) => {
           <th style={styles.head}>Room</th>
           <th style={styles.head}>Date</th>
           <th style={styles.head}>Time</th>
-          <th style={styles.head}></th>
+          <th style={styles.last}></th>
         </tr>
       </thead>
       <tbody>
