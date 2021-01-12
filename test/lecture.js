@@ -733,7 +733,7 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return 401 (Unauthorized error)", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${lectureTuple.id}/attendances`)
-        .send([studentTuple1.id]);
+        .send({studentlist: [studentTuple1.id]});
       expect(res.status).to.equal(401);
     });
     it("lecture_booking table should still have status null for the student 1", async () => {
@@ -754,7 +754,7 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return 204 after considering a valid lecture and Student 1 present", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
-        .send([studentTuple1.id]);
+        .send({studentlist: [studentTuple1.id]});
       expect(res.status).to.equal(204);
     });
     it("Should return Student 1 present, Student 2 absent", async () => {
@@ -766,14 +766,14 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return 400 (today's lesson but after now)", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${lectureTuple.id}/attendances`)
-        .send([studentTuple1.id]);
+        .send({studentlist: [studentTuple1.id]});
       expect(res.status).to.equal(400);
     });
 
     it("Should return 204 and no changed status after trying passing the same values as before", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
-        .send([studentTuple1.id]);
+        .send({studentlist: [studentTuple1.id]});
       expect(res.status).to.equal(204);
     });
     it("Should return Student 1 present Student 2 absent (after sending the same array)", async () => {
@@ -785,7 +785,7 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return 204 after passing two student with status present", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
-        .send([studentTuple1.id, studentTuple2.id]);
+        .send({studentlist: [studentTuple1.id, studentTuple2.id]});
       expect(res.status).to.equal(204);
     });
     it("Should return all students for the lecture present", async () => {
@@ -796,7 +796,7 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return all students absent after passing an empty array (students previous status present)", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
-        .send([]);
+        .send({studentlist: []});
       expect(res.status).to.equal(204);
       expect(
         (await knex.select("status").from("lecture_booking")
@@ -820,13 +820,13 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return 404 (Lecture doesn't exist)", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/16/attendances`)
-        .send([studentTuple1.id]);
+        .send({studentlist: [studentTuple1.id]});
       expect(res.status).to.equal(404);
     });
     it("Should return 400 (Wrong body)", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
-        .send([studentTuple1.name])
+        .send({studentlist: [studentTuple1.name]})
       expect(res.status).to.equal(400);
     });
   });
@@ -837,7 +837,7 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return 400", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${oldLectureTuple.id}/attendances`)
-        .send([studentTuple1.id]);
+        .send({studentlist: [studentTuple1.id]});
       expect(res.status).to.equal(400);
     });
   })
@@ -846,7 +846,7 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     it("Should return 400 (Wrong day)", async () => {
       const res = await authenticatedUser
         .put(`/api/lectures/${futureLectureTuple.id}/attendances`)
-        .send([studentTuple1.id]);
+        .send({studentlist: [studentTuple1.id]});
       expect(res.status).to.equal(400);
     });
     it("lecture_booking table should still have status null for the futureLecture", async () => {
