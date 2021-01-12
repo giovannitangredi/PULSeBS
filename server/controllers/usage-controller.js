@@ -197,7 +197,7 @@ exports.getSystemStats = async (req, res) => {
       if (result[0].role != "manager") {
         //console.log(result.role);
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data.",
         });
       }
     })
@@ -231,7 +231,7 @@ exports.getAllLecturesStats = async (req, res) => {
     .then((result) => {
       if (result[0].role != "manager")
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data.",
         });
     })
     .catch((err) => {
@@ -272,7 +272,7 @@ exports.getCourseTotalStats = async (req, res) => {
     .then((result) => {
       if (result[0].role != "manager")
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data",
         });
     })
     .catch((err) => {
@@ -308,7 +308,7 @@ exports.getCourseLecturesStats = async (req, res) => {
     .then((result) => {
       if (result[0].role != "manager")
         res.status(401).json({
-          message: "Unauthorize acces only managers can acces this query",
+          message: "Unauthorized access, only managers can access this data.",
         });
     })
     .catch((err) => {

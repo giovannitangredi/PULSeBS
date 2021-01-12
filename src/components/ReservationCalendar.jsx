@@ -127,7 +127,7 @@ class ReservationCalendar extends React.Component {
         ? "Do you want to book this lecture?"
         : "Do you want to be added to the booking waiting list of this lecture?");
 
-    moment(start, "YYYY-MM-DD hh:mm:ss").isAfter(moment()) &&
+    moment(start, "YYYY-MM-DD HH:mm:ss").isAfter(moment()) &&
       confirmText &&
       window.confirm(confirmText) &&
       this.props.bookLecture(id);
@@ -207,7 +207,7 @@ class ReservationCalendar extends React.Component {
                       }}
                     />
                     <text fontSize="14" fontFamily="Verdana" x="703" y="22">
-                     In Waiting List
+                      In Waiting List
                     </text>
                     <rect
                       x="810"
@@ -220,7 +220,6 @@ class ReservationCalendar extends React.Component {
                         stroke: "rgb(0,0,0)",
                       }}
                     />
-                   
                   </svg>
                 </div>
               </div>
