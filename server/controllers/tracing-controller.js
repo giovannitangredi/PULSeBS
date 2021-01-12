@@ -6,7 +6,7 @@ const checkManager = async (userId)=>{
     .from("user")
     .where("id", userId)
     .catch(() => {
-        throw { msg: `There was an error retrieving user info`, status: 400 };
+        throw { message: `There was an error retrieving user info`, status: 400 };
       });
     if (result[0].role != "manager") {
        return false;
@@ -19,7 +19,7 @@ exports.searchBySsn = async (req,res)=>{
     const user = req.user && req.user.id;
     if(!(await checkManager(user)))
     {
-        res.status(401).json({msg: "Only manager can search by ssn.",})
+        res.status(401).json({message: "Only manager can search by ssn.",})
     }
     knex
     .select(
@@ -37,7 +37,7 @@ exports.searchBySsn = async (req,res)=>{
     .then((queryResults)=>{
         if(queryResults.length == 0)
             {
-                res.status(402).json({msg: `There is none student with the following ssn`});
+                res.status(402).json({message: `There is none student with the following ssn`});
                 return;
             }
         else
@@ -46,7 +46,7 @@ exports.searchBySsn = async (req,res)=>{
         }
     })
     .catch(err=>{
-        res.status(501).json({msg: `There were an error while retrieving the student : ${err}`});
+        res.status(501).json({message: `There were an error while retrieving the student : ${err}`});
     });
 }
 // Get the List of students and teacher that had contact with the positive student with id = studentId
@@ -57,9 +57,9 @@ exports.getContactTracingReport = async (req,res)=>{
     const user = req.user && req.user.id;
     if(!(await checkManager(user)))
     {
-        res.status(401).json({msg: "Only manager can search by ssn.",})
+        res.status(401).json({message: "Only manager can search by ssn.",})
     }
-    //find the teacher of lecture the positive student was present
+    //Find the teachers that taught the lectures that the positive student attended.
     const teachers = knex
     .select({id : "u.id"},
     {name : "u.name"},
@@ -115,6 +115,6 @@ exports.getContactTracingReport = async (req,res)=>{
     })
     .catch(err=>{
         console.log(err)
-        res.status(502).json({msg : `An error happed while generating the contac tracing report : ${err}`});
+        res.status(502).json({message : `An error occurred while generating the contac tracing report : ${err}`});
     });
 }
