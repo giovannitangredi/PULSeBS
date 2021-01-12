@@ -1,7 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Form, Button, Spinner, Container } from "react-bootstrap";
+import {
+  Col,
+  Form,
+  Row,
+  Tab,
+  ListGroup,
+  Button,
+  Table,
+  Spinner,
+  Container,
+} from "react-bootstrap";
 import { Check, X } from "react-bootstrap-icons";
+import Papa from "papaparse";
+
+const CSViewer = ({ header, data, length, ...props }) => {
+  console.log(header, data, length)
+
+
+  return (
+    <Table {...props}>
+      <thead>
+        <tr>
+          {
+            header.map((item) =>
+              <th key={item}>{item}</th>
+            )
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          data.map((row) =>
+            <tr key={row}>
+              {
+                row.map((col) =>
+                  <td key={col}>{col}</td>
+                )
+              }
+            </tr>
+          )
+        }
+      </tbody>
+      <thead><tr><th colSpan = {header.length}>{`3 of ${length} rows` }</th></tr></thead>
+    </Table>
+  );
+};
 
 export const DataSetup = () => {
   const [files, setFiles] = useState({});
@@ -9,6 +53,8 @@ export const DataSetup = () => {
   const [resetDisabled, setResetDisabled] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [uploadStatus, setUploadStatus] = useState({});
+  const [previews, setPreviews] = useState({});
+
 
   const sendingOrder = ["students", "teachers", "courses", "enrollments"];
 
@@ -32,6 +78,7 @@ export const DataSetup = () => {
       setSubmitDisabled(false);
       // fix the problem with chrome that doesn't trigger onChange event when the same file is selected
       fileBrowser.value = "";
+      readCSV(fileSelected, fileBrowser.id, 4);
     }
   };
 
@@ -88,6 +135,17 @@ export const DataSetup = () => {
     }
   };
 
+  const readCSV = async (file, type, limit) => {
+    console.log(file, type);
+    let newPreviews = {};
+    Papa.parse(file, {
+      complete: function (results) {
+        newPreviews[type] = { header: results.data[0], data: results.data.slice(1, limit), length: results.data.length - 1 };
+        setPreviews(newPreviews);
+      }
+    })
+  };
+
   return (
     <Container className="d-flex flex-column pt-0 align-items-center rounded border border-primary col-10 bg-white">
       <div className="col-sm-8 my-4">
@@ -99,36 +157,50 @@ export const DataSetup = () => {
         onSubmit={handleOnSubmit}
       >
         {sendingOrder.map((item) => (
-          <Form.Row
-            key={item}
-            className="d-flex flex-row justify-content-center"
-          >
-            <Form.Group className="col-sm-10">
-              <Form.File custom>
-                <Form.File.Input
-                  id={item}
-                  accept=".csv"
-                  onChange={handleOnChange}
-                />
-                <Form.File.Label>
-                  {files[item] ? (
-                    <span className="font-weight-bold">{files[item].name}</span>
-                  ) : (
-                    `Upload file for ${item}`
-                  )}
-                </Form.File.Label>
-              </Form.File>
-            </Form.Group>
-            <Form.Group>
-              {uploadStatus[item] === "uploading" && (
-                <Spinner animation="border" />
-              )}
-              {uploadStatus[item] === "completed" && (
-                <Check size={48} color="green" />
-              )}
-              {uploadStatus[item] === "failed" && <X size={48} color="red" />}
-            </Form.Group>
-          </Form.Row>
+          <div key={item}>
+            <Form.Row
+              key={item}
+              className="d-flex flex-row justify-content-center"
+            >
+              <Form.Group as= {Row} className="col-sm-10">
+                <Form.Label column sm = "2">{item}:</Form.Label>
+                <Col>
+                <Form.File custom >
+                  <Form.File.Input
+                    id={item}
+                    accept=".csv"
+                    onChange={handleOnChange}
+                  />
+                  <Form.File.Label>
+                    {files[item] ? (
+                      <span className="font-weight-bold">{files[item].name}</span>
+                    ) : (
+                        `Upload file for ${item}`
+                      )}
+                  </Form.File.Label>
+                </Form.File>
+                </Col>
+              </Form.Group>
+              <Form.Group>
+                {uploadStatus[item] === "uploading" && (
+                  <Spinner animation="border" />
+                )}
+                {uploadStatus[item] === "completed" && (
+                  <Check size={48} color="green" />
+                )}
+                {uploadStatus[item] === "failed" && <X size={48} color="red" />}
+              </Form.Group>
+            </Form.Row>
+            {
+              files[item] && previews[item] &&
+              <Form.Row
+                key={`${item}-preview`}
+                className="d-flex flex-row justify-content-center"
+              >
+                <CSViewer {...previews[item]} size="sm" bordered className="col-sm-10 text-center" />
+              </Form.Row>
+            }
+          </div>
         ))}
         <Form.Row className="d-flex flex-row justify-content-center">
           <Button type="submit" disabled={submitDisabled}>
