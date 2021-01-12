@@ -1044,10 +1044,10 @@ describe("Booking Updates by all ", async function () {
     batchItems:['0']
   }
   
-  it("should return  with status 202", async () => {
+  it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsAll);
     expect(res.body.message).to.not.be.null;
-    expect(res.status).to.equal(202);
+    expect(res.status).to.equal(204);
   });
  
   it("it should change the status distance", async () => {
@@ -1094,10 +1094,10 @@ describe("Booking Updates by year ", async function () {
     granularity:"by year",
     batchItems : ['1']
   }
-  it("should return  with status 202", async () => {
+  it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsyear);
     expect(res.body.message).to.not.be.null;
-    expect(res.status).to.equal(202);
+    expect(res.status).to.equal(204);
   });
   it(" it should change the status to distance", async () => {
   const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsyear);
@@ -1144,10 +1144,10 @@ describe("Booking Updates by lecturer ", async function () {
     granularity:"by professor",
     batchItems : ['2']
   }
-  it("should return  with status 202", async () => {
+  it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsprof);
     expect(res.body.message).to.not.be.null;
-    expect(res.status).to.equal(202);
+    expect(res.status).to.equal(204);
   });
   it("it should change the status to distance", async () => {
   const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsprof);
@@ -1192,10 +1192,10 @@ describe("Booking Updates by semester ", async function () {
       granularity:"by semester",
       batchItems : ['1']
   }
-  it("should return  with status 202", async () => {
+  it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailssems);
     expect(res.body.message).to.not.be.null;
-    expect(res.status).to.equal(202);
+    expect(res.status).to.equal(204);
   });
   it("it should change the status to distance", async () => {
   const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailssems);
@@ -1242,10 +1242,10 @@ describe("Booking Updates by Course ", async function () {
     granularity:"by course",
     batchItems : ['1']
   }
-  it("should return  with status 202", async () => {
+  it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailscourse);
     expect(res.body.message).to.not.be.null;
-    expect(res.status).to.equal(202);
+    expect(res.status).to.equal(204);
   });
   it("it should change the status to distance", async () => {
   const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailscourse);
@@ -1290,10 +1290,10 @@ describe("Booking Updates by lecture ", async function () {
     granularity:"by lecture",
     batchItems : ['1']
   }
-  it("should return  with status 202", async () => {
+  it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailslecture);
     expect(res.body.message).to.not.be.null;
-    expect(res.status).to.equal(202);
+    expect(res.status).to.equal(204);
   });
   it("it should change the status to distance", async () => {
   const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailslecture);
