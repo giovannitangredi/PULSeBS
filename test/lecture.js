@@ -1288,7 +1288,7 @@ describe("Booking Updates by lecture ", async function () {
   let detailslecture={
     bookable:false,
     granularity:"by lecture",
-    batchItems : ['1']
+    batchItems : [futureLectureTuple.id]
   }
   it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailslecture);

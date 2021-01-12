@@ -784,8 +784,13 @@ exports.updateBookability = async (req, res) => {
               message: `There was an error updating the bookability of the selected lectures: invalid granularity value.`,
             }).send();
         }
-        if (updateResult) res.status(204).send();
-        else res.status(304).send({message: `Selected parameters didn't affect any lecture.` }).send();
+        if (updateResult) {
+          res.status(204).send();
+        }
+        else 
+        {
+          res.status(304).send({message: `Selected parameters didn't affect any lecture.` });
+        }
       }
     })
     .catch((err) => {
