@@ -229,7 +229,7 @@ class StudentList extends React.Component {
     switch (event.target.id) {
       case "select-st-all":
        
-        newarray.map(e=>{
+        newarray.forEach(e=>{
          e.status=this.state.present
       });
       this.setState({students:newarray});
@@ -237,13 +237,13 @@ class StudentList extends React.Component {
         break;
       case "select-st-none":
         
-        newarray.map(e=>{
+        newarray.forEach(e=>{
           e.status=this.state.absent
        });
        this.setState({students:newarray});
         break;
       case "select-st-inverse":
-        newarray.map(e=>{
+        newarray.forEach(e=>{
           e.status= (e.status==this.state.present)?this.state.absent:this.state.present;
        });
        this.setState({students:newarray});
