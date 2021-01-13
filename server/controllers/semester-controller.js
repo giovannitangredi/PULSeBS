@@ -25,7 +25,7 @@ exports.getFutureSemesters = async (req, res) => {
     .where("id", userId)
     .then(async (result) => {
       if (result[0].role != "supportOfficer") {
-        res.status(401).json({
+        return res.status(401).json({
           message:
             "Unauthorized access, only support officers can access this data.",
         });

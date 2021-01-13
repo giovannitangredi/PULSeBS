@@ -109,17 +109,38 @@ const lectureTuple = {
   room: 1,
 };
 
+const onlinelectureTuple = {
+  id: 5,
+  course: courseTuple.id,
+  lecturer: teacherTuple.id,
+  start: moment().add(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().add(3, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  capacity: 25,
+  status: "distance",
+  room: 1,
+};
+
 const oldLectureTuple = {
   id: 4,
   course: courseTuple.id,
-  lecturer: teacherTuple.id,
-  start: moment().subtract(2, "hours").format("YYYY-MM-DD HH:mm:ss"),
-  end: moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  lecturer: teacherTuple.id,  //oggi ma prima di ora
+  start: moment().subtract(1, "minutes").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
   capacity: 25,
   status: "presence",
   room: 1,
 };
 
+const startingNowLectureTuple = {
+  id: 6,
+  course: courseTuple.id,
+  lecturer: teacherTuple.id,
+  start: moment().subtract(10, "minutes").format("YYYY-MM-DD HH:mm:ss"),
+  end: moment().add(1, "hours").format("YYYY-MM-DD HH:mm:ss"),
+  capacity: 25,
+  status: "distance",
+  room: 1,
+};
 
 const futureLectureTuple = {
   id: 3,
@@ -247,6 +268,7 @@ describe("Lecture test", async function () {
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
+    await knex("lecture").insert(onlinelectureTuple);
     await knex("lecture").insert(limitedCapacityLectureTuple);
     await knex("course_available_student").insert(courseStudent1Tuple);
     await knex("course_available_student").insert(courseStudent2Tuple);
@@ -275,6 +297,18 @@ describe("Lecture test", async function () {
       const email = await newEmailPromise;
       expect(email.body).to.match(/You have successfully booked a seat/);
     });
+
+    it("should return 400, There was an error booking the lecture: 400", async () => {//try booking an already booked
+      await authenticatedUser
+        .post(`/api/lectures/${lectureTuple.id}/book`)
+        .expect(400);
+    });
+
+    it("should return 400, There was an error booking the lecture: 400", async () => {//try booking a remote lecture (Lecture of the course ${lecture.courseName} is a remote one, can't be bookable)
+      await authenticatedUser
+        .post(`/api/lectures/${onlinelectureTuple.id}/book`)
+        .expect(400);
+    })
   });
 
   describe("Waiting list insertion", async () => {
@@ -675,6 +709,7 @@ describe("Presence Lecture into distance one ", async function () {
     await knex("user").insert(teacherTuple);
     await knex("course").insert(courseTuple);
     await knex("lecture").insert(lectureTuple);
+    await knex("lecture").insert(startingNowLectureTuple);
     await knex("lecture_booking").insert(lectureBookingTuple);
     const res = await authenticatedUser
       .post("/api/auth/login")
@@ -698,6 +733,20 @@ describe("Presence Lecture into distance one ", async function () {
       { id: lectureTuple.id, status: "distance" },
     ]);
     expect(res.body.message).to.not.be.null;
+  });
+
+  it("should return status 304 ", async () => { //convert already remote lecture
+    const res = await authenticatedUser
+      .put(`/api/lectures/${lectureTuple.id}/convert`)
+      .send();
+    expect(res.status).to.equal(304);
+  });
+
+  it("should return status 304 ", async () => { //try to convert a starting lecture
+    const res = await authenticatedUser
+      .put(`/api/lectures/${startingNowLectureTuple.id}/convert`)
+      .send();
+    expect(res.status).to.equal(304);
   });
 
   it("should return status 401 ", async () => {
@@ -861,7 +910,6 @@ describe("Story 18 - As a teacher I want to record the students present at my le
       expect(res.status).to.equal(400);
     });
   })
-
   describe("Test Wrong day", async () => {
     it("Should return 400 (Wrong day)", async () => {
       const res = await authenticatedUser
@@ -886,6 +934,40 @@ describe("Story 18 - As a teacher I want to record the students present at my le
     await knex("course_available_student").del();
   })
 });
+
+describe("Retrieve future lecture, professor, courses when not logged as support office", async () => {
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(teacherCredentials);
+    expect(res.status).to.equal(200);
+  });
+
+  it("Should return 401, Unauthorized access", async () => {
+    await authenticatedUser.get(`/api/lectures/future`).expect(401, {message: "Unauthorized access, only support officers can access this data."});
+  });
+
+  it("Should return 401, Unauthorized access", async () => {
+    await authenticatedUser.get(`/api/lectures/future/teachers`).expect(401, {message: "Unauthorized access, only support officers can access this data."});
+  });
+
+  it("Should return 401, Unauthorized access", async () => {
+    await authenticatedUser.get(`/api/lectures/future/courses`).expect(401, {message: "Unauthorized access, only support officers can access this data."});
+  });
+  after(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("lecture_booking").del();
+    await knex("course").del();
+  });
+})
+
+
 //Retrieves all lectures that will be held in the future
 describe("Future Lectures ", async function () {
   this.timeout(5000);
@@ -931,9 +1013,8 @@ describe("Future Lectures ", async function () {
   });
 });
 
-
-//Retrieves the profressor that will teach the lectures in the future.
-describe("Future Profressor ", async function () {
+//Retrieves the professor that will teach the lectures in the future.
+describe("Future Professor ", async function () {
   this.timeout(5000);
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
@@ -1017,8 +1098,6 @@ describe("Future Courses ", async function () {
 });
 
 //Updates lecture bookable to unbookable 
-
-
 // Case :"All"
 describe("Booking Updates by all ", async function () {
   this.timeout(10000);
@@ -1069,7 +1148,6 @@ describe("Booking Updates by all ", async function () {
   });
 });
 
-
 // Case :"Year"
 describe("Booking Updates by year ", async function () {
   this.timeout(5000);
@@ -1094,6 +1172,21 @@ describe("Booking Updates by year ", async function () {
     granularity:"by year",
     batchItems : ['1']
   }
+
+  it("should return status 421, No op, data given didn't modify the database.", async () => {
+    await authenticatedUser.post(`/api/lectures/bookable`).send({bookable:false,
+      granularity:"by year",
+      batchItems : []})
+    .expect(421, {message: "No op, data given didn't modify the database."});
+  });
+
+  it("should return status 400, invalid granularity value", async () => {
+    await authenticatedUser.post(`/api/lectures/bookable`).send({bookable:false,
+      granularity:"wrong",
+      batchItems : [1]})
+    .expect(400, {message: "There was an error updating the bookability of the selected lectures: invalid granularity value."});
+  });
+
   it("should return  with status 204", async () => {
     const res = await authenticatedUser.post(`/api/lectures/bookable`).send(detailsyear);
     expect(res.body.message).to.not.be.null;

@@ -162,6 +162,29 @@ describe("Semester test", async function () {
   });
 });
 
+describe("Retrieves semesters when not logged as support officer", async () => {
+  const authenticatedUser = request.agent(app);
+  before(async () => {
+    await knex("user").del();
+    await knex("lecture").del();
+    await knex("course").del();
+    await knex("user").insert(teacherTuple);
+    const res = await authenticatedUser
+      .post("/api/auth/login")
+      .send(teacherCredentials);
+    expect(res.status).to.equal(200);
+  });
+
+  it("Should return 401, Unauthorized access, only support officers can access this data.", async () => {
+    await authenticatedUser.get(`/api/semesters/future`).expect(401, {message: "Unauthorized access, only support officers can access this data."});
+  })
+
+  after(async () => {
+    await knex("user").del();
+  });
+})
+
+
 describe("Future Semester ", async function () {
   this.timeout(5000);
   //now let's login the user before we run any tests

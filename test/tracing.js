@@ -7,11 +7,6 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 const moment = require("moment");
 
-const managerCredentials = {
-  email: "mario.castello@polito.it",
-  password: "password",
-};
-
 const Student1Tuple = {
   // in the lecture with the student corona +
   id: "1",
@@ -83,6 +78,16 @@ const managerTuple = {
   city: "Napoli",
   birthday: "1961-11-04",
   ssn: "UQ88181741",
+};
+
+const managerCredentials = {
+  email: managerTuple.email,
+  password: "password",
+};
+
+const teacherCredentials = {
+  email: teacherTuple.email,
+  password: "password",
 };
 
 const courseTuple = {
@@ -197,6 +202,32 @@ describe("Tracing test", async function () {
     await knex("course_available_student").insert(courseCoronaPlusStudentTuple);
   });
 
+  describe("contact tracing when not logged as manager", async () => {
+    before(async () => {
+      const res = await authenticatedUser
+        .post("/api/auth/login")
+        .send(teacherCredentials)
+        .expect(200);
+    });
+
+    it("Should return 401, Only manager can search by ssn.", async () => {
+      await authenticatedUser
+        .get(`/api/tracing/${Student1Tuple.ssn}/search`)
+        .expect(401, { message: "Only manager can search by ssn." });
+    })
+
+    it("Should return 401, Only manager can tracing users", async () => {
+      await authenticatedUser
+        .get(`/api/tracing/${StudentCoronaPlusTuple.id}/report`)
+        .expect(401, { message: "Only manager can search by ssn." });
+    })
+    after(async () => {
+      await authenticatedUser
+        .post("/api/auth/logout")
+        .expect(200);
+    })
+  })
+
   describe("preparing records to generate a contact tracing report starting with a positive student so that we comply with safety regulations", async () => {
     before(async () => {
       const res = await authenticatedUser
@@ -223,11 +254,16 @@ describe("Tracing test", async function () {
       expect(res.body[0].id).to.equal(Student1Tuple.id);
     });
 
+    it("Should return 402 error, there is none student with the following ssn", async () => {
+      await authenticatedUser
+        .get(`/api/tracing/wrong/search`)
+        .expect(402, { message: "There is none student with the following ssn" });
+    })
+
     it("Should return List of students and teacher that had contact with the positive student with id = studentId", async () => {
       const res = await authenticatedUser
         .get(`/api/tracing/${StudentCoronaPlusTuple.id}/report`)
         .expect(200);
-      console.log(res.body[1].id);
       // list of teacher and students in the lecture with student positive corona
       expect(res.body.length).to.equal(3);
       // get the teacher in the lecture with student positive corona

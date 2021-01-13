@@ -620,7 +620,7 @@ exports.getFutureLectures = async (req, res) => {
     .where("id", user)
     .then(async (result) => {
       if (result[0].role != "supportOfficer") {
-        res.status(401).json({
+        return res.status(401).json({
           message:
             "Unauthorized access, only support officers can access this data.",
         });
@@ -656,7 +656,7 @@ exports.getFutureTeachers = async (req, res) => {
     .where("id", user)
     .then(async (result) => {
       if (result[0].role != "supportOfficer") {
-        res.status(401).json({
+        return res.status(401).json({
           message:
             "Unauthorized access, only support officers can access this data.",
         });
@@ -684,7 +684,7 @@ exports.getFutureCourses = async (req, res) => {
     .where("id", userId)
     .then(async (result) => {
       if (result[0].role != "supportOfficer") {
-        res.status(401).json({
+        return res.status(401).json({
           message:
             "Unauthorized access, only support officers can access this data.",
         });
@@ -780,7 +780,7 @@ exports.updateBookability = async (req, res) => {
               .debug();
             break;
           default: 
-            res.status(400).json({
+           return res.status(400).json({
               message: `There was an error updating the bookability of the selected lectures: invalid granularity value.`,
             }).send();
         }

@@ -19,7 +19,8 @@ exports.searchBySsn = async (req,res)=>{
     const user = req.user && req.user.id;
     if(!(await checkManager(user)))
     {
-        res.status(401).json({message: "Only manager can search by ssn.",})
+        res.status(401).json({message: "Only manager can search by ssn.",});
+        return;
     }
     knex
     .select(
@@ -57,7 +58,8 @@ exports.getContactTracingReport = async (req,res)=>{
     const user = req.user && req.user.id;
     if(!(await checkManager(user)))
     {
-        res.status(401).json({message: "Only manager can search by ssn.",})
+        res.status(401).json({message: "Only manager can search by ssn.",});
+        return;
     }
     //Find the teachers that taught the lectures that the positive student attended.
     const teachers = knex
