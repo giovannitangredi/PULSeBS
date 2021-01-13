@@ -59,6 +59,7 @@ exports.getBookingStats = async (req, res) => {
         .andWhere("st.week", ">=", fromWeek)
         .andWhere("st.week", "<=", toWeek)
         .andWhere(knex.raw("su.booking - su.cancellations"), ">", 0)
+        .andWhere("st.date", "<", knex.raw("date('now')"))
         .groupBy("course_id", "course_name", "week")
         .then((queryResults) => {
           res.json(queryResults);
@@ -87,6 +88,7 @@ exports.getBookingStats = async (req, res) => {
         .andWhere("st.month", ">=", fromMonth)
         .andWhere("st.month", "<=", toMonth)
         .andWhere(knex.raw("su.booking - su.cancellations"), ">", 0)
+        .andWhere("st.date", "<", knex.raw("date('now')"))
         .groupBy("course_id", "course_name", "month")
         .then((queryResults) => {
           res.json(queryResults);
@@ -195,25 +197,26 @@ exports.getSystemStats = async (req, res) => {
     .where("id", user)
     .then((result) => {
       if (result[0].role != "manager") {
-        //console.log(result.role);
         res.status(401).json({
           message: "Unauthorized access, only managers can access this data.",
         });
       }
-    })
-    .catch((err) => {
-      res.status(501).json({
-        message: `There was an error retrieving the system stats: ${err}`,
-      });
-    });
-  knex("stats_usage")
-    .sum({
-      cancellations: "cancellations",
-      bookings: knex.raw("(booking-cancellations)"),
-      attendances: "attendance",
-    })
-    .then((queryResults) => {
-      res.json(queryResults);
+      else {
+        knex("stats_usage")
+          .sum({
+            cancellations: "cancellations",
+            bookings: knex.raw("(booking-cancellations)"),
+            attendances: "attendance",
+          })
+          .then((queryResults) => {
+            res.json(queryResults);
+          })
+          .catch((err) => {
+            res.status(501).json({
+              message: `There was an error retrieving the system stats: ${err}`,
+            });
+          });
+      }
     })
     .catch((err) => {
       res.status(501).json({
@@ -230,34 +233,36 @@ exports.getAllLecturesStats = async (req, res) => {
     .where("id", user)
     .then((result) => {
       if (result[0].role != "manager")
-        res.status(401).json({
+          res.status(401).json({
           message: "Unauthorized access, only managers can access this data.",
         });
+      else {
+        knex
+          .select(
+            //{ lecture: "sl.lecture_name" },
+            { course: "sl.course_name" },
+            { courseId: "sl.course_id" },
+            { cancellations: "su.cancellations" },
+            { attendances: "su.attendance" },
+            { bookings: knex.raw("(su.booking-su.cancellations)") },
+            { date: "st.date" }
+          )
+          .from({ su: "stats_usage" })
+          .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
+          .join({ st: "stats_time" }, "st.tid", "=", "su.tid")
+          .then((queryResults) => {
+            res.json(queryResults);
+          })
+          .catch((err) => {
+            res.status(501).json({
+              message: `There was an error retrieving the all the lectures stats: ${err}`,
+            });
+          });
+      }
     })
     .catch((err) => {
       res.status(501).json({
         message: `There was an error retrieving the system stats: ${err}`,
-      });
-    });
-  knex
-    .select(
-      //{ lecture: "sl.lecture_name" },
-      { course: "sl.course_name" },
-      { courseId: "sl.course_id" },
-      { cancellations: "su.cancellations" },
-      { attendances: "su.attendance" },
-      { bookings: knex.raw("(su.booking-su.cancellations)") },
-      { date: "st.date" }
-    )
-    .from({ su: "stats_usage" })
-    .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
-    .join({ st: "stats_time" }, "st.tid", "=", "su.tid")
-    .then((queryResults) => {
-      res.json(queryResults);
-    })
-    .catch((err) => {
-      res.status(501).json({
-        message: `There was an error retrieving the all the lectures stats: ${err}`,
       });
     });
 };
@@ -274,29 +279,32 @@ exports.getCourseTotalStats = async (req, res) => {
         res.status(401).json({
           message: "Unauthorized access, only managers can access this data",
         });
+      else {
+        const courseid = req.params.courseid;
+        knex("stats_usage")
+          .sum({
+            cancellations: "cancellations",
+            bookings: knex.raw("(booking-cancellations)"),
+            attendances: "attendance",
+          })
+          .join({ sl: "stats_lecture" }, "stats_usage.lid", "=", "sl.lid")
+          .where("sl.course_id", courseid)
+          .then((queryResults) => {
+            res.json(queryResults);
+          })
+          .catch((err) => {
+            res.status(501).json({
+              message: `There was an error retrieving the course  stats: ${err}`,
+            });
+          });
+      }
     })
     .catch((err) => {
       res.status(501).json({
         message: `There was an error retrieving the system stats: ${err}`,
       });
     });
-  const courseid = req.params.courseid;
-  knex("stats_usage")
-    .sum({
-      cancellations: "cancellations",
-      bookings: knex.raw("(booking-cancellations)"),
-      attendances: "attendance",
-    })
-    .join({ sl: "stats_lecture" }, "stats_usage.lid", "=", "sl.lid")
-    .where("sl.course_id", courseid)
-    .then((queryResults) => {
-      res.json(queryResults);
-    })
-    .catch((err) => {
-      res.status(501).json({
-        message: `There was an error retrieving the course  stats: ${err}`,
-      });
-    });
+
 };
 
 exports.getCourseLecturesStats = async (req, res) => {
@@ -310,32 +318,35 @@ exports.getCourseLecturesStats = async (req, res) => {
         res.status(401).json({
           message: "Unauthorized access, only managers can access this data.",
         });
+      else {
+        const courseid = req.params.courseid;
+        knex
+          .select(
+            //{ lecture: "sl.lecture_name" },
+            { course: "sl.course_name" },
+            { cancellations: "su.cancellations" },
+            { attendances: "su.attendance" },
+            { bookings: knex.raw("(su.booking-su.cancellations)") },
+            { date: "st.date" }
+          )
+          .from({ su: "stats_usage" })
+          .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
+          .join({ st: "stats_time" }, "st.tid", "=", "su.tid")
+          .where("sl.course_id", courseid)
+          .then((queryResults) => {
+            res.json(queryResults);
+          })
+          .catch((err) => {
+            res.status(501).json({
+              message: `There was an error retrieving the all the course lectures stats: ${err}`,
+            });
+          });
+      }
     })
     .catch((err) => {
       res.status(501).json({
         message: `There was an error retrieving the system stats: ${err}`,
       });
     });
-  const courseid = req.params.courseid;
-  knex
-    .select(
-      //{ lecture: "sl.lecture_name" },
-      { course: "sl.course_name" },
-      { cancellations: "su.cancellations" },
-      { attendances: "su.attendance" },
-      { bookings: knex.raw("(su.booking-su.cancellations)") },
-      { date: "st.date" }
-    )
-    .from({ su: "stats_usage" })
-    .join({ sl: "stats_lecture" }, "su.lid", "=", "sl.lid")
-    .join({ st: "stats_time" }, "st.tid", "=", "su.tid")
-    .where("sl.course_id", courseid)
-    .then((queryResults) => {
-      res.json(queryResults);
-    })
-    .catch((err) => {
-      res.status(501).json({
-        message: `There was an error retrieving the all the course lectures stats: ${err}`,
-      });
-    });
+
 };

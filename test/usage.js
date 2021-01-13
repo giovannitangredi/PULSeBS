@@ -224,11 +224,11 @@ describe("Usage test", async function () {
         student_id: userTuple.id,
         booked_at: moment().subtract(2, "weeks").format("YYYY-MM-DD HH:mm:ss"),
       }); //+1 second week
- 
+
       await knex("lecture_booking").insert(lectureBookingTuple); //+1 third week
       await knex("lecture_booking").insert(lecture2BookingTuple); //+1 third week
       await knex("lecture_booking").insert(lectureBookingTuple2); //+1 third week
-      
+
       await authenticatedUser
         .post("/api/auth/login")
         .send(teacherCredentials)
@@ -239,7 +239,7 @@ describe("Usage test", async function () {
       const week1 = moment(twoWeekAgoLectureTuple.start, "YYYY-MM-DD HH:mm:ss").format("YYYY-W");
       const week2 = moment(oneWeekAgoLectureTuple.start, "YYYY-MM-DD HH:mm:ss").format("YYYY-W");
       const week3 = moment(lectureTuple.start, "YYYY-MM-DD HH:mm:ss").format("YYYY-W");
-      
+
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings?fromWeek=${week1}&toWeek=${week3}`)
         .expect(200);
@@ -248,7 +248,7 @@ describe("Usage test", async function () {
         [
           {
             course_id: courseTuple.id,
-            course_name:courseTuple.name,
+            course_name: courseTuple.name,
             week: week1,
             booking: 1,
             cancellations: 0,
@@ -256,7 +256,7 @@ describe("Usage test", async function () {
           },
           {
             course_id: courseTuple.id,
-            course_name:courseTuple.name,
+            course_name: courseTuple.name,
             week: week2,
             booking: 1,
             cancellations: 0,
@@ -264,9 +264,9 @@ describe("Usage test", async function () {
           },
           {
             course_id: courseTuple.id,
-            course_name:courseTuple.name,
+            course_name: courseTuple.name,
             week: week3,
-            booking: 3/2,
+            booking: 3 / 2,
             cancellations: 0,
             attendances: 0,
           },
@@ -299,7 +299,7 @@ describe("Usage test", async function () {
         student_id: userTuple.id,
         booked_at: moment().subtract(2, "months").format("YYYY-MM-DD HH:mm:ss"),
       }); //+1 second months
-      
+
       await authenticatedUser
         .post("/api/auth/login")
         .send(teacherCredentials)
@@ -309,7 +309,7 @@ describe("Usage test", async function () {
     it("Should return the stats between two months", async () => {
       const month1 = moment(twoMonthAgoLectureTuple.start, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM");
       const month2 = moment(oneMonthAgoLectureTuple.start, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM");
-      
+
       const res = await authenticatedUser
         .get(`/api/courses/${courseTuple.id}/bookings?fromMonth=${month1}&toMonth=${month2}`)
         .expect(200);
@@ -318,7 +318,7 @@ describe("Usage test", async function () {
         [
           {
             course_id: courseTuple.id,
-            course_name:courseTuple.name,
+            course_name: courseTuple.name,
             month: month1,
             booking: 1,
             cancellations: 0,
@@ -326,7 +326,7 @@ describe("Usage test", async function () {
           },
           {
             course_id: courseTuple.id,
-            course_name:courseTuple.name,
+            course_name: courseTuple.name,
             month: month2,
             booking: 1,
             cancellations: 0,
@@ -442,7 +442,7 @@ describe("Usage test", async function () {
   });
 
   describe("Get the number of bookings for all lectures of the course scheduled for the month", async () => {
-    const date = moment(lectureTuple.start).format("YYYY-MM"); 
+    const date = moment(lectureTuple.start).format("YYYY-MM");
     before(async () => {
       const res = await authenticatedUser
         .post("/api/auth/login")
@@ -496,11 +496,59 @@ describe("Usage test", async function () {
   });
 });
 
+describe("Stats error when not logged as manager", async () => {
+  const authenticatedUser = request.agent(app);
+
+  before(async () => {
+    await knex("user").del();
+    await knex("stats_lecture").del();
+    await knex("stats_time").del();
+    await knex("stats_usage").del(); 
+    await knex("user").insert(teacherTuple);
+    await authenticatedUser
+      .post("/api/auth/login")
+      .send(teacherCredentials)
+      .expect(200);
+  });
+  it("should return  with status 401, Unauthorized access, only managers can access this data.", async () => {
+    const res = await authenticatedUser.get(`/api/stats/system`);
+    expect(res).to.be.json;
+    expect(res.status).to.equal(401);
+  });
+
+  it("should return  with status 401, Unauthorized access, only managers can access this data.", async () => {
+    const res = await authenticatedUser.get(`/api/stats/lectures`);
+    expect(res).to.be.json;
+    expect(res.status).to.equal(401);
+  });
+  it("should return  with status 401, Unauthorized access, only managers can access this data.", async () => {
+    const res = await authenticatedUser.get(
+      `/api/courses/${courseTuple.id}/stats`
+    );
+    expect(res).to.be.json;
+    expect(res.status).to.equal(401);
+  });
+  it("should return  with status 401, Unauthorized access, only managers can access this data.", async () => {
+    const res = await authenticatedUser.get(
+      `/api/courses/${courseTuple.id}/lecturesStats`
+    );
+    expect(res).to.be.json;
+    expect(res.status).to.equal(401);
+  });
+
+  after(async () => {
+    await knex("user").del();
+    await knex("stats_lecture").del();
+    await knex("stats_time").del();
+    await knex("stats_usage").del();
+  });
+});
+
 describe("Return the system stats ", async function () {
   this.timeout(5000);
   //now let's login the user before we run any tests
   const authenticatedUser = request.agent(app);
-  
+
   before(async () => {
     await knex("user").del();
     await knex("stats_lecture").del();
@@ -532,7 +580,7 @@ describe("Return the system stats ", async function () {
     expect(res.body[0].attendances).to.equal(0);
   });
   it("should return the updated value of attendences (1) after changing the status null -> present", async () => {
-    await knex("lecture_booking").update("status","present").where("lecture_id",lectureBookingTuple.lecture_id).andWhere("student_id",lectureBookingTuple.student_id);
+    await knex("lecture_booking").update("status", "present").where("lecture_id", lectureBookingTuple.lecture_id).andWhere("student_id", lectureBookingTuple.student_id);
     const res = await authenticatedUser.get(`/api/stats/system`);
     expect(res).to.have.property("body");
     expect(res.body.length).to.equal(1);
@@ -541,7 +589,7 @@ describe("Return the system stats ", async function () {
     expect(res.body[0].attendances).to.equal(1);
   });
   it("should return the updated value of attendences (0) after changing the status present -> absent", async () => {
-    await knex("lecture_booking").update("status","absent").where("lecture_id",lectureBookingTuple.lecture_id).andWhere("student_id",lectureBookingTuple.student_id);
+    await knex("lecture_booking").update("status", "absent").where("lecture_id", lectureBookingTuple.lecture_id).andWhere("student_id", lectureBookingTuple.student_id);
     const res = await authenticatedUser.get(`/api/stats/system`);
     expect(res).to.have.property("body");
     expect(res.body.length).to.equal(1);
