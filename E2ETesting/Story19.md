@@ -1,7 +1,7 @@
 # End to end test for Story 19
 
 - [End to end test for Story 19](#end-to-end-test-for-story-19)
-  - [Get Attendence](#get-attendence)
+- [Get Attendence](#get-attendence)
 
 ## Get Attendence
 
