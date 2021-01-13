@@ -1,13 +1,11 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-// import { BookingLectureList } from "./BookingLectureList";
-import { BookedLectureList } from "./BookedLectureList";
 import Container from "react-bootstrap/Container";
 import axios from "axios";
-import { Col, Form, Row, Tab, Table, Tabs } from "react-bootstrap";
-import { CourseDetail } from "./TeacherStatistics";
+import { Col, Form, Row, Tab, Table, Pagination, Tabs } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
+import ReactEcharts from "echarts-for-react";
 
 interface GeneralStats {
   attendances: number;
@@ -45,6 +43,12 @@ class WeekDate {
   format() {
     return `${this.year}-${this.week}`;
   }
+
+  toString() {
+    return this.week > 9
+      ? `${this.year}-${this.week}`
+      : `${this.year}-0${this.week}`;
+  }
 }
 
 class MonthDate {
@@ -56,6 +60,12 @@ class MonthDate {
   }
 
   format() {
+    return this.month > 9
+      ? `${this.year}-${this.month}`
+      : `${this.year}-0${this.month}`;
+  }
+
+  toString() {
     return this.month > 9
       ? `${this.year}-${this.month}`
       : `${this.year}-0${this.month}`;
@@ -88,6 +98,7 @@ interface LectureStats {
   date: Date;
   lecture: string;
 };
+
 */
 
 const DateRangePicker = (props: {
@@ -200,6 +211,132 @@ export const ManagerPage = (props: any) => {
     new Date(),
   ]);
 
+  // pagination
+
+  const pageSize = 9;
+  const [currentPage, setCurrentPage] = useState<any>({
+    lectureStats: 1,
+    courseLectureStats: 1,
+    courseWeekStats: 1,
+    courseMonthStats: 1,
+  });
+
+  const paginate = (array: any[], pageNumber: number) => {
+    return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+  };
+
+  const handlePrev = (statsType: string) => {
+    if (currentPage[statsType] > 1) {
+      let newPage = { ...currentPage };
+      newPage[statsType] -= 1;
+      setCurrentPage(newPage);
+    }
+  };
+
+  const handleNext = (statsType: string, listLength: number) => {
+    if (currentPage[statsType] < Math.ceil(listLength / pageSize)) {
+      let newPage = { ...currentPage };
+      newPage[statsType] += 1;
+      setCurrentPage(newPage);
+    }
+  };
+
+  const resetPageFor = (statsType: string) => {
+    let newPage = { ...currentPage };
+    newPage[statsType] = 1;
+    setCurrentPage(newPage);
+  };
+
+  // chart
+
+  const generateNewDataFrom = (
+    rawData: any[],
+    dataProperties:{
+      bookings?: string,
+      attendances?: string,
+      cancellations?: string,
+      date?: string
+    }
+  ) => {
+
+    const p = rawData
+      .map((item) => {
+        return {
+          date: item[dataProperties.date || "date"].toString(), 
+          bookings: item[dataProperties.bookings || "bookings"], 
+          attendances: item[dataProperties.attendances || "attendances"], 
+          cancellations: item[dataProperties.cancellations || "cancellations"]
+        };
+      })
+      .sort((v1:any, v2:any ) => v1.date.localeCompare(v2.date));
+    return p;
+  };
+
+  const [systemChartData, setSystemChartData] = useState<any[]>([]);
+  const [byCourseChartData, setByCourseChartData] = useState<any[]>([]);
+  const [byWeekChartData, setByWeekChartData] = useState<any[]>([]);
+  const [byMonthChartData, setByMonthChartData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const lectureStatsGroupByDate:any = {};
+    lectureStats.forEach((value: LectureStats) => {
+      if (!lectureStatsGroupByDate[value.date.toString()]) {
+        lectureStatsGroupByDate[value.date.toString()] = {
+          date: value.date,
+          bookings: 0,
+          cancellations: 0,
+          attendances: 0,
+        };
+      }
+      lectureStatsGroupByDate[value.date.toString()].bookings += value.bookings;
+      lectureStatsGroupByDate[value.date.toString()].cancellations += value.cancellations;
+      lectureStatsGroupByDate[value.date.toString()].attendances += value.attendances;
+    });
+    setSystemChartData(
+      generateNewDataFrom(
+        Object.values(lectureStatsGroupByDate), 
+        {}
+      )
+    );
+  }, [lectureStats]);
+
+  useEffect(() => {
+    setByCourseChartData(
+      generateNewDataFrom(
+        courseLectureStats, 
+        {}
+      )
+    );
+  }, [courseLectureStats]);
+
+  useEffect(() => {
+    setByWeekChartData(
+      generateNewDataFrom(
+        courseWeekStats, 
+        {
+          bookings: "avgBookings", 
+          attendances: "avgAttendances", 
+          cancellations: "avgCancellations",
+          date: "weekDate",
+        }
+      )
+    );
+  }, [courseWeekStats]);
+
+  useEffect(() => {
+    setByMonthChartData(
+      generateNewDataFrom(
+        courseMonthStats, 
+        {
+          bookings: "avgBookings", 
+          attendances: "avgAttendances", 
+          cancellations: "avgCancellations",
+          date: "monthDate",
+        }
+      )
+    );
+  }, [courseMonthStats]);
+
   const getSystemStats = () => {
     //get the sum of booking, cancellations, attendance for all lectures
     axios
@@ -229,6 +366,7 @@ export const ManagerPage = (props: any) => {
 
         setLectureStats(lectureStats);
         setLoading(false);
+        resetPageFor("lectureStats");
       })
       .catch((err) => {
         console.log(err);
@@ -260,6 +398,7 @@ export const ManagerPage = (props: any) => {
         let courseLectureStats = res.data;
         setCourseLectureStats(courseLectureStats);
         setLoading(false);
+        resetPageFor("courseLectureStats");
       })
       .catch((err) => {
         console.log(err);
@@ -308,6 +447,7 @@ export const ManagerPage = (props: any) => {
           )
         );
         setLoading(false);
+        resetPageFor("courseWeekStats");
         // weeklyBooked
       })
       .catch((err) => {
@@ -357,6 +497,7 @@ export const ManagerPage = (props: any) => {
           )
         );
         setLoading(false);
+        resetPageFor("courseMonthStats");
         // weeklyBooked
       })
       .catch((err) => {
@@ -386,6 +527,27 @@ export const ManagerPage = (props: any) => {
         <Tab eventKey="general" title="All Lectures">
           {lectureStats.length > 0 ? (
             <Row>
+              <Container style={{ width: "100%", height: "300px" }}>
+                <ReactEcharts
+                  option={{
+                    legend: {},
+                    tooltip: {},
+                    dataset: {
+                        source: systemChartData
+                    },
+                    xAxis: { type: 'category' },
+                    yAxis: {},
+                    series: [
+                        { type: 'line' },
+                        { type: 'line' },
+                        { type: 'line' },
+                    ]
+                  }}
+                  notMerge={true}
+                  lazyUpdate={true} 
+                />
+              </Container>
+
               <Table striped bordered hover className="p-5">
                 <thead>
                   <tr>
@@ -398,18 +560,34 @@ export const ManagerPage = (props: any) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {lectureStats.map((lecture: LectureStats, index: number) => (
-                    <tr key={index}>
-                      <td>{lecture.course}</td>
-                      {/*<td>{lecture.lecture}</td>*/}
-                      <td>{lecture.date}</td>
-                      <td>{lecture.bookings}</td>
-                      <td>{lecture.cancellations}</td>
-                      <td>{lecture.attendances}</td>
-                    </tr>
-                  ))}
+                  {paginate(lectureStats, currentPage["lectureStats"]).map(
+                    (lecture: LectureStats, index: number) => (
+                      <tr key={index}>
+                        <td>{lecture.course}</td>
+                        {/*<td>{lecture.lecture}</td>*/}
+                        <td>{lecture.date}</td>
+                        <td>{lecture.bookings}</td>
+                        <td>{lecture.cancellations}</td>
+                        <td>{lecture.attendances}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </Table>
+
+              <Pagination className="mb-0">
+                <Pagination.Prev onClick={() => handlePrev("lectureStats")} />
+                <Pagination.Item disabled>
+                  {currentPage["lectureStats"] +
+                    " of " +
+                    Math.ceil(lectureStats.length / pageSize)}
+                </Pagination.Item>
+                <Pagination.Next
+                  onClick={() =>
+                    handleNext("lectureStats", lectureStats.length)
+                  }
+                />
+              </Pagination>
             </Row>
           ) : (
             <Row>
@@ -443,10 +621,31 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseLectureStats.length > 0 ? (
               <Row>
+                <Container style={{ width: "100%", height: "300px" }}>
+                  <ReactEcharts
+                    option={{
+                      legend: {},
+                      tooltip: {},
+                      dataset: {
+                          source: byCourseChartData
+                      },
+                      xAxis: { type: 'category' },
+                      yAxis: {},
+                      series: [
+                          { type: 'line' },
+                          { type: 'line' },
+                          { type: 'line' },
+                      ]
+                    }}
+                    notMerge={true}
+                    lazyUpdate={true} 
+                  />
+                </Container>
+
                 <Table striped bordered hover>
                   <thead>
                     <tr>
-                     {/*<th>Lecture ({courseLectureStats.length})</th>*/}
+                      {/*<th>Lecture ({courseLectureStats.length})</th>*/}
                       <th>Date</th>
                       <th>Bookings ({courseSumStats?.bookings})</th>
                       <th>Cancellations ({courseSumStats?.cancellations})</th>
@@ -454,19 +653,38 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {courseLectureStats.map(
-                      (lecture: CourseLectureStats, index: number) => (
-                        <tr key={index}>
-                           {/*<td>{lecture.lecture}</td>*/}
-                          <td>{lecture.date}</td>
-                          <td>{lecture.bookings}</td>
-                          <td>{lecture.cancellations}</td>
-                          <td>{lecture.attendances}</td>
-                        </tr>
-                      )
-                    )}
+                    {paginate(
+                      courseLectureStats,
+                      currentPage["courseLectureStats"]
+                    ).map((lecture: CourseLectureStats, index: number) => (
+                      <tr key={index}>
+                        {/*<td>{lecture.lecture}</td>*/}
+                        <td>{lecture.date}</td>
+                        <td>{lecture.bookings}</td>
+                        <td>{lecture.cancellations}</td>
+                        <td>{lecture.attendances}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </Table>
+                <Pagination className="mb-0">
+                  <Pagination.Prev
+                    onClick={() => handlePrev("courseLectureStats")}
+                  />
+                  <Pagination.Item disabled>
+                    {currentPage["courseLectureStats"] +
+                      " of " +
+                      Math.ceil(courseLectureStats.length / pageSize)}
+                  </Pagination.Item>
+                  <Pagination.Next
+                    onClick={() =>
+                      handleNext(
+                        "courseLectureStats",
+                        courseLectureStats.length
+                      )
+                    }
+                  />
+                </Pagination>
               </Row>
             ) : (
               <Row>
@@ -489,7 +707,7 @@ export const ManagerPage = (props: any) => {
                         event: React.ChangeEvent<HTMLInputElement>
                       ) => {
                         if (event.target.value) {
-                          const courseId: string =event.target.value;
+                          const courseId: string = event.target.value;
                           setByCourseSelect(courseId);
                           getCourseLecturesWeekRange(
                             courseId,
@@ -539,6 +757,27 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseWeekStats.length > 0 ? (
               <Row>
+                <Container style={{ width: "100%", height: "300px" }}>
+                  <ReactEcharts
+                    option={{
+                      legend: {},
+                      tooltip: {},
+                      dataset: {
+                          source: byWeekChartData
+                      },
+                      xAxis: { type: 'category' },
+                      yAxis: {},
+                      series: [
+                          { type: 'line' },
+                          { type: 'line' },
+                          { type: 'line' },
+                      ]
+                    }}
+                    notMerge={true}
+                    lazyUpdate={true} 
+                  />
+                </Container>
+
                 <Table striped bordered hover>
                   <thead>
                     <tr>
@@ -550,19 +789,36 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {courseWeekStats.map(
-                      (course: CourseWeekStats, index: number) => (
-                        <tr key={index}>
-                          <td>{course.name}</td>
-                          <td>{course.weekDate.format()}</td>
-                          <td>{course.avgBookings}</td>
-                          <td>{course.avgCancellations}</td>
-                          <td>{course.avgAttendances}</td>
-                        </tr>
-                      )
-                    )}
+                    {paginate(
+                      courseWeekStats,
+                      currentPage["courseWeekStats"]
+                    ).map((course: CourseWeekStats, index: number) => (
+                      <tr key={index}>
+                        <td>{course.name}</td>
+                        <td>{course.weekDate.format()}</td>
+                        <td>{course.avgBookings}</td>
+                        <td>{course.avgCancellations}</td>
+                        <td>{course.avgAttendances}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </Table>
+
+                <Pagination className="mb-0">
+                  <Pagination.Prev
+                    onClick={() => handlePrev("courseWeekStats")}
+                  />
+                  <Pagination.Item disabled>
+                    {currentPage["courseWeekStats"] +
+                      " of " +
+                      Math.ceil(courseWeekStats.length / pageSize)}
+                  </Pagination.Item>
+                  <Pagination.Next
+                    onClick={() =>
+                      handleNext("courseWeekStats", courseWeekStats.length)
+                    }
+                  />
+                </Pagination>
               </Row>
             ) : (
               <Row>
@@ -635,6 +891,27 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseMonthStats.length > 0 ? (
               <Row>
+                <Container style={{ width: "100%", height: "300px" }}>   
+                  <ReactEcharts
+                    option={{
+                      legend: {},
+                      tooltip: {},
+                      dataset: {
+                          source: byMonthChartData
+                      },
+                      xAxis: { type: 'category' },
+                      yAxis: {},
+                      series: [
+                          { type: 'line' },
+                          { type: 'line' },
+                          { type: 'line' },
+                      ]
+                    }}
+                    notMerge={true}
+                    lazyUpdate={true} 
+                  />
+                </Container>
+
                 <Table striped bordered hover>
                   <thead>
                     <tr>
@@ -646,19 +923,36 @@ export const ManagerPage = (props: any) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {courseMonthStats.map(
-                      (course: CourseMonthStats, index: number) => (
-                        <tr key={index}>
-                          <td>{course.name}</td>
-                          <td>{course.monthDate.format()}</td>
-                          <td>{course.avgBookings}</td>
-                          <td>{course.avgCancellations}</td>
-                          <td>{course.avgAttendances}</td>
-                        </tr>
-                      )
-                    )}
+                    {paginate(
+                      courseMonthStats,
+                      currentPage["courseMonthStats"]
+                    ).map((course: CourseMonthStats, index: number) => (
+                      <tr key={index}>
+                        <td>{course.name}</td>
+                        <td>{course.monthDate.format()}</td>
+                        <td>{course.avgBookings}</td>
+                        <td>{course.avgCancellations}</td>
+                        <td>{course.avgAttendances}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </Table>
+
+                <Pagination className="mb-0">
+                  <Pagination.Prev
+                    onClick={() => handlePrev("courseMonthStats")}
+                  />
+                  <Pagination.Item disabled>
+                    {currentPage["courseMonthStats"] +
+                      " of " +
+                      Math.ceil(courseMonthStats.length / pageSize)}
+                  </Pagination.Item>
+                  <Pagination.Next
+                    onClick={() =>
+                      handleNext("courseMonthStats", courseMonthStats.length)
+                    }
+                  />
+                </Pagination>
               </Row>
             ) : (
               <Row>
