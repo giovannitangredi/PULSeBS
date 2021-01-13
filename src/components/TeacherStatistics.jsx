@@ -79,17 +79,18 @@ export const CourseDetail = (props) => {
     let lectures = [];
     let reservations = [];
     let lecturesMonth = [];
-
     courseFilter.forEach((id) => {
+      
       promiseArray.push(
         GetFromServer(
-          `/courses/${id}/bookings?fromWeek=${startDate
-            .getFullYear()
-            .toString()}-${startDate
-              .getWeek()
-              .toString()}&toWeek=${endDate
-                .getFullYear()
-                .toString()}-${endDate.getWeek().toString()}`
+          `/courses/${id}/bookings?fromWeek=${startDate.getWeek() === 0 ? (startDate.getFullYear()-1) :
+            (startDate
+            .getFullYear())
+            .toString()}-${moment(startDate).isoWeek()
+              }&toWeek=${endDate.getWeek() === 0 ? (endDate.getFullYear()-1) :
+                (endDate
+                .getFullYear())
+                .toString()}-${moment(endDate).isoWeek()}`
         )
       );
     });
@@ -99,8 +100,8 @@ export const CourseDetail = (props) => {
         GetFromServer(
           `/courses/${id}/bookings?fromMonth=${startDate
             .getFullYear()
-            .toString()}-${startDate.getMonth() + (1).toString()
-          }&toMonth=${endDate.getFullYear().toString()}-${endDate.getMonth() + 1
+            .toString()}-${(startDate.getMonth()<9 ? "0" : "") + (startDate.getMonth() + 1) 
+                    }&toMonth=${endDate.getFullYear().toString()}-${(endDate.getMonth()<9 ? "0" :"") + (endDate.getMonth() + 1)
           }`
         )
       );
@@ -188,8 +189,6 @@ export const CourseDetail = (props) => {
   };
   /*gets the week number of a date */
   Date.prototype.getWeek = function (dowOffset) {
-    /*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.meanfreepath.com */
-
     dowOffset = typeof dowOffset == "int" ? dowOffset : 0; //default dowOffset to zero
     var newYear = new Date(this.getFullYear(), 0, 1);
     var day = newYear.getDay() - dowOffset; //the day of week the year begins on
