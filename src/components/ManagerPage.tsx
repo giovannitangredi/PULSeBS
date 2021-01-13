@@ -1,16 +1,11 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-// import { BookingLectureList } from "./BookingLectureList";
-import { BookedLectureList } from "./BookedLectureList";
 import Container from "react-bootstrap/Container";
 import axios from "axios";
 import { Col, Form, Row, Tab, Table, Pagination, Tabs } from "react-bootstrap";
-import { CourseDetail } from "./TeacherStatistics";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
-
-import { Chart } from "react-charts";
-import { useMemo } from "react";
+import ReactEcharts from "echarts-for-react";
 
 interface GeneralStats {
   attendances: number;
@@ -50,7 +45,9 @@ class WeekDate {
   }
 
   toString() {
-    return `${this.year}-${this.week}`;
+    return this.week > 9
+      ? `${this.year}-${this.week}`
+      : `${this.year}-0${this.week}`;
   }
 }
 
@@ -69,7 +66,9 @@ class MonthDate {
   }
 
   toString() {
-    return `${this.year}-${this.month}`;
+    return this.month > 9
+      ? `${this.year}-${this.month}`
+      : `${this.year}-0${this.month}`;
   }
 }
 
@@ -215,7 +214,7 @@ export const ManagerPage = (props: any) => {
   // pagination
 
   const pageSize = 9;
-  const [currentPage, setCurrentPage] = useState({
+  const [currentPage, setCurrentPage] = useState<any>({
     lectureStats: 1,
     courseLectureStats: 1,
     courseWeekStats: 1,
@@ -248,92 +247,95 @@ export const ManagerPage = (props: any) => {
     setCurrentPage(newPage);
   };
 
-  const generateDataFrom = (
+  // chart
+
+  const generateNewDataFrom = (
     rawData: any[],
-    values: string[],
-    dateAttribute: string
+    dataProperties:{
+      bookings?: string,
+      attendances?: string,
+      cancellations?: string,
+      date?: string
+    }
   ) => {
-    const p = values.map((series) => {
-      return {
-        label: series,
-        data: rawData
-          .map((lecture): { primary: string; secondary: Number } => {
-            return {
-              primary: lecture[dateAttribute].toString(),
-              secondary: new Number(lecture[series]),
-            };
-          })
-          .sort(
-            (
-              v1: { primary: string; secondary: Number },
-              v2: { primary: string; secondary: Number }
-            ) => v1.primary.localeCompare(v2.primary)
-          ),
-      };
-    });
+
+    const p = rawData
+      .map((item) => {
+        return {
+          date: item[dataProperties.date || "date"].toString(), 
+          bookings: item[dataProperties.bookings || "bookings"], 
+          attendances: item[dataProperties.attendances || "attendances"], 
+          cancellations: item[dataProperties.cancellations || "cancellations"]
+        };
+      })
+      .sort((v1:any, v2:any ) => v1.date.localeCompare(v2.date));
     return p;
   };
 
-  // chart
+  const [systemChartData, setSystemChartData] = useState<any[]>([]);
+  const [byCourseChartData, setByCourseChartData] = useState<any[]>([]);
+  const [byWeekChartData, setByWeekChartData] = useState<any[]>([]);
+  const [byMonthChartData, setByMonthChartData] = useState<any[]>([]);
 
-  const systemChartData = useMemo(() => {
-    const lectureStatsGroupByDate = {};
+  useEffect(() => {
+    const lectureStatsGroupByDate:any = {};
     lectureStats.forEach((value: LectureStats) => {
-      if (!lectureStatsGroupByDate[value.date]) {
-        lectureStatsGroupByDate[value.date] = {
+      if (!lectureStatsGroupByDate[value.date.toString()]) {
+        lectureStatsGroupByDate[value.date.toString()] = {
           date: value.date,
           bookings: 0,
           cancellations: 0,
           attendances: 0,
         };
       }
-      lectureStatsGroupByDate[value.date].bookings += value.bookings;
-      lectureStatsGroupByDate[value.date].cancellations += value.cancellations;
-      lectureStatsGroupByDate[value.date].attendances += value.attendances;
+      lectureStatsGroupByDate[value.date.toString()].bookings += value.bookings;
+      lectureStatsGroupByDate[value.date.toString()].cancellations += value.cancellations;
+      lectureStatsGroupByDate[value.date.toString()].attendances += value.attendances;
     });
-    return generateDataFrom(
-      Object.values(lectureStatsGroupByDate),
-      ["bookings", "attendances", "cancellations"],
-      "date"
+    setSystemChartData(
+      generateNewDataFrom(
+        Object.values(lectureStatsGroupByDate), 
+        {}
+      )
     );
   }, [lectureStats]);
 
-  const byCourseChartData = useMemo(
-    () =>
-      generateDataFrom(
-        courseLectureStats,
-        ["bookings", "attendances", "cancellations"],
-        "date"
-      ),
-    [courseLectureStats]
-  );
-  const byWeekChartData = useMemo(
-    () =>
-      generateDataFrom(
-        courseWeekStats,
-        ["avgBookings", "avgAttendances", "avgCancellations"],
-        "weekDate"
-      ),
-    [courseWeekStats]
-  );
-  const byMonthChartData = useMemo(
-    () =>
-      generateDataFrom(
-        courseMonthStats,
-        ["avgBookings", "avgAttendances", "avgCancellations"],
-        "monthDate"
-      ),
-    [courseMonthStats]
-  );
+  useEffect(() => {
+    setByCourseChartData(
+      generateNewDataFrom(
+        courseLectureStats, 
+        {}
+      )
+    );
+  }, [courseLectureStats]);
 
-  const axes = React.useMemo(
-    () => [
-      { primary: true, type: "ordinal", position: "bottom" },
-      { type: "linear", position: "left", stacked: false },
-    ],
-    []
-  );
-  const series = React.useMemo(() => ({ type: "line" }), []);
+  useEffect(() => {
+    setByWeekChartData(
+      generateNewDataFrom(
+        courseWeekStats, 
+        {
+          bookings: "avgBookings", 
+          attendances: "avgAttendances", 
+          cancellations: "avgCancellations",
+          date: "weekDate",
+        }
+      )
+    );
+  }, [courseWeekStats]);
+
+  useEffect(() => {
+    setByMonthChartData(
+      generateNewDataFrom(
+        courseMonthStats, 
+        {
+          bookings: "avgBookings", 
+          attendances: "avgAttendances", 
+          cancellations: "avgCancellations",
+          date: "monthDate",
+        }
+      )
+    );
+  }, [courseMonthStats]);
 
   const getSystemStats = () => {
     //get the sum of booking, cancellations, attendance for all lectures
@@ -526,11 +528,23 @@ export const ManagerPage = (props: any) => {
           {lectureStats.length > 0 ? (
             <Row>
               <Container style={{ width: "100%", height: "300px" }}>
-                <Chart
-                  series={series}
-                  data={systemChartData}
-                  axes={axes}
-                  tooltip
+                <ReactEcharts
+                  option={{
+                    legend: {},
+                    tooltip: {},
+                    dataset: {
+                        source: systemChartData
+                    },
+                    xAxis: { type: 'category' },
+                    yAxis: {},
+                    series: [
+                        { type: 'line' },
+                        { type: 'line' },
+                        { type: 'line' },
+                    ]
+                  }}
+                  notMerge={true}
+                  lazyUpdate={true} 
                 />
               </Container>
 
@@ -608,11 +622,23 @@ export const ManagerPage = (props: any) => {
             {courseLectureStats.length > 0 ? (
               <Row>
                 <Container style={{ width: "100%", height: "300px" }}>
-                  <Chart
-                    series={series}
-                    data={byCourseChartData}
-                    axes={axes}
-                    tooltip
+                  <ReactEcharts
+                    option={{
+                      legend: {},
+                      tooltip: {},
+                      dataset: {
+                          source: byCourseChartData
+                      },
+                      xAxis: { type: 'category' },
+                      yAxis: {},
+                      series: [
+                          { type: 'line' },
+                          { type: 'line' },
+                          { type: 'line' },
+                      ]
+                    }}
+                    notMerge={true}
+                    lazyUpdate={true} 
                   />
                 </Container>
 
@@ -732,11 +758,23 @@ export const ManagerPage = (props: any) => {
             {courseWeekStats.length > 0 ? (
               <Row>
                 <Container style={{ width: "100%", height: "300px" }}>
-                  <Chart
-                    series={series}
-                    data={byWeekChartData}
-                    axes={axes}
-                    tooltip
+                  <ReactEcharts
+                    option={{
+                      legend: {},
+                      tooltip: {},
+                      dataset: {
+                          source: byWeekChartData
+                      },
+                      xAxis: { type: 'category' },
+                      yAxis: {},
+                      series: [
+                          { type: 'line' },
+                          { type: 'line' },
+                          { type: 'line' },
+                      ]
+                    }}
+                    notMerge={true}
+                    lazyUpdate={true} 
                   />
                 </Container>
 
@@ -853,12 +891,24 @@ export const ManagerPage = (props: any) => {
           <Container>
             {courseMonthStats.length > 0 ? (
               <Row>
-                <Container style={{ width: "100%", height: "300px" }}>
-                  <Chart
-                    series={series}
-                    data={byMonthChartData}
-                    axes={axes}
-                    tooltip
+                <Container style={{ width: "100%", height: "300px" }}>   
+                  <ReactEcharts
+                    option={{
+                      legend: {},
+                      tooltip: {},
+                      dataset: {
+                          source: byMonthChartData
+                      },
+                      xAxis: { type: 'category' },
+                      yAxis: {},
+                      series: [
+                          { type: 'line' },
+                          { type: 'line' },
+                          { type: 'line' },
+                      ]
+                    }}
+                    notMerge={true}
+                    lazyUpdate={true} 
                   />
                 </Container>
 
