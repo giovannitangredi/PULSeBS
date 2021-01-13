@@ -90,6 +90,15 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       .send(officerCredentials)
       .expect(200);
     });
+    it("should return an error ", async () => {
+      const res = await authenticatedUser.post(`/api/upload/students`)
+      .attach(
+        "file",
+        fs.readFileSync("./test/csvfiles/wrong.txt"),
+        "wrong.txt"
+      );
+      expect(res.status).to.equal(400);
+    });
 
     it("should return an error 501 when the file is not correct", async () => {
       const res = await authenticatedUser.post(`/api/upload/students`)
@@ -478,6 +487,16 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
       .expect(200);
     });
 
+    it("should return an error 505 when there is no semester selected", async () => {
+      const res = await authenticatedUser.post(`/api/upload/schedule/75`)
+      .attach(
+        "file",
+        fs.readFileSync("./test/csvfiles/Profressors.csv"),
+        "Profressors.csv"
+      );
+      expect(res.status).to.equal(505);
+    });
+
     it("should return an error 501 when the file is not correct", async () => {
       const res = await authenticatedUser.post(`/api/upload/schedule/${semesterTuple.sid}`)
       .attach(
@@ -517,6 +536,17 @@ describe("Story 12 test - As a support officer I want to upload the list of stud
         .from("lecture");
       expect(uploadedschedule.length).to.equal(16);
     });
+    it("should return  with status 504, already inserted", async () => {
+      const res = await authenticatedUser
+        .post(`/api/upload/schedule/${semesterTuple.sid}`)
+        .attach(
+          "file",
+          fs.readFileSync("./test/csvfiles/Schedule.csv"),
+          "Schedule.csv"
+        );
+      expect(res.status).to.equal(504);
+    });
+
     after(async () => {
       await knex("user").del();
       await knex("course").del();

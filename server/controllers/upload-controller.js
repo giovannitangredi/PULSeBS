@@ -219,12 +219,6 @@ exports.uploadSchedule = async (req, res) => {
   const semesterId = req.params.semesterid;
   let path = `${__dirname}/../../resources/static/uploads/` + req.file.filename;
   try {
-    if (!semesterId) {
-      throw {
-        msg: "No params included",
-        status: 500,
-      };
-    }
     const semester = await knex
       .select({
         sid: "sid",

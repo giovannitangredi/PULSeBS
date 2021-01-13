@@ -9,19 +9,11 @@ const upload = require("./../middlewares/upload-middlewares");
 // Create router
 const router = express.Router();
 
-router.post("/students", upload.single("file"), uploadRoutes.uploadStudents);
-router.post("/teachers", upload.single("file"), uploadRoutes.uploadProfessors);
-router.post("/courses", upload.single("file"), uploadRoutes.uploadCourses);
-router.post(
-  "/enrollments",
-  upload.single("file"),
-  uploadRoutes.uploadEnrollments
-);
-router.post(
-  "/schedule/:semesterid",
-  upload.single("file"),
-  uploadRoutes.uploadSchedule
-);
+router.post("/students", upload, uploadRoutes.uploadStudents);
+router.post("/teachers", upload, uploadRoutes.uploadProfessors);
+router.post("/courses", upload, uploadRoutes.uploadCourses);
+router.post("/enrollments", upload, uploadRoutes.uploadEnrollments);
+router.post("/schedule/:semesterid",upload,uploadRoutes.uploadSchedule);
 
 // Export router
 module.exports = router;
