@@ -23,7 +23,7 @@ docker pull giovannitangredi/pulsebs:<tag>
 ```sh
 docker run -p 3000:3000 -p 4001:4001 giovannitangredi/pulsebs:<tag>
 ```
-
+the final version is the one tagged as Release2
 User inside the system :
 
 - s274930@studenti.polito.it student
@@ -31,6 +31,9 @@ User inside the system :
 - s280113@studenti.polito.it supportOfficer
 - behnam.lotfi@polito.it manager
 - 1297320697@qq.com student
+- s900000@students.politu.it student
+- Ines.Beneventi@politu.it teacher
+- Nino.Lucciano@politu.it teacher
 
 the password for all accounts is password
 
