@@ -23,7 +23,9 @@ docker pull giovannitangredi/pulsebs:<tag>
 ```sh
 docker run -p 3000:3000 -p 4001:4001 giovannitangredi/pulsebs:<tag>
 ```
+
 the final version is the one tagged as Release2
+
 User inside the system :
 
 - s274930@studenti.polito.it student
