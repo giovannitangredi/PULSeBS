@@ -28,11 +28,9 @@ the final version is the one tagged as Release2
 
 User inside the system :
 
-- s274930@studenti.polito.it student
 - mario.rossi@polito.it teacher
-- s280113@studenti.polito.it supportOfficer
+- federico.quarta@polito.it  supportOfficer
 - behnam.lotfi@polito.it manager
-- 1297320697@qq.com student
 - s900000@students.politu.it student
 - Ines.Beneventi@politu.it teacher
 - Nino.Lucciano@politu.it teacher
